@@ -1,0 +1,22 @@
+# This file defines handy gdb macros
+# To use it, add this line to your ~/.gdbinit :
+# source /path/to/kde/sources/kdelibs/kjs/kjs-devel-gdb
+
+define printucharstar
+       set $i=0
+       while ($i<($arg1))
+         p (char)(($arg0)[$i++])
+       end
+end
+document printucharstar
+  Prints the contents of an UChar [] - for KJS.
+  Usage: 'printucharstar <UChar* dat> <int len>'
+end
+
+define printustring
+        printucharstar ($arg0).rep->dat ($arg0).rep->len
+end
+document printustring
+  Prints the contents of an UString - for KJS
+  Usage: 'printustring <UString str>'
+end

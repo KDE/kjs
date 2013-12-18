@@ -1,0 +1,435 @@
+/*
+ *  Opcode data structure and selection routines for KJS/Frostbyte
+ *  This file is part of the KDE libraries
+ *  Copyright (C) 2008 Maksim Orlovich (maksim@kde.org)
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
+#include "opcodes.h"
+#include "CompileState.h"
+#include <cstdio>
+
+#if PLATFORM(SOLARIS_OS)
+using std::printf;
+#endif
+
+// Enable this to dump instruction selection instructions.
+// #define TRACE_INSTR_SELECT
+
+namespace KJS {
+
+const int Cost_NoConversion = -100000; // small enough so that adding actual costs doesn't
+                                       // make it positive
+const int Cost_Checked      = -2;
+
+@generate
+
+// Note: costOut will be negative if no conversion is possible
+ConvOp computeCast(const OpValue* in, OpType outType, bool outImmediate, int& costOut, bool exact)
+{
+    bool   inImmediate = (in->immediate != 0);
+    OpType inType      = in->type;
+
+    // Obviously, we can't make a register result into an an immediate value
+    if (outImmediate && !inImmediate) {
+        costOut = Cost_NoConversion;
+        return Conv_NoConversion;
+    }
+
+    if (exact) {
+        if (inType == outType) {
+            costOut = 0;
+            // We want to prefer these even if they require a spill,
+            // (since the implementation is more immediate),
+            // but we do want a slight cost to the spill so we don't do it for no good reason
+            if (!outImmediate && inImmediate)
+                costOut = 1;
+            return Conv_NoOp;
+        }
+
+        // as a special case, int32 -> number conversion is always safe; otherwise
+        // exact matching can't happen
+        if (inType != OpType_int32 || outType != OpType_number) {
+            costOut = Cost_NoConversion;
+            return Conv_NoConversion;
+        }
+    }
+
+    // In general, if we're converting immediate to register, we first try to
+    // convert the immediate value to the right type. That will either produce
+    // a fresh immediate value that be spilled directly, or may even emit the
+    // conversion for us. If it produces the value --- and hence the basic conversion ---
+    // all we have to do is spill it.
+
+    // Look up in the table..
+    const ConvInfo* inf = getConversionInfo(inImmediate, inType, outType);
+
+    if (inf->costCode == Cost_Checked) {
+        ASSERT(inImmediate);
+        ASSERT(outType == OpType_value);
+        ASSERT(inType  == OpType_int32 || inType == OpType_number);
+
+        // Where a conversion is checked, we may not be able to get an
+        // immediate<->immediate match, so we may have to generate
+        // a special immediate<->register conversion.
+
+        bool inlineOK = inType == OpType_int32 ? JSImmediate::from(in->value.narrow.int32Val) :
+                                                 JSImmediate::from(in->value.wide.numberVal);
+
+        if (outImmediate) {
+            // immediate -> immediate..
+            if (inlineOK)
+                costOut = 0;
+            else
+                costOut = Cost_NoConversion;
+            return inf->routine;
+        } else {
+            // immediate -> register.
+
+            // If we know inline op OK, we follow the normal path below which adds in a spill cost.
+            // Otherwise we emit the op directly.
+            if (!inlineOK) {
+                // cost about the same as register int32-> number conversion
+                costOut = getConversionInfo(false, OpType_int32, OpType_value)->costCode;
+                return inType == OpType_int32 ? Conv_I_R_Int32_Value :
+                                                Conv_I_R_Number_Value;
+            }
+        }
+    }
+
+    costOut = inf->costCode;
+    // Add some cost for a spill...
+    if (inImmediate && !outImmediate)
+        costOut += 25;
+
+    return inf->routine;
+}
+
+void emitConversion(CompileState* comp, bool outImm,
+                    ConvOp convType, OpValue* original, OpValue& out)
+{
+    if (emitImmediateConversion(convType, original, out)) {
+        // Emit a spill if needed, after the value gets converted..
+        if (!outImm && original->immediate) {  // Need both checks since NoOp might get here..
+            OpValue spillVal, spillRef;
+
+            comp->requestTemporary(out.type, &spillVal, &spillRef);
+            CodeGen::emitRegStore(comp, &spillRef, &out);
+            out = spillVal;
+        }
+
+        return;
+    }
+
+    if (emitSimpleRegisterConversion(comp, convType, original, out))
+        return;
+
+    switch (convType) {
+    case Conv_I_R_Int32_Value:
+        CodeGen::emitOp(comp, Op_RInt32_Value_NonImm, &out, original);
+        break;
+
+    case Conv_I_R_Number_Value:
+        CodeGen::emitOp(comp, Op_RNum_Value_NonImm, &out, original);
+        break;
+
+    default:
+        fprintf(stderr, "Unable to emit conversion:%s, in:%c, out:%c\n", ConvOpVals[convType],
+               original->immediate ? 'I' : 'R', outImm ? 'I' : 'R');
+        CRASH();
+    };
+}
+
+static inline void setArg(unsigned char* argBase, const OpValue& val)
+{
+    if (val.immediate) {
+        if (opTypeIsAlign8[val.type]) {
+            *reinterpret_cast<WideArg*>(argBase) = val.value.wide;
+        } else {
+            *reinterpret_cast<NarrowArg*>(argBase) = val.value.narrow;
+        }
+    } else {
+        // For arguments, we actually output the byte offset.
+        reinterpret_cast<NarrowArg*>(argBase)->regVal = val.ownedReg->reg() * sizeof(LocalStorageEntry);
+    }
+}
+
+static void emitArg(unsigned char* basePtr, const Op* opDescr, int pos, const OpValue& val)
+{
+    ASSERT(opDescr->immediateParams[pos] == val.immediate);
+    ASSERT(opDescr->paramTypes[pos] == val.type);
+
+    unsigned char* argBase = basePtr + opDescr->paramOffsets[pos];
+    setArg(argBase, val);
+}
+
+void CodeGen::emitConvertTo(CompileState* comp, OpValue* in,
+                            OpType outType, OpValue* out)
+{
+    int cost;
+    ConvOp op = computeCast(in, outType, in->immediate, cost, false);
+    ASSERT(cost >= 0);
+    emitConversion(comp, in->immediate, op, in, *out);
+}
+
+void CodeGen::emitRegStore(CompileState* comp, OpValue* regNum, OpValue* val)
+{
+    ASSERT(regNum->immediate && regNum->type == OpType_reg);
+
+    switch (val->type) {
+    case OpType_bool:
+        emitOp(comp, Op_RegPutBool, 0, regNum, val);
+        break;
+    case OpType_int32:
+        emitOp(comp, Op_RegPutInt32, 0, regNum, val);
+        break;
+    case OpType_value:
+        emitOp(comp, Op_RegPutValue, 0, regNum, val);
+        break;
+    case OpType_number:
+        emitOp(comp, Op_RegPutNumber, 0, regNum, val);
+        break;
+    default:
+        fprintf(stderr, "Don't know how to store type to register:%s\n", OpTypeVals[val->type]);
+        CRASH();
+    }
+}
+
+static void printType(const char* prefix, int pos, OpValue* v) {
+    fprintf(stderr, "%s%d:%s/imm:%d\n", prefix, pos, OpTypeVals[v->type], v->immediate);
+}
+
+Addr CodeGen::emitOp(CompileState* comp, OpName baseInstr,
+                     OpValue* retOut, OpValue* a0, OpValue* a1, OpValue* a2, OpValue* a3)
+{
+    CodeBlock& block = comp->codeBlock();
+    const Op* const* cands = opSpecializations[baseInstr];
+
+    const Op* cheapest = 0;
+    int    cheapestCost = 0;
+    ConvOp cheapestConvOps[4] = {Conv_NoConversion, Conv_NoConversion, Conv_NoConversion};
+
+    // Here, we assume that all methods either return or not.
+    OpType retType = opRetTypes[baseInstr];
+    OpValue retVal, retReg;
+    if (retType != OpType_void) {
+        // Add in a register argument.. For now just a dummy #;
+        // will fill in w/appropriate type later
+        ASSERT(!a3);
+        retReg.immediate = true;
+        retReg.type      = OpType_reg;
+        a3 = a2;
+        a2 = a1;
+        a1 = a0;
+        a0 = &retReg;
+    } else {
+        ASSERT(!retOut);
+    }
+
+    OpValue* args[4] = {a0, a1, a2, a3};
+    
+    int numArgs = 0;
+    while (numArgs < 4 && args[numArgs])
+        ++numArgs;
+
+#ifdef TRACE_INSTR_SELECT
+    fprintf(stderr, "\n\nTrying to select variant for:%s\n", OpNameVals[baseInstr]);
+    for (int i = 0; i < numArgs; ++i)
+        printType("\targ", i, args[i]);
+#endif
+        
+    // First, scan through, and determine the cheapest non-align variant.
+    // We can't select whether to align or not, since we may have to emit
+    // cast ops, which could change where we are.
+    for (int c = 0; cands[c]; ++c) {
+        const Op* cand = cands[c];
+        ASSERT(cand->baseInstr == baseInstr);
+        ASSERT(cand->numParams == numArgs);
+
+        if (cand->padAlign)
+            continue;
+
+        int    costs[4];
+        ConvOp convOps[4];
+
+        int totalCost = cand->cost;
+        for (int i = 0; i < numArgs; ++i) {
+            convOps[i] = computeCast(args[i], cand->paramTypes[i],
+                                     cand->immediateParams[i], costs[i], cand->exactParams[i]);
+
+            totalCost += costs[i];
+        }
+
+#ifdef TRACE_INSTR_SELECT
+        fprintf(stderr, "Candidate:%s, totalCost:%d, variant cost:%d\n", OpByteCodeVals[cand->opCode], totalCost, cand->cost);
+        for (int i = 0; i < numArgs; ++i) {
+            fprintf(stderr, "\tconv:%s, costs:%d\n", ConvOpVals[convOps[i]], costs[i]);
+        }
+#endif
+
+        if (totalCost < 0) // Cost_NoConversion in the sum...
+            continue;
+
+        if (totalCost < cheapestCost || !cheapest) {
+            cheapest        = cand;
+            cheapestCost    = totalCost;
+            cheapestConvOps[0] = convOps[0];
+            cheapestConvOps[1] = convOps[1];
+            cheapestConvOps[2] = convOps[2];
+            cheapestConvOps[3] = convOps[3];
+        }
+    }
+
+    if (!cheapest) {
+        fprintf(stderr, "Unable to find an acceptable conversion for:%s\n", OpNameVals[baseInstr]);
+        for (int i = 0; i < numArgs; ++i)
+            printType("\ta", i, args[i]);
+        CRASH(); // Should never happen!
+    }
+
+    if (cheapest->endsBB)
+        comp->localFlushAll(block);
+
+    // Now that we have a candidate, actually grab a register of the proper return type.
+    retType = cheapest->retType;
+    if (retType != OpType_void) {
+        comp->requestTemporary(retType, &retVal, &retReg);
+
+        // Set return value, if needed
+        if (retOut)
+            *retOut = retVal;
+    }
+
+    OpValue c[4]; // converted version
+
+    for (int i = 0; i < numArgs; ++i)
+        emitConversion(comp, cheapest->immediateParams[i], cheapestConvOps[i], args[i], c[i]);
+
+    // Now figure out if we need to do align.. We need it if the PC is 8-aligned, since
+    // the instr will mess that up, and the instruction need it..
+    if (cheapest->hasPadVariant && ((block.size() % 8) == 0)) {
+        // The padded variant of the instruction always preceeds the unpadded one..
+        cheapest = &opsForOpCodes[cheapest->opCode - 1];
+    }
+
+    // Phewww. Now we can actually write out stuff.
+    size_t pos = block.size();
+    block.resize(pos + cheapest->length);
+    unsigned char* basePtr = block.data() + pos;
+
+    // Write out the opcode..
+    *reinterpret_cast<OpByteCode*>(basePtr) = cheapest->opCode;
+
+    // ... and the args, as needed.
+    for (int i = 0; i < numArgs; ++i) {
+        emitArg(basePtr, cheapest, i, c[i]);
+    }
+
+    return basePtr - block.data();
+}
+
+Addr CodeGen::nextPC(CompileState* comp)
+{
+    CodeBlock& block = comp->codeBlock();
+    comp->localFlushAll(block);
+    return block.size();
+}
+
+void CodeGen::patchOpArgument(CodeBlock& block, Addr baseAddr, int pos, OpValue& newVal)
+{
+    OpByteCode* base = reinterpret_cast<OpByteCode*>(block.data() + baseAddr);
+    const Op& variant = opsForOpCodes[*base];
+
+    // We only permit patching immediate arguments for now..
+    ASSERT(variant.immediateParams[pos] && newVal.immediate);
+    ASSERT(variant.paramTypes[pos] == newVal.type);
+    ASSERT(pos < variant.numParams);
+
+    unsigned char* argBase = reinterpret_cast<unsigned char*>(base) + variant.paramOffsets[pos];
+    setArg(argBase, newVal);
+}
+
+void CodeGen::patchJumpToNext(CompileState* comp, Addr op, int argNum)
+{
+    OpValue destAddr = OpValue::immAddr(nextPC(comp));
+    patchOpArgument(comp->codeBlock(), op, argNum, destAddr);
+}
+
+static void dumpParam(CodeBlock& block, size_t offset, OpType type, bool wasImm)
+{
+    switch (type) {
+    case OpType_bool:
+        if (reinterpret_cast<NarrowArg*>(block.data() + offset)->boolVal)
+            std::fprintf(stderr, "true");
+        else
+            std::fprintf(stderr, "false");
+        break;
+    case OpType_int32:
+        std::fprintf(stderr, "%d", reinterpret_cast<NarrowArg*>(block.data() + offset)->int32Val);
+        break;
+    case OpType_value:
+        // Immediate value -- should go through JSImmediate stuff..
+        std::fprintf(stderr, "<ival:%s>", reinterpret_cast<WideArg*>(block.data() + offset)->valueVal->toString(0).ascii());
+        break;
+    case OpType_ident:
+        std::fprintf(stderr, "%s", reinterpret_cast<WideArg*>(block.data() + offset)->identVal->ustring().ascii());
+        break;
+    case OpType_string:
+        std::fprintf(stderr, "\"%s\"", reinterpret_cast<WideArg*>(block.data() + offset)->stringVal->ascii());
+        break;
+    case OpType_number:
+        std::fprintf(stderr, "%f", reinterpret_cast<WideArg*>(block.data() + offset)->numberVal);
+        break;
+    case OpType_addr:
+        std::fprintf(stderr, "A%08x", reinterpret_cast<NarrowArg*>(block.data() + offset)->addrVal);
+        break;
+    case OpType_reg:
+        std::fprintf(stderr, "r%lu", reinterpret_cast<NarrowArg*>(block.data() + offset)->regVal / (wasImm ?
+                    1lu : sizeof(LocalStorageEntry)));
+        break;
+    case OpType_node:
+        std::fprintf(stderr,"N%p", (void*)(reinterpret_cast<WideArg*>(block.data() + offset)->nodeVal));
+        break;
+    case OpType_cstr:
+        std::fprintf(stderr, "c\"%s\"", reinterpret_cast<WideArg*>(block.data() + offset)->cstrVal);
+        break;
+    default:
+        std::fprintf(stderr, "???:%s", OpTypeVals[type]);
+    };
+    std::fprintf(stderr, " ");
+}
+
+void CodeGen::disassembleBlock(CodeBlock& block)
+{
+    size_t pc = 0;
+    while (pc < block.size()) {
+        OpByteCode opCode = *reinterpret_cast<OpByteCode*>(block.data() + pc);
+        const Op& opDescr = opsForOpCodes[opCode];
+
+        std::fprintf(stderr, "%08lx %s ", pc, OpNameVals[opDescr.baseInstr]);
+        for (int p = 0; p < opDescr.numParams; ++p) {
+            dumpParam(block, pc + opDescr.paramOffsets[p],
+                      opDescr.immediateParams[p] ? opDescr.paramTypes[p] : OpType_reg, opDescr.immediateParams[p]);
+        }
+
+        std::fprintf(stderr, "\t\t// %s\n", OpByteCodeVals[opCode]);
+        pc += opDescr.length;
+    }
+}
+
+} //namespace KJS
+// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

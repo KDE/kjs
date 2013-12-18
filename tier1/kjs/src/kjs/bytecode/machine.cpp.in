@@ -1,0 +1,259 @@
+/*
+ *  Main VM dispatch loop and related routines for KJS/Frostbyte
+ *  This file is part of the KDE libraries
+ *  Copyright (C) 2008 Maksim Orlovich (maksim@kde.org)
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
+#include "completion.h"
+#include "ExecState.h"
+#include "value.h"
+
+#include "nodes.h"
+#include "opcodes.h"
+#include "LocalStorage.h"
+#include "bytecode/opargs.h"
+#include "bytecode/machine.h"
+#include "scriptfunction.h"
+#include "internal.h" // for printInfo
+#include "ustring.h"
+#include "debugger.h"
+
+#include <stdio.h>
+
+// maximum global call stack size. Protects against accidental or
+// malicious infinite recursions. Define to -1 if you want no limit.
+#if PLATFORM(DARWIN)
+// Given OS X stack sizes we run out of stack at about 350 levels.
+// If we improve our stack usage, we can bump this number.
+#define KJS_MAX_STACK 100
+#else
+#define KJS_MAX_STACK 1000 // ### set system specific
+#endif
+
+namespace KJS {
+
+#if defined(__GNUC__)
+#define USE_LABEL_VALS
+#endif
+
+// We can either do jumps via switch or a GCC extension
+#ifdef USE_LABEL_VALS
+    #define handler(X) l##X
+#else
+    #define handler(X) case OpByteCode_##X
+#endif
+
+
+// #define COUNT_INSTRS
+
+// A little profiling aid -- counts the # of dynamic instances of each instruction.
+#ifdef COUNT_INSTRS
+
+static unsigned instrCounts[OpByteCode_NumValues];
+
+struct InstrCountPrinter
+{
+    ~InstrCountPrinter() {
+        for (int c = 0; c < OpByteCode_NumValues; ++c) {
+            printf("%9d %s\n", instrCounts[c], OpByteCodeVals[c]);
+        }
+    }
+};
+
+static InstrCountPrinter dumpCounts;
+#endif
+
+// ### Need to consolidate this w/things remaining in nodes.cpp somehow.
+static void substitute(UString &string, const UString &substring)
+{
+    int position = string.find("%s");
+    assert(position != -1);
+    UString newString = string.substr(0, position);
+    newString.append(substring);
+    newString.append(string.substr(position + 2));
+    string = newString;
+}
+
+NEVER_INLINE void throwUndefinedVariableError(ExecState* exec, const Identifier& ident)
+{
+    UString msg = "Can't find variable: %s";
+    substitute(msg, ident.ustring());
+    throwError(exec, ReferenceError, msg);
+}
+
+static JSValue* typeStringForValue(JSValue* v)
+{
+    switch (v->type()) {
+    case UndefinedType:
+        return jsString("undefined");
+    case NullType:
+        return jsString("object");
+    case BooleanType:
+        return jsString("boolean");
+    case NumberType:
+        return jsString("number");
+    case StringType:
+        return jsString("string");
+    default:
+        if (v->isObject()) {
+            // Return "undefined" for objects that should be treated
+            // as null when doing comparisons.
+            if (static_cast<JSObject*>(v)->masqueradeAsUndefined())
+                return jsString("undefined");
+            else if (static_cast<JSObject*>(v)->isFunctionType())
+                return jsString("function");
+        }
+
+        return jsString("object");
+    }
+}
+
+template<bool errorOut, bool trySkipOne, bool replaceActivations>
+ALWAYS_INLINE void lookupScopeAndFetch(ExecState* exec, Identifier* varName, JSValue*& scopeOut, JSValue*& valOut)
+{
+    const ScopeChain& chain = exec->scopeChain();
+    ScopeChainIterator iter = chain.begin();
+    ScopeChainIterator end = chain.end();
+
+    // we must always have something in the scope chain
+    assert(iter != end);
+
+    JSObject *scopeObj = *iter;
+    if (trySkipOne && !scopeObj->isLocalInjected()) {
+        // Unless eval introduced new variables dynamically,
+        // we know this isn't in the top scope
+        ++iter;
+    }
+
+    PropertySlot slot;
+    do {
+        scopeObj = *iter;
+        ++iter;
+        if (scopeObj->getPropertySlot(exec, *varName, slot)) {
+            if (!replaceActivations) {
+                scopeOut = scopeObj;
+            } else {
+                // Common case: we found it in global object -- no need to check
+                // if it's an activation
+                if (iter == end || !scopeObj->isActivation())
+                    scopeOut = scopeObj;
+                else
+                    scopeOut = exec->dynamicInterpreter()->globalObject();
+            }
+            valOut   = slot.getValue(exec, scopeObj, *varName);
+            return;
+        }
+    } while (iter != end);
+
+    scopeOut = scopeObj;
+    valOut = jsUndefined();
+    if (errorOut) {
+        throwUndefinedVariableError(exec, *varName);
+    }
+}
+
+static int depth;
+
+NEVER_INLINE JSValue* handleStackOverflow(ExecState* exec) {
+    depth -= 11; //Give the debugger some room..
+    JSValue *ret = throwError(exec, RangeError, "Maximum call stack size exceeded.");
+    depth += 10; //Put it back..
+    return ret;
+}
+
+enum Dir { Enter, Exit };
+
+NEVER_INLINE void changeDebugContext(Dir d, ExecState* exec, Node* n) {
+    FunctionBodyNode* body = static_cast<FunctionBodyNode*>(n);
+    Debugger* dbg = exec->dynamicInterpreter()->debugger();
+    List args;
+    FunctionImp* fn = 0;
+
+    // Find the activation that contains arguments, fn
+    const ScopeChain& chain = exec->scopeChain();
+    for (ScopeChainIterator iter = chain.begin(); iter != chain.end(); ++iter) {
+        JSObject* scopeObj = *iter;
+
+        if (scopeObj->isActivation()) {
+            ActivationImp* act = static_cast<ActivationImp*>(scopeObj);
+            args = act->passedInArguments();
+            fn   = static_cast<FunctionImp*>(act->function());
+            break;
+        }
+    }
+
+    if (d == Enter)
+        dbg->enterContext(exec, body->sourceId(), body->firstLine(), fn, args);
+    else
+        dbg->exitContext(exec, body->sourceId(), body->lastLine(), fn);
+}
+
+class ForInState: public JSObject {
+public:
+    PropertyNameArray* array;
+    int                pos;
+
+    ForInState() {
+        array = new PropertyNameArray;
+        pos   = 0;
+    }
+    
+    ~ForInState() {
+        delete array;
+    }
+};
+
+struct DepthCleanup
+{
+    ~DepthCleanup() { --depth; }
+};
+
+
+ALWAYS_INLINE_INTO JSValue*
+Machine::runBlock(ExecState* exec, const CodeBlock& codeBlock, ExecState* parentExec) {
+
+#ifdef USE_LABEL_VALS
+    // Jump table, if needed
+    @generate
+#endif
+
+    ++depth;
+    if (depth > KJS_MAX_STACK)
+        return handleStackOverflow(exec);
+
+    DepthCleanup dc;
+
+    const unsigned char* base = codeBlock.data();
+    const unsigned char* pc   = base;
+    List workList;
+    LocalStorageEntry* localStore = exec->localStorage();
+    exec->setMachineRegisters(base, &pc, &localStore);
+    JSObject* globalObject = exec->dynamicInterpreter()->globalObject();
+
+    while (true) {
+#ifdef COUNT_INSTRS
+        OpByteCode opCodeLog = *reinterpret_cast<const OpByteCode*>(pc);
+        ++instrCounts[opCodeLog];
+#endif
+        @generate
+    }
+}
+
+}
+
+// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

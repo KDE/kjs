@@ -1,0 +1,110 @@
+Get rid of SourceElementsNode by integrating its functionality into
+StatementNode.
+
+==========================================================================
+
+The hash value of a string could be calculated at creation time and be
+stored in the UString instance for later use by the lookup functions.
+
+==========================================================================
+
+Proposal for a new object model. Far from being complete.
+
+  Object                            Type
++---------+                    +-------------+
+|  type   | ---------------->  | toString()  |
+|         |		       | toNumber()  |
+|  data   |		       |   ....      |
++---------+		       | construct() |
+     |                         +-------------+
+     |                                |   /|\
+    \|/                               |    |
++---------+                           |    |
+|  type   |                           |    |
+|         | Shared (optional)        \|/   |
+|  data   |                       +-------------+
++---------+	+---------+       | types       |
+       /|\      |         |<------| gc          | Interpreter/Environment
+	+-------|         |       |   ....      |
+		|         |       | excp state  |
+		+---------+       +-------------+
+              Garbage Collector
+
+Features:
+        - offers class static data (nice replacement for pointers to member
+	function objects in the prototype object)
+	- no more need to pass around ExecState pointers for the C++ user
+	(substituted with the need for Object* in the type implementation)
+	- simple types are stored simple (no new'ed Imp objects)
+
+Alternative A: pass around Object by pointer rather than value
+               rather than new'ing they should come out of a pool
+
+Alternative B: instead of virtual functions like toBoolean(), Type could
+               have an array of function pointers which can be modified
+               on the fly and checked for != 0.
+
+Limitations: Konqueror's requirement to allow access to other frame's
+             interpreter data but flagging errors on the caller's side
+	     is not satisfied.
+
+class Interpreter;
+
+class Type {
+public:
+  Type(Interpreter* i, Type *b) : ip(i), bs(b) { }
+  virtual UString name() const = 0;
+  Type* base() const { return bs; }
+  Interpreter* interpreter() const { return ip; }
+
+  virtual bool toBoolean(Object *o);
+  // ....
+  virtual Object construct(const List &args);
+
+  // factory
+  Boolean newBoolean(bool b) { return Boolean(interpreter(), b); }
+
+private:
+  Interpreter* ip;
+  Type* bs;
+};
+
+union Data {
+   bool b;
+   double d;
+   // UString ???
+   Shared* sh;
+};
+
+class Object {
+public:
+   // creation
+   Boolean newBoolean(bool b) { return Boolean(typ->interpreter(), b); }
+
+   // conversion
+   bool to Boolean() const { return typ->toBoolean(this); }
+
+   // this object's "parent"
+   Interpreter* interpreter() const { return typ->ip; }
+private:
+   Type* typ;
+   Data dat;
+};
+
+class Boolean : public Object {
+public:
+   // used by convenience function newBoolean()
+   Boolean(Interpreter *i, bool b) {
+      typ = i->booleanType();
+      dat.b = b;
+   }
+   Boolean(const Boolean &b) {
+      typ = b.typ;
+      dat.b = b.b;
+   }
+   Boolean& operator=(const Boolean &b) {
+      type = b.typ;
+      dat.b = b.b;
+      return *this;
+   }
+};

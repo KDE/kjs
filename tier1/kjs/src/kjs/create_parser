@@ -1,0 +1,16 @@
+
+#!/bin/sh
+
+#
+# A replacement for the make parser target until someone figures out
+# how to do that in CMake.
+#
+
+bison -d -p kjsyy grammar.y && mv grammar.tab.c grammar.cpp;
+if test -f grammar.tab.h;
+then
+if cmp -s grammar.tab.h grammar.h; then rm -f grammar.tab.h;
+else mv grammar.tab.h grammar.h;
+fi
+else :;
+fi

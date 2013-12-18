@@ -1,0 +1,37 @@
+/** @mainpage KDE ECMAScript Engine
+
+This library provides an extensible interpreter for ECMAScript - a
+dynamic scripting language also known as JavaScript or JScript. Within
+the set of KDE libraries is used in the HTML component of Konqueror
+and the application scripting solutions KJSEmbed and Kross.
+
+KJS is made up of an internal core library and a public kjsapi library
+that provides a stable and easy-to-use interface for developers
+wanting to embed the engine as well as implement custom object types.
+
+See the <a href="annotated.html">class list</a> for an overview of
+classes representing the interpreter, standard types as well as
+extension interfaces.
+
+@authors
+Harri Porten \<porten@kde.org\><br>
+Maks Orlovich \<maksim@kde.org\><br>
+Apple Computer, Inc.<br>
+Peter Kelly \<pmk@post.com\><br>
+Christopher E. Hyde \<C.Hyde@parableuk.force9.co.uk\><br>
+David Faure \<faure@kde.org\><br>
+
+Plus various contributors like Richard Moore, Daegeun Lee, Marco
+Pinelli and Christian Kirsch.
+
+@maintainers
+Maks Orlovich \<maksim@kde.org\><br>
+Harri Porten \<porten@kde.org\>
+
+@licenses
+@lgpl
+
+*/
+
+// DOXYGEN_SET_PROJECT_NAME = KJS-API
+// vim:ts=4:sw=4:expandtab:filetype=doxygen

@@ -1,0 +1,136 @@
+/*
+ *  Opcode data structure and selection routines for KJS/Frostbyte
+ *  This file is part of the KDE libraries
+ *  Copyright (C) 2008 Maksim Orlovich (maksim@kde.org)
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
+#include <wtf/Assertions.h>
+    // be nice to our fruity overlords and their silly assert-unfriendly environment
+
+#include <wtf/RefPtr.h>
+#include <wtf/Vector.h>
+#include "value.h"
+#include "identifier.h"
+#include "ExecState.h"
+
+#ifndef OPCODES_H
+#define OPCODES_H
+
+namespace KJS {
+
+typedef unsigned Register;
+class CompileState;
+
+@generate
+
+/**
+ There are 2 levels at which instructions exist. First of all, there is
+ an actual operation name, represent by the OpName enum. This is something like
+ Op_IfJump. For each one of these, we have multiple bytecode instructions, such as
+ OpByteCode_IfJump_Ibool_Iaddr and OpByteCode_IfJump_Rbool_Iaddr, with their
+ names given in the OpByteCode_ enum.
+
+ For each of these bytecode codes, there is an entry in the opsForOpCodes
+ array, which provides an Op structure, which describes which parameters
+ go where, and so on. The opSpecializations array lets one look up
+ all these structures relevant for each OpName, so one can select
+ the specific operation for each conceptual instruction.
+
+ Besides parameter variants, there is also variation based on padding, with
+ some bytecodes skipping 4 extra bytes after the opcode to make things 8-aligned.
+ Those bytecodes are always 1 below their unaligned version
+*/
+
+struct Op {
+    OpName     baseInstr;
+    OpByteCode opCode;
+    int        cost;
+
+    int numParams;
+    OpType paramTypes[4];
+    bool   immediateParams[4];
+    bool   exactParams[4]; // if true, we should not perform any
+                           // (non-injective) conversions for the given parameter
+
+    OpType retType; // type of this specialization
+
+    int length; // Length of instruction, including opcode + args
+
+    // This contains offsets of arguments, starting from before the instruction
+    int paramOffsets[4];
+
+    // If this is true, this version of the instruction has an
+    // extra word inserted after the opcode, for alignment reasons.
+    bool padAlign;
+
+    // If this is true, this version has both padded and unpadded flavors
+    bool hasPadVariant;
+
+    // If this is true, this instruction performs a jump, and hence
+    // should flush per-BB info
+    bool endsBB;
+};
+
+// The main array of Op instances, mapped by OpByteCode
+extern const Op opsForOpCodes[];
+
+// Lists all the specialized versions of each Op class, mapped by OpName,
+// 0 terminated.
+extern const Op* const* const opSpecializations[];
+
+// Describes whether the type is align8 or not.
+extern const bool opTypeIsAlign8[];
+
+struct OpValue;
+
+typedef Vector<unsigned char> CodeBlock;
+
+class CodeGen {
+public:
+    // All of these emit the instruction of given type, and return its base.
+    // If retVal isn't 0, the return value will be placed there
+    static Addr emitOp(CompileState* comp, OpName baseInstr,
+                       OpValue* retOut = 0, OpValue* a0 = 0, OpValue* a1 = 0,
+                                            OpValue* a2 = 0, OpValue* a3 = 0);
+
+    static void emitConvertTo(CompileState* comp, OpValue* in,
+                              OpType outType, OpValue* out);
+
+    // Emits a register store of appropriate type
+    static void emitRegStore(CompileState* comp, OpValue* regNum, OpValue* val);
+
+    static void patchOpArgument(CodeBlock& block, Addr base, int pos, OpValue& newVal);
+
+    // Patches op at address 'op' to jump to next instr.
+    static void patchJumpToNext(CompileState* comp, Addr op, int argNum);
+
+    // This requests the address of next instruction, for use in control flow, and
+    // designates a basic block boundary, flushing everything BB-dependent;
+    static Addr nextPC(CompileState* comp);
+
+    static void disassembleBlock(CodeBlock& block);
+
+};
+
+
+} //namespace KJS
+
+#endif
+
+// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;
+

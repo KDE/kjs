@@ -1,0 +1,1286 @@
+/*
+ *  This describe the various bytecode operations for KJS/Frostbyte, and gives their implementations
+ *
+ *  This file is part of the KDE libraries
+ *  Copyright (C) 1999-2002 Harri Porten (porten@kde.org)
+ *  Copyright (C) 2001 Peter Kelly (pmk@post.com)
+ *  Copyright (C) 2003, 2004, 2005, 2006, 2007 Apple Inc. All rights reserved.
+ *  Copyright (C) 2007, 2008 Maksim Orlovich (maksim@kde.org)
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
+// JS types.
+type bool: bool [register, immediate];
+
+// We have to be careful about uint32/int32, as while number -> them behaves
+// transparently, the results may be converted back to a number, which may show
+// a sign
+type int32: int32_t [register, immediate];
+
+// We provide immediate JSValue's, for the following:
+// 1) Small numeric constants
+// 2) undefined and null.
+// This relies on immediate value JSValue conversion rountines not touching exec!
+type value:  JSValue* [register, immediate, align8];
+
+type number: double [register, immediate, align8];
+
+// Program types; these all represent stuff in source code and not actual program values
+// Hence, no conversions for them.
+type ident:  Identifier* [immediate, align8];
+type addr:  Addr        [immediate];
+type reg:   Register    [immediate]; // an output register
+
+// We have to be careful with this type --- it only represents
+// string literals in the program, as we have no nice way of memory managing others..
+// ### we may want to use a register jsString type instead, in particular to
+// infer the proper overload of +, when appropriate
+type string: UString* [immediate, align8];
+
+// AST nodes passed to helpers... They may cast it further..
+type node: Node* [immediate, align8];
+
+// for error messages and the like
+type cstr: const char* [immediate, align8];
+
+// Just for the return type...
+type void: void [immediate];
+
+/**
+Notes on the conversion rules from the spec:
+The conversion operations in general do not form a commutative diagram ---
+one can call toBoolean(toUInt32(foo)) and get something different
+from toBoolean(foo). We don't worry about this, however, because when we
+know the type enough to annotate it as uint32, etc., it's when the computation
+would naturally produces a 32-bit int, so we would never marshal an object to it!
+
+We also never chain multiple conversions ourselves.
+*/
+
+/*
+ Conversions from bool
+*/
+conversion bool => int32 {
+    impl [[
+        return in ? 1 : 0;
+    ]]
+
+    tile     costs 0; //cost in tile..
+    register costs 0; // we always store bool as 0/1, so this is free.
+}
+
+conversion bool => value {
+    impl [[
+        return jsBoolean(in);
+    ]]
+
+    tile     costs 0;
+    register costs 10; // Separate jsBoolean instruction
+}
+
+conversion bool => number {
+    impl [[
+        return in ? 1.0 : 0.0;
+    ]]
+
+    tile     costs 0;
+    register costs 10;
+}
+
+/*
+ Conversions from values
+*/
+conversion value => bool {
+    impl [[
+        return in->toBoolean(exec);
+    ]]
+
+    tile     costs 5; // it is a virtual call
+    register costs 15; // ToBoolean instr, includes a virtual call..
+}
+
+conversion value => int32 {
+    impl [mayThrow] [[
+        return in->toInt32(exec);
+    ]]
+
+    tile     costs 40; // toInt32 uses toNumber --- expensive
+    register costs 50; // above, plus a separate instr
+}
+
+conversion value => number {
+    impl [mayThrow] [[
+        return in->toNumber(exec);
+    ]]
+
+    tile     costs 37;
+    register costs 49;
+}
+
+/*
+ Conversions from int32
+*/
+conversion int32 => bool {
+    impl [[
+        return in ? true : false; // Expect stupid MSVC 0/1 warning
+    ]]
+
+    tile     costs 0;
+    register costs 10;
+}
+
+conversion int32 => value {
+    impl [checked, mayThrow] /* due to OOM */ [[
+        return jsNumber(in);
+    ]]
+
+    tile     costs 15;
+    register costs 25;
+}
+
+conversion int32 => number {
+    impl [[
+        return in;
+    ]]
+
+    tile     costs 3;
+    register costs 10;
+}
+
+/*
+ Conversions from number
+*/
+conversion number => bool {
+    impl [[
+        return in < 0.0 || in > 0.0; // false for NaN
+    ]]
+
+    tile     costs 15;
+    register costs 25;
+}
+
+conversion number => value {
+    impl [checked, mayThrow] /* due to OOM */ [[
+        return jsNumber(in);
+    ]]
+
+    tile     costs 15;
+    register costs 35;
+}
+
+conversion number => int32 {
+    impl [[
+        return JSValue::toInt32(in);
+    ]]
+
+    tile     costs 10;
+    register costs 20;
+}
+
+/*
+ These are specializes versions for when we have an immediate # and are trying for
+ an immediate value --- avoids extra check
+*/
+operation RInt32_Value_NonImm {
+    impl value(int32 val) [[
+        $$ = jsNumberCell(val);
+    ]]
+}
+
+operation RNum_Value_NonImm {
+    impl value(number val) [[
+        $$ = jsNumberCell(val);
+    ]]
+}
+
+/***************************************************************************
+ WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+ $$/localStore should never be set on the same call that can tearoff
+ the frame or reallocate the stack, since the evaluation order if undefined
+****************************************************************************/
+
+/**
+ Debug only..
+ */
+operation PrintInfo {
+    impl void(value in) [[
+        printInfo(exec, "", in);
+    ]]
+}
+
+/**
+ Actual debugger support...
+*/
+operation AtStatement {
+    impl void(node in) [[
+        static_cast<StatementNode*>(in)->hitStatement(exec);
+    ]]
+}
+
+/**
+ Control flow stuff
+*/
+operation Exit[endsBB] {
+    impl void exit() [[
+        return jsUndefined();
+    ]]
+}
+
+operation Jump[endsBB] {
+    impl void jmp(addr dest) [[
+        pc = base + dest;
+    ]]
+}
+
+operation IfJump[endsBB] {
+    impl void executeIfJump(bool condResult, addr dest) [[
+        if (condResult)
+            pc = base + dest;
+    ]]
+
+    tile (value, addr) as executeIfJump;
+}
+
+operation IfNotJump[endsBB] {
+    impl void executeIfNotJump(bool condResult, addr dest) [[
+        if (!condResult)
+            pc = base +dest;
+    ]]
+
+    tile (value, addr) as executeIfNotJump;
+}
+
+// Fetches the propertly list, if any, and sets up the iterator state in given
+// register. Returns the value to iterator
+operation BeginForIn[endsBB] {
+    impl value (value e, reg stateReg) [[
+        ForInState* st = new ForInState();
+        localStore[stateReg].val.valueVal = st;
+    
+        if (!e->isUndefinedOrNull()) {
+            JSObject* v = e->toObject(exec);
+            // The above might raise an exception..
+            if (pc != localPC) continue;
+
+            v->getPropertyNames(exec, *st->array);
+            $$ = v;
+        } else {
+            // empty array, so this doesn't matter.
+            $$ = jsUndefined();
+        }
+    ]]
+}
+
+operation NextForInEntry {
+    impl value(value[noimm] e, value[noimm] ctx, addr jumpToIfDone) [[
+        ForInState* st = static_cast<ForInState*>(ctx);
+        PropertyNameArray& pa  = *st->array;
+
+        // Invariant: pos = next entry to consider.
+        int& pos = st->pos;
+
+        $$ = jsUndefined();
+        while (pos < pa.size()) {
+            ASSERT(e->isObject());
+            JSObject* v = static_cast<JSObject*>(e);
+
+            Identifier& name = pa[pos];
+            ++pos;
+
+            if (v->hasProperty(exec, name)) {
+                // Wasn't deleted during iteration..
+                $$ = jsOwnedString(name.ustring());
+                break;
+            }
+        }
+
+        if ($$ == jsUndefined()) // Nothing found. Jump to end of the loop
+            pc = base + jumpToIfDone;
+    ]]
+}
+
+// These update the scope chain, and sets the special unwind exception handler, which is used to
+// restore the chain if an exception happens
+operation PushScope {
+    impl void pushScope(value in) [[
+        JSObject* obj = in->toObject(exec);
+        if (exec->hadException())
+            continue; // will jump to handler.
+
+        exec->pushScope(obj);
+        exec->pushExceptionHandler(ExecState::PopScope);
+    ]]
+}
+
+operation UnwindStacks {
+    impl void(int32 handlers) [[
+        // This op is used when a break or continue is used to jump out
+        // of a context that updated various stacks in ExecState,
+        // in order to clean them up. Each of those ops contributes an
+        // entry to the main exception handler stack, and perhaps some others.
+        // We unwind the main stack, using the cleanup entries on it as appropriate.
+        exec->quietUnwind(handlers);
+    ]]
+}
+
+operation PopScope {
+    impl void () [[
+        // As PushScope does not Push anything on Exception case, we can not Pop.
+        // NOTE: the Exception checking on Push/Pop-Scope is not optimal.
+        // Such a Situation, where PushScope already has a Exception can only
+        // occour if import is used inside the the "with"-statement. As import is
+        // executed at the beginning of the code (as val decl) and can leave a exception.
+        // As "import" is not (yet) part of ECMA-262 the correct behavior is unknown
+        // when this changes we can rework the bahavior, but for now just fix the crash.
+        if (exec->hadException())
+                continue;
+
+        exec->popScope();
+        exec->popExceptionHandler();
+    ]]
+}
+
+operation PopExceptionHandler {
+    impl void popCatch() [[
+        exec->popExceptionHandler();
+    ]]
+}
+
+operation PushExceptionHandler {
+    impl void (addr handler) [[
+        exec->pushExceptionHandler(ExecState::JumpToCatch, handler);
+    ]]
+}
+
+operation EnterCatch {
+    impl void (ident exceptionIdent) [[
+        // First, check if we have a non-exception indirect continuation,
+        // if so, we re-raise it directly to the finally (and skip the rest of the catch section)
+        if (exec->abruptCompletion().complType() != Throw) {
+            // By this point, the previous handler has been popped, so we should have the
+            // 'finally' bound as the handler. Hence, set the completion again to jump to it.
+            exec->setAbruptCompletion(exec->abruptCompletion());
+            continue;
+        }
+
+        // Now we have a plain, old exception. Grab & clear exception it exec state,
+        // and put it in a scope w/a name to it
+        JSValue* exception = exec->exception();
+        exec->clearException();
+
+        JSObject *obj = new JSObject;
+        obj->put(exec, *exceptionIdent, exception, DontDelete);
+        exec->pushScope(obj);
+        exec->pushExceptionHandler(ExecState::PopScope);
+    ]]
+}
+
+operation ExitCatch {
+    impl void() [[
+        exec->popScope();
+        exec->popExceptionHandler();
+    ]]
+}
+
+operation DeferCompletion {
+    impl void() [[
+        exec->deferCompletion();
+    ]]
+}
+
+operation ReactivateCompletion {
+    impl void(bool insideFinally) [[
+        JSValue* retVal = exec->reactivateCompletion(insideFinally);
+        if (retVal)
+            return retVal;
+    ]]
+}
+
+operation ReactivateCompletionDebug {
+    // version for inside functions + debug mode, which calls ExitContext
+    impl void(bool insideFinally, node n) [[
+        JSValue* retVal = exec->reactivateCompletion(insideFinally);
+        if (retVal) {
+            changeDebugContext(Exit, exec, n);
+            return retVal;
+        }
+    ]]
+}
+
+operation Throw {
+    impl void throw(value exception) [[
+        exec->setException(exception);
+    ]]
+}
+
+operation ContBreakInTryFinally {
+    impl void (addr dest) [[
+        exec->setAbruptCompletion(Completion(Continue /*or break, doesn't matter*/, 0, dest));
+    ]]
+}
+
+operation ReturnInTryFinally {
+    impl void(value val) [[
+        exec->setAbruptCompletion(Completion(ReturnValue, val));
+    ]]
+}
+
+operation PropagateException {
+    impl void() [[
+        JSValue* e = exec->exception();
+        if (parentExec)
+            parentExec->setException(e);
+        return e;
+    ]]
+}
+
+operation Return[endsBB] {
+    impl void return (value retVal) [[
+        return retVal;
+    ]]
+}
+
+operation RaiseError {
+    impl void (node node, int32 errorType, cstr msg) [[
+        node->throwError(exec, ErrorType(errorType), msg);
+    ]]
+}
+
+// Function entry: set things we cache in registers
+operation Preamble {
+    impl void(reg scopeReg, reg globalReg, reg thisReg) [[
+         localStore[scopeReg ].val.valueVal = exec->variableObject();
+         localStore[thisReg  ].val.valueVal = exec->thisValue();
+         localStore[globalReg].val.valueVal = globalObject;
+    ]]
+}
+
+operation EnterDebugContext {
+    impl void(node n) [[
+        changeDebugContext(Enter, exec, n);
+    ]]
+}
+
+operation ExitDebugContext {
+    impl void(node n) [[
+        changeDebugContext(Exit, exec, n);
+    ]]
+}
+
+// Variable stuff... Locals access can just use register addressing,
+// not specific get/put, but when we have to do symbolic lookup, we use these.
+
+
+operation FunctionLookupAndGet {
+    impl value(reg thisOutReg, ident varName) [[
+        JSValue* res;
+        JSValue* thisOut;
+        lookupScopeAndFetch<true /*error out*/, false /* don't skip one*/, true /* want this value*/>
+                (exec, varName, thisOut, res);
+        localStore[thisOutReg].val.valueVal = thisOut;
+        $$ = res;
+    ]]
+}
+
+operation NonLocalFunctionLookupAndGet {
+    impl value(reg thisOutReg, ident varName) [[
+        JSValue* res;
+        JSValue* thisOut;
+        lookupScopeAndFetch<true /*error out*/, true /* skip one*/, true /* want this value*/>
+                (exec, varName, thisOut, res);
+        $$ = res;
+        localStore[thisOutReg].val.valueVal = thisOut;
+    ]]
+}
+
+operation ScopeLookupAndGetChecked {
+    impl value(reg valOutReg, ident varName) [[
+        JSValue* scopeOut;
+        JSValue* val;
+
+        lookupScopeAndFetch<true /*error out*/, false /* don't skip one*/, false /* scope, not this*/>
+                    (exec, varName, scopeOut, val);
+        $$ = scopeOut;
+        localStore[valOutReg].val.valueVal = val;
+    ]]
+}
+
+operation ScopeLookupAndGet {
+    impl value(reg valOutReg, ident varName) [[
+        JSValue* scopeOut;
+        JSValue* val;
+
+        lookupScopeAndFetch<false /*don't error out*/, false /* no skip*/, false /* scope, not this*/ >
+                    (exec, varName, scopeOut, val);
+        $$ = scopeOut;
+        localStore[valOutReg].val.valueVal = val;
+    ]]
+}
+
+operation NonLocalScopeLookupAndGetChecked {
+    impl value(reg valOutReg, ident varName) [[
+        JSValue* scopeOut;
+        JSValue* val;
+
+        lookupScopeAndFetch<true /*error out*/, true /* skip one */, false /* scope, not this*/ >
+                    (exec, varName, scopeOut, val);
+        $$ = scopeOut;
+        localStore[valOutReg].val.valueVal = val;
+    ]]
+}
+
+operation NonLocalScopeLookupAndGet {
+    impl value(reg valOutReg, ident varName) [[
+        JSValue* scopeOut;
+        JSValue* val;
+
+        lookupScopeAndFetch<false /*don't error out*/, true /* skip one */, false /* scope, not this*/ >
+                    (exec, varName, scopeOut, val);
+        $$ = scopeOut;
+        localStore[valOutReg].val.valueVal = val;
+    ]]
+}
+
+
+operation ScopeLookup {
+    // Find which scope the variable is in, e.g. basically evaluates to a reference.
+    // If we want failures detected, the errorNode is set to non-zero, to help with line #s, etc
+    impl value scopeLookup(ident varName, node errorNode) [[
+        const ScopeChain& chain = exec->scopeChain();
+        ScopeChainIterator iter = chain.begin();
+        ScopeChainIterator end = chain.end();
+
+        // we must always have something in the scope chain
+        assert(iter != end);
+
+        JSObject *scopeObj;
+        PropertySlot slot;
+        do {
+            scopeObj = *iter;
+
+            if (scopeObj->getPropertySlot(exec, *varName, slot))
+                break;
+            ++iter;
+        } while (iter != end);
+
+        if (errorNode && iter == end) {
+            $$ = errorNode->throwUndefinedVariableError(exec, *varName);
+            continue;
+        }
+
+        $$ = scopeObj;
+    ]]
+}
+
+operation NonLocalScopeLookup {
+    // As above, but may skip one step
+    impl value scopeLookup(ident varName, node errorNode) [[
+        const ScopeChain& chain = exec->scopeChain();
+        ScopeChainIterator iter = chain.begin();
+        ScopeChainIterator end = chain.end();
+
+        // we must always have something in the scope chain
+        assert(iter != end);
+
+        JSObject *scopeObj = *iter;
+        if (!scopeObj->isLocalInjected()) {
+            // Unless eval introduced new variables dynamically,
+            // we know this isn't in the top scope
+            ++iter;
+        }
+
+        PropertySlot slot;
+        do {
+            scopeObj = *iter;
+
+            if (scopeObj->getPropertySlot(exec, *varName, slot))
+                break;
+            ++iter;
+        } while (iter != end);
+
+        if (errorNode && iter == end) {
+            $$ = errorNode->throwUndefinedVariableError(exec, *varName);
+            continue;
+        }
+        $$ = scopeObj;
+    ]]
+}
+
+
+// Looks up a given variable in the scope chain, returns its value
+operation VarGet {
+    impl value varGet(ident varName) [[
+        JSValue* scopeOut;
+        JSValue* val;
+
+        lookupScopeAndFetch<true /*error out*/, false /* don't skip one*/, false /*no this*/ >(exec, varName, scopeOut, val);
+        $$ = val;
+    ]]
+}
+
+// Like above, but skips the first step, if possible.
+operation NonLocalVarGet {
+    impl value nonLocalVarGet(ident varName) [[
+        JSValue* scopeOut;
+        JSValue* val;
+
+        lookupScopeAndFetch<true /*error out*/, true /* don't skip one*/, false /*no this*/ >(exec, varName, scopeOut, val);
+        $$ = val;
+    ]]
+}
+
+operation RegPutValue {
+    impl void regPut(reg destReg, value val) [[
+        localStore[destReg].val.valueVal = val;
+    ]]
+
+    tile (reg, number) as regPut;
+}
+
+operation RegPutNumber {
+    impl void (reg destReg, number val) [[
+        localStore[destReg].val.numberVal = val;
+    ]]
+}
+
+operation RegPutBool {
+    impl void (reg destReg, bool val) [[
+        localStore[destReg].val.boolVal = val;
+    ]]
+}
+
+operation RegPutInt32 {
+    impl void (reg destReg, int32 val) [[
+        localStore[destReg].val.int32Val = val;
+    ]]
+}
+
+operation ToObject {
+    impl value toObject(value val) [[
+        $$ = val->toObject(exec);
+    ]]
+}
+
+// Put for an object..
+operation SymPutKnownObject {
+    impl void symPutKnownObject(value [noimm] scope, ident varName, value val) [[
+        ASSERT(scope->isObject());
+        static_cast<JSObject*>(scope)->put(exec, *varName, val);
+    ]]
+
+    tile (value, ident, number) as symPutKnownObject;
+}
+
+// Generic get..
+operation SymGet {
+    impl value symGet(value base, ident prop) [[
+        JSObject* baseObj = base->toObject(exec);
+        // toObject may fail and return an exception object, but get from it is harmless
+
+        // IMPORTANT: The call and store to $$ should be two steps, since ::get can tear off frames!
+        JSValue* val = baseObj->get(exec, *prop);
+        $$ = val;
+    ]]
+}
+
+// Get when we know the base is an object
+operation SymGetKnownObject {
+    impl value symGet(value base, ident prop) [[
+        ASSERT(base->isObject());
+
+        $$ = static_cast<JSObject*>(base)->get(exec, *prop);
+    ]]
+}
+
+// As above, but also stores the object
+operation SymGetAndBind {
+    impl value (reg objDest, value [noimm] base, ident varName) [[
+        JSObject* baseObj = base->toObject(exec);
+        // toObject may fail and return an exception object, but get from it is harmless
+        localStore[objDest].val.valueVal = baseObj;
+
+        // IMPORTANT: The call and store to $$ should be two steps, since ::get can tear off frames!
+        JSValue* val = baseObj->get(exec, *varName);
+        $$ = val;
+    ]]
+}
+
+operation BracketGet {
+    impl value (value [noimm] v1, value v2) costs 50 [[
+        uint32_t i;
+
+        if (v2->getUInt32(i)) {
+           $$ = v1->getByIndex(exec, i);
+           continue;
+        }
+
+        JSObject *o = v1->toObject(exec);
+        // Make sure to  handle exception immediately, here, since toString might throw, too!
+        if (exec->hadException())
+            continue;
+
+        // IMPORTANT: The call and store to $$ should be two steps, since ::get can tear off frames!
+        JSValue* val = o->get(exec, Identifier(v2->toString(exec)));
+        $$ = val;
+    ]]
+
+    impl value (value [noimm] base, int32 [exact] prop) [[        
+        if (prop >= 0) {
+            $$ = base->getByIndex(exec, static_cast<uint32_t>(prop));
+        } else {
+            // Have to go as a string, as above.
+            JSObject* o = base->toObject(exec);
+            JSValue* val = o->get(exec, Identifier(UString::from(prop)));
+            $$ = val;
+        }
+    ]]
+}
+
+// Also computes the base object
+operation BracketGetAndBind {
+    impl value (reg objDest, value [noimm] v1, value v2) costs 50 [[
+        uint32_t i;
+        JSObject *o = v1->toObject(exec);
+        // Make sure to  handle exception immediately, here, since toString might throw, too!
+        if (exec->hadException())
+            continue;
+
+        localStore[objDest].val.valueVal = o;
+
+        JSValue* val;
+        if (v2->getUInt32(i))
+            val = o->get(exec, i);
+        else
+            val = o->get(exec, Identifier(v2->toString(exec)));
+        $$ = val;
+    ]]
+
+    impl value (reg objDest, value [noimm] base, int32 [exact] prop) [[
+        JSObject* baseObj = base->toObject(exec);
+        // toObject may fail and return an exception object, but get from it is harmless
+        localStore[objDest].val.valueVal = baseObj;
+
+        if (prop >= 0) {
+            $$ = baseObj->get(exec, static_cast<uint32_t>(prop));
+        } else {
+            JSValue* val = baseObj->get(exec, Identifier(UString::from(prop)));
+            $$ = val;
+        }
+    ]]
+}
+
+
+operation BracketPutKnownObject {
+    impl void (value [noimm] v1, value v2, value v3) costs 50 [[
+        ASSERT(v1->isObject());
+        uint32_t i;
+        JSObject *o = static_cast<JSObject*>(v1);
+
+        if (v2->getUInt32(i))
+            o->put(exec, i, v3);
+        else
+            o->put(exec, Identifier(v2->toString(exec)), v3);
+    ]]
+
+    impl void (value [noimm] base, int32 [exact] prop, value val) [[
+        ASSERT(base->isObject());
+        if (prop >= 0) {
+            static_cast<JSObject*>(base)->put(exec, static_cast<uint32_t>(prop), val);
+        } else {
+            static_cast<JSObject*>(base)->put(exec, Identifier(UString::from(prop)), val);
+        }
+    ]]
+}
+
+operation GlobalObjectGet {
+    impl value(ident varName) [[
+        JSObject* scopeObj = globalObject;
+        PropertySlot slot;
+        if (scopeObj->getPropertySlot(exec, *varName, slot)) {
+            JSValue* val = slot.getValue(exec, scopeObj, *varName);;
+            $$ = val;
+        } else {
+            throwUndefinedVariableError(exec, *varName);
+        }
+    ]]
+}
+
+operation SymDeleteKnownObject {
+    impl bool(value scope, ident name) [[
+        ASSERT(scope->isObject());
+        $$ = static_cast<JSObject*>(scope)->deleteProperty(exec, *name);
+    ]]
+}
+
+operation SymDelete {
+    impl bool(value scope, ident name) [[
+        JSObject* o = scope->toObject(exec);
+        if (pc == localPC) // No exception!
+            $$ = o->deleteProperty(exec, *name);
+    ]]
+}
+
+operation BracketDelete {
+    impl bool(value [noimm] v1, value v2) costs 50 [[
+        uint32_t i;
+        JSObject *o = v1->toObject(exec);
+        if (pc != localPC)
+            continue;
+
+        if (v2->getUInt32(i))
+            $$ = o->deleteProperty(exec, i);
+        else
+            $$ = o->deleteProperty(exec, Identifier(v2->toString(exec)));
+    ]]
+
+    impl bool(value v1, int32 [exact] i) [[
+        JSObject *o = v1->toObject(exec);
+        if (pc != localPC)
+            continue;
+
+        if (i >= 0)
+            $$ = o->deleteProperty(exec, static_cast<uint32_t>(i));
+        else
+            $$ = o->deleteProperty(exec, Identifier(UString::from(i)));
+    ]]
+}
+
+/**
+ Making things..
+*/
+operation OwnedString {
+    impl value ownedString(string in) [[
+        $$ = jsOwnedString(*in);
+    ]]
+}
+
+operation NewEmptyArray {
+    impl value() [[
+        $$ = exec->lexicalInterpreter()->builtinArray()->construct(exec, List::empty());
+    ]]
+}
+
+operation NewObject {
+    impl value() [[
+        $$ = new JSObject(exec->lexicalInterpreter()->builtinObjectPrototype());
+    ]]
+}
+
+operation NewRegExp {
+    impl value(string pattern, string flags) [[
+        // ### TODO: this is -very- wasteful
+        List list;
+        list.append(jsOwnedString(*pattern));
+        list.append(jsOwnedString(*flags));
+
+        JSObject *reg = exec->lexicalInterpreter()->builtinRegExp();
+        $$ = reg->construct(exec,list);
+    ]]
+}
+
+operation DefineGetter {
+    impl void(value [noimm] base, ident name, value getter) [[
+        ASSERT(base->isObject());
+        ASSERT(getter->isObject());
+        static_cast<JSObject*>(base)->defineGetter(exec, *name, static_cast<JSObject*>(getter));
+    ]]
+}
+
+operation DefineSetter {
+    impl void(value [noimm] base, ident name, value setter) [[
+        ASSERT(base->isObject());
+        ASSERT(setter->isObject());
+        static_cast<JSObject*>(base)->defineSetter(exec, *name, static_cast<JSObject*>(setter));
+    ]]
+}
+
+
+/**
+ Numeric ops
+ */
+operation Add1 {
+    impl number add1(number old) [[
+        $$ = old + 1.0;
+    ]]
+
+    tile (value) as add1;
+}
+
+operation Sub1 {
+    impl number sub1(number old) [[
+        $$ = old - 1.0;
+    ]]
+}
+
+operation Neg {
+    impl number neg(number old) [[
+        $$ = -old;
+    ]]
+
+    tile (value) as neg;
+}
+
+operation Mult {
+    impl number mult (number v1, number v2) [[
+        $$ = v1 * v2;
+    ]]
+
+    tile (value, value) as mult;
+    tile (value, number) as mult;
+    tile (number, value) as mult;
+}
+
+operation Div {
+    impl number(number v1, number v2) [[
+        $$ = v1 / v2;
+    ]]
+}
+
+operation Mod {
+    impl number(number v1, number v2) [[
+        $$ = fmod(v1, v2);
+    ]]
+}
+
+operation Sub {
+    impl number(number v1, number v2) [[
+        $$ = v1 - v2;
+    ]]
+}
+
+operation Add {
+    impl value(value v1, value v2) costs 50 [[
+        // exception for the Date exception in defaultValue()
+        JSValue *p1 = v1->toPrimitive(exec, UnspecifiedType);
+        if (pc != localPC) continue;
+        JSValue *p2 = v2->toPrimitive(exec, UnspecifiedType);
+        if (pc != localPC) continue;
+
+        if (p1->isString() || p2->isString()) {
+            UString value = p1->toString(exec) + p2->toString(exec);
+            if (value.isNull()) {
+                JSObject *error = Error::create(exec, GeneralError, "Out of memory");
+                exec->setException(error);
+            } else {
+                $$ = jsString(value);
+            }
+        } else {
+            $$ = jsNumber(p1->toNumber(exec) + p2->toNumber(exec));
+        }
+    ]]
+
+    impl number(number[exact] n1, number[exact] n2) [[
+        $$ = n1 + n2;
+    ]]
+}
+
+
+operation LShift {
+    impl int32(int32 v1, int32 v2) [[
+        $$ = (v1 << ((uint32_t)v2 & 0x1f));
+    ]]
+}
+
+operation RShift {
+    impl int32(int32 v1, int32 v2) [[
+        $$ = (v1 >> ((uint32_t)v2 & 0x1f));
+    ]]
+}
+
+operation URShift {
+    // This returns number since we don't have a uint32 type (yet?)
+    impl number(int32 v1, int32 v2) [[
+        $$ = (uint32_t(v1) >> ((uint32_t)v2 & 0x1f));
+    ]]
+}
+
+operation Less {
+    // ### ??? TODO: conversion-less overloads here, when core supports them ???
+
+    impl bool(value v1, value v2) costs 40 [[
+        // operator <
+        // -1: NaN, undefined => false
+        //  0: v1 >= v2       => false
+        //  1: v1 <  v2       => true;
+        $$ = (relation(exec, v1, v2) == 1);
+    ]]
+
+    impl bool(value v1, number[exact] n2) [[
+        // As above..
+        $$ = (relation(exec, v1, n2) == 1);
+    ]]
+
+    impl bool(value v1, int32[exact] n2) [[
+        // As above... 
+        $$ = (relation(exec, v1, n2) == 1);
+    ]]
+}
+
+operation GreaterEq {
+    impl bool(value v1, value v2) [[
+        // operator >=
+        // -1: NaN, undefined => false
+        //  0: v1 >= v2       => true
+        //  1: v1 <  v2       => false;
+        $$ = (relation(exec, v1, v2) == 0);
+    ]]
+}
+
+operation Greater {
+    impl bool(value v1, value v2) [[
+        // operator >
+        // -1: NaN, undefined => false
+        //  0: v2 >= v1       => false
+        //  1: v2 <  v1       => true
+        $$ = (relation(exec, v2, v1, false) == 1);
+    ]]
+}
+
+operation LessEq {
+    impl bool(value v1, value v2) [[
+        // operator <=
+        // -1: NaN, undefined => false
+        //  0: v2 >= v1       => true
+        //  1: v2 <  v1       => false
+        $$ = (relation(exec, v2, v1, false) == 0);
+    ]]
+}
+
+operation EqEq {
+    impl bool(value v1, value v2) costs 30  [[
+        // operator ==
+        $$ = equal(exec, v1, v2);
+    ]]
+
+    impl bool(value v1, int32[exact] n2) [[
+        double n1;
+        if (v1->getNumber(n1))
+            $$ = (n1 == n2);
+        else
+            $$ = equal(exec, v1, jsNumber(n2));
+    ]]
+}
+
+operation NotEq {
+    impl bool(value v1, value v2) costs 30 [[
+        // operator !=
+        $$ = !equal(exec,v1, v2);
+    ]]
+
+    impl bool(value v1, int32[exact] n2) [[
+        double n1;
+        if (v1->getNumber(n1))
+            $$ = (n1 != n2);
+        else
+            $$ = !equal(exec, v1, jsNumber(n2));
+    ]]
+}
+
+
+operation StrEq {
+    impl bool(value v1, value v2) [[
+        // operator ===
+        $$ = strictEqual(exec,v1, v2);
+    ]]
+}
+
+operation StrNEq {
+    impl bool(value v1, value v2) [[
+        // operator !==
+        $$ = !strictEqual(exec,v1, v2);
+    ]]
+}
+
+
+/**
+ Bitops stuff
+*/
+operation BitNot {
+    impl int32 bitNot(int32 old) [[
+        $$ = ~old;
+    ]]
+}
+
+operation BitAnd {
+    impl int32 andOp(int32 a0, int32 a1) [[
+        $$ = a0 & a1;
+    ]]
+
+    tile (value, value) as andOp;
+    tile (value, int32) as andOp;
+    tile (int32, value) as andOp;
+}
+
+operation BitXOr {
+    impl int32 (int32 a0, int32 a1) [[
+        $$ = a0 ^ a1;
+    ]]
+}
+
+operation BitOr {
+    impl int32 (int32 a0, int32 a1) [[
+        $$ = a0 | a1;
+    ]]
+}
+
+
+/**
+ Logical ops... All one of them!
+*/
+operation LogicalNot {
+    impl bool logicalNot(bool old) [[
+        $$ = !old;
+    ]]
+}
+
+/**
+ Miscellaneous ops
+*/
+operation TypeOf {
+    impl value typeOf(value v) [[
+        $$ = typeStringForValue(v);
+    ]]
+}
+
+operation In {
+    impl bool (value v1, value v2) [[
+        if (!v2->isObject()) {
+            throwError(exec,  TypeError, "Value is not an object. Cannot be used with IN expression.");
+            continue;
+        }
+        JSObject* o2 = static_cast<JSObject*>(v2);
+        $$ = o2->hasProperty(exec, Identifier(v1->toString(exec)));
+    ]]
+}
+
+operation InstanceOf {
+    impl bool (value v1, value v2) [[
+        if (!v2->isObject()) {
+            throwError(exec,  TypeError, "Value is not an object. Cannot be used with instanceof operator.");
+            continue;
+        }
+
+        JSObject* o2 = static_cast<JSObject*>(v2);
+        if (!o2->implementsHasInstance())
+            // According to the spec, only some types of objects "implement" the [HasInstance] property.
+            // But we are supposed to throw an exception where the object does not "have" the [HasInstance]
+            // property. It seems that all object have the property, but not all implement it, so in this
+            // case we return false (consistent with mozilla)
+            $$ = false;
+        else
+            $$ = o2->hasInstance(exec, v1);
+    ]]
+}
+
+
+/**
+ Function call stuff, for first prototype.
+*/
+operation ClearArgs {
+    impl void() [[
+        workList.clear();
+    ]]
+}
+
+operation AddArg {
+    impl void(value val) [[
+        workList.append(val);
+    ]]
+}
+
+operation Add2Arg {
+    impl void(value a1, value a2) [[
+        workList.append(a1);
+        workList.append(a2);
+    ]]
+}
+
+operation Add3Arg {
+    impl void(value a1, value a2, value a3) [[
+        workList.append(a1);
+        workList.append(a2);
+        workList.append(a3);
+    ]]
+}
+
+operation FunctionCall {
+    impl value(value v, value thisVal) [[
+        ASSERT(thisVal->isObject());
+        ASSERT(!static_cast<JSObject*>(thisVal)->isActivation());
+
+        if (!v->implementsCall()) {
+            throwError(exec, TypeError, "Attempt to use a non-function object or a value as a function.");
+            //return throwError(exec, TypeError, notAnObjectMessage(), v, expr.get());
+            continue;
+        }
+
+        JSObject *func = static_cast<JSObject*>(v);
+        JSValue* val;
+        val = func->call(exec, static_cast<JSObject*>(thisVal), workList);
+        $$  = val;
+    ]]
+}
+
+operation CtorCall {
+    impl value(value v) [[
+        if (!v->isObject()) {
+            throwError(exec, TypeError, "Value is not an object. Cannot be used with new.");
+            //return throwError(exec, TypeError, "Value %s (result of expression %s) is not an object. Cannot be used with new.", v, expr.get());
+            continue;
+        }
+
+        JSObject *constr = static_cast<JSObject*>(v);
+        if (!constr->implementsConstruct()) {
+            throwError(exec, TypeError, "Value is not a constructor. Cannot be used with new.");
+            // ### TODO
+            // return throwError(exec, TypeError, "Value %s (result of expression %s) is not a constructor. Cannot be used with new.", v, expr.get());
+            continue;
+        }
+
+        JSValue* val = constr->construct(exec, workList);
+        $$ = val;
+    ]]
+}
+
+operation EvalFuncExpr {
+    impl value(ident ident, node body) [[
+        bool named = !ident->isNull();
+        JSObject *functionScopeObject = 0;
+
+        if (named) {
+            // named FunctionExpressions can recursively call themselves,
+            // but they won't register with the current scope chain and should
+            // be contained as single property in an anonymous object.
+            functionScopeObject = new JSObject;
+            exec->pushScope(functionScopeObject);
+        }
+
+        FunctionImp *func = new FunctionImp(exec, *ident, static_cast<FunctionBodyNode*>(body), exec->scopeChain());
+        JSObject *proto = exec->lexicalInterpreter()->builtinObject()->construct(exec, List::empty());
+        proto->put(exec, exec->propertyNames().constructor, func, DontEnum);
+        func->put(exec, exec->propertyNames().prototype, proto, Internal|DontDelete|DontEnum);
+
+        if (named) {
+            functionScopeObject->put(exec, *ident, func, Internal | ReadOnly | (exec->codeType() == EvalCode ? 0 : DontDelete));
+                exec->popScope();
+        }
+
+        $$ = func;
+    ]]
+}
+
+// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

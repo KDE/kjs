@@ -1,0 +1,30 @@
+{
+  local:
+   extern "C++"
+   {
+        kjsyy*;
+	yylloc;
+	KJS::*Node*::*; 
+	vtable?for?KJS::*Node*;
+	typeinfo*KJS::*Node*;
+	# vtable and typeinfo symbols not matched below
+	KJS::Lexer::*;
+	KJS::Parser::*;
+	KJS::InterpreterImp::*;
+	KJS::ListImp*;
+	*KJS::*InstanceImp*;
+        KJS::CompletionImp*;
+        KJS::StringObjectImp*;
+        KJS::BooleanObjectImp*;
+        KJS::FunctionObjectImp*;
+        KJS::DateObjectImp*;
+        KJS::MathObjectImp*;
+        KJS::JSONObjectImp*;
+        KJS::ArrayObjectImp*;
+        KJS::NumberObjectImp*;
+        KJS::RegExpObjectImp*;
+        KJS::ErrorObjectImp*;
+        KJS::ObjectObjectImp*;
+        KJS::*ProtoFuncIm*
+   };
+};
