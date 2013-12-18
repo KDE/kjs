@@ -30,7 +30,8 @@
 
 using namespace std;
 
-static string strReplace(string where, string from, string to) {
+static string strReplace(string where, string from, string to)
+{
     string res = where;
     size_t pos;
     while ((pos = res.find(from)) != string::npos) {
@@ -39,8 +40,8 @@ static string strReplace(string where, string from, string to) {
     return res;
 }
 
-TableBuilder::TableBuilder(istream* inStream, ostream* hStream,
-                           ostream* cppStream, FileTemplate* fTemplate, ostream* mStream):
+TableBuilder::TableBuilder(istream *inStream, ostream *hStream,
+                           ostream *cppStream, FileTemplate *fTemplate, ostream *mStream):
     Parser(inStream), out(hStream, cppStream, mStream), types(this, out), fTemplate(fTemplate)
 {}
 
@@ -53,7 +54,7 @@ void TableBuilder::generateCode()
     // Operations
     Enum opNamesEnum("OpName", "Op_", operationNames);
     opNamesEnum.printDeclaration(out(OpH));
-    opNamesEnum.printDefinition (out(OpCpp));
+    opNamesEnum.printDefinition(out(OpCpp));
 
     // Enumerate all the variants..
     for (unsigned c = 0; c < operations.size(); ++c) {
@@ -65,8 +66,9 @@ void TableBuilder::generateCode()
     out(OpCpp) << "static const OpType opRetTypes[] = {\n";
     for (unsigned c = 0; c < operationNames.size(); ++c) {
         out(OpCpp) << "     OpType_" << operationRetTypes[operationNames[c]];
-        if (c  != operationNames.size() - 1)
+        if (c  != operationNames.size() - 1) {
             out(OpCpp) << ",";
+        }
         out(OpCpp) << " //" << operationNames[c] << "\n";
     }
     out(OpCpp) << "};\n\n";
@@ -74,23 +76,24 @@ void TableBuilder::generateCode()
     // Now we have all our bytecode names... Whee.
     Enum opByteCodesEnum("OpByteCode", "OpByteCode_", variantNames);
     opByteCodesEnum.printDeclaration(out(OpH));
-    opByteCodesEnum.printDefinition (out(OpCpp));
+    opByteCodesEnum.printDefinition(out(OpCpp));
 
     // We can now emit the actual tables...
 
     // ... first descriptors for each bytecode op..
     out(OpCpp) << "const Op opsForOpCodes[] = {\n";
     for (unsigned c = 0; c < variants.size(); ++c) {
-        const OperationVariant& variant = variants[c];
-        if (variant.needsPadVariant)
+        const OperationVariant &variant = variants[c];
+        if (variant.needsPadVariant) {
             dumpOpStructForVariant(variant, true, variant.needsPadVariant, true);
+        }
         dumpOpStructForVariant(variant, false, variant.needsPadVariant, c != variants.size() - 1);
     }
     out(OpCpp) << "};\n\n";
 
     // then variant tables for each main op..
     for (unsigned c = 0; c < operationNames.size(); ++c) {
-        const string& opName = operationNames[c];
+        const string &opName = operationNames[c];
         out(OpCpp) << "static const Op* const op" << opName << "Variants[] = {";
         StringList variants = variantNamesForOp[opName];
         for (unsigned v = 0; v < variants.size(); ++v) {
@@ -103,8 +106,9 @@ void TableBuilder::generateCode()
     out(OpCpp) << "const Op* const* const opSpecializations[] = {\n";
     for (unsigned o = 0; o < operationNames.size(); ++o) {
         out(OpCpp) << "    op" << operationNames[o] << "Variants";
-        if (o != (operationNames.size() - 1))
+        if (o != (operationNames.size() - 1)) {
             out(OpCpp) << ",";
+        }
         out(OpCpp) << "\n";
     }
     out(OpCpp) << "};\n\n";
@@ -112,9 +116,10 @@ void TableBuilder::generateCode()
     // Jump table, if needed
     Array jumps(out(MaCpp), "static void*", "kjsVMOpHandlers");
     for (unsigned c = 0; c < variants.size(); ++c) {
-        const OperationVariant& var = variants[c];
-        if (var.needsPadVariant)
+        const OperationVariant &var = variants[c];
+        if (var.needsPadVariant) {
             jumps.item("__extension__ &&l" + var.sig + "_Pad");
+        }
 
         jumps.item("__extension__ &&l" + var.sig);
     }
@@ -122,7 +127,6 @@ void TableBuilder::generateCode()
     jumps.endArray();
 
     fTemplate->handleUntilGenerate();
-
 
     // Now, generate the VM loop.
     mInd(8) << "OpByteCode op = *reinterpret_cast<const OpByteCode*>(pc);\n";
@@ -134,7 +138,7 @@ void TableBuilder::generateCode()
     mInd(8) << "switch (op) {\n";
     mInd(0) << "#endif\n";
     for (unsigned c = 0; c < variants.size(); ++c) {
-        const OperationVariant& var = variants[c];
+        const OperationVariant &var = variants[c];
         if (var.needsPadVariant) {
             mInd(12) << "handler(" + var.sig + "_Pad):\n";
             mInd(16) << "pc += 4;\n";
@@ -150,26 +154,26 @@ void TableBuilder::generateCode()
     mInd(8) << "}\n\n";
 }
 
-void TableBuilder::handleType(const string& type, const string& nativeName, unsigned flags)
+void TableBuilder::handleType(const string &type, const string &nativeName, unsigned flags)
 {
     types.handleType(type, nativeName, flags);
 }
 
-void TableBuilder::handleConversion(const string& code, int codeLine,
-                                    unsigned flags, const string& from, const string& to,
+void TableBuilder::handleConversion(const string &code, int codeLine,
+                                    unsigned flags, const string &from, const string &to,
                                     int tileCost, int registerCost)
 {
     types.handleConversion(code, codeLine, flags, from, to, tileCost, registerCost);
 }
 
-void TableBuilder::handleOperation(const string& name, unsigned flags)
+void TableBuilder::handleOperation(const string &name, unsigned flags)
 {
     operationNames.push_back(name);
     operationFlags = flags;
 }
 
-void TableBuilder::handleImpl(const string& fnName, const string& code, int codeLine, int cost,
-                              const string& retType, vector<Parameter> sig)
+void TableBuilder::handleImpl(const string &fnName, const string &code, int codeLine, int cost,
+                              const string &retType, vector<Parameter> sig)
 {
     // If the return type isn't 'void', we prepend a destination register as a parameter in the encoding.
     // emitOp will convert things as needed
@@ -182,8 +186,9 @@ void TableBuilder::handleImpl(const string& fnName, const string& code, int code
         extSig.push_back(ret);
     }
 
-    for (unsigned c = 0; c < sig.size(); ++c)
+    for (unsigned c = 0; c < sig.size(); ++c) {
         extSig.push_back(sig[c]);
+    }
 
     // Now go through and resolve each type. These are also
     // the types of the params of this base op.
@@ -203,25 +208,27 @@ void TableBuilder::handleImpl(const string& fnName, const string& code, int code
     op.cost           = cost;
     op.flags          = operationFlags;
     operations.push_back(op);
-    if (!fnName.empty())
+    if (!fnName.empty()) {
         implementations[fnName] = op;
+    }
 }
 
-void TableBuilder::handleTile(const string& fnName, StringList sig)
+void TableBuilder::handleTile(const string &fnName, StringList sig)
 {
-    if (implementations.find(fnName) == implementations.end())
+    if (implementations.find(fnName) == implementations.end()) {
         out.issueError("Unknown implementation name " + fnName + " in a tile definition");
-    const Operation& impl = implementations[fnName];
+    }
+    const Operation &impl = implementations[fnName];
 
     // Add in a return reg if need be
     StringList extSig;
-    if (impl.retType != "void")
+    if (impl.retType != "void") {
         extSig.push_back("reg");
+    }
 
-    for (unsigned c = 0; c < sig.size(); ++c)
+    for (unsigned c = 0; c < sig.size(); ++c) {
         extSig.push_back(sig[c]);
-
-
+    }
 
     // Most of the stuff is the same as in the base impl,
     // but we have a different external signature, and are a tile.
@@ -230,13 +237,14 @@ void TableBuilder::handleTile(const string& fnName, StringList sig)
     op.opParamTypes = types.resolveSignature(extSig);
 
     // Now also include the cost of inline conversions.
-    for (unsigned p = 0; p < op.opParamTypes.size(); ++p)
+    for (unsigned p = 0; p < op.opParamTypes.size(); ++p) {
         op.cost += types.immConv(op.opParamTypes[p], op.implParams[p].type).cost;
+    }
 
     operations.push_back(op);
 }
 
-void TableBuilder::expandOperationVariants(const Operation& op, vector<bool>& paramIsIm)
+void TableBuilder::expandOperationVariants(const Operation &op, vector<bool> &paramIsIm)
 {
     unsigned numParams = op.opParamTypes.size();
     if (paramIsIm.size() < numParams) {
@@ -248,15 +256,18 @@ void TableBuilder::expandOperationVariants(const Operation& op, vector<bool>& pa
         bool genReg = hasReg;
 
         // Don't generate non-register variants for tiles when possible.
-        if (op.isTile && hasReg)
+        if (op.isTile && hasReg) {
             genIm = false;
+        }
 
         // There may be hints saying not to generate some version
-        if (op.implParams[paramPos].flags & Param_NoImm)
+        if (op.implParams[paramPos].flags & Param_NoImm) {
             genIm = false;
+        }
 
-        if (op.implParams[paramPos].flags & Param_NoReg)
+        if (op.implParams[paramPos].flags & Param_NoReg) {
             genReg = false;
+        }
 
         if (genIm) {
             paramIsIm.push_back(true);
@@ -283,8 +294,9 @@ void TableBuilder::expandOperationVariants(const Operation& op, vector<bool>& pa
 
     // We may need padding if we have an immediate align8 param..
     bool needsPad = false;
-    for (unsigned c = 0; c < numParams; ++c)
+    for (unsigned c = 0; c < numParams; ++c) {
         needsPad |= (paramIsIm[c] & op.opParamTypes[c].alignTo8());
+    }
 
     OperationVariant var;
     var.sig = sig;
@@ -293,8 +305,9 @@ void TableBuilder::expandOperationVariants(const Operation& op, vector<bool>& pa
     var.needsPadVariant = needsPad;
 
     // Build offset table, giving param positions..
-    while (var.paramOffsets.size() < numParams) // no setSize in QList..
+    while (var.paramOffsets.size() < numParams) { // no setSize in QList..
         var.paramOffsets.push_back(0);
+    }
 
     int pos = 4;
     // pad8/align ones go first.
@@ -324,8 +337,8 @@ void TableBuilder::expandOperationVariants(const Operation& op, vector<bool>& pa
     variantNamesForOp[op.name].push_back(sig);
 }
 
-void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool doPad,
-                                          bool hasPadVariant, bool needsComma)
+void TableBuilder::dumpOpStructForVariant(const OperationVariant &variant, bool doPad,
+        bool hasPadVariant, bool needsComma)
 {
     out(OpCpp) << "    {";
     out(OpCpp) << "Op_" << variant.op.name << ", ";     // baseInstr..
@@ -338,8 +351,9 @@ void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool 
     out(OpCpp) << "{";
     for (int p = 0; p < numParams; ++p) {
         out(OpCpp) << "OpType_" << variant.op.opParamTypes[p].name;
-        if (p != numParams - 1)
+        if (p != numParams - 1) {
             out(OpCpp) << ", ";
+        }
     }
     out(OpCpp) << "}, ";
 
@@ -347,8 +361,9 @@ void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool 
     out(OpCpp) << "{";
     for (int p = 0; p < numParams; ++p) {
         out(OpCpp) << (variant.paramIsIm[p] ? "true" : "false");
-        if (p != numParams - 1)
+        if (p != numParams - 1) {
             out(OpCpp) << ", ";
+        }
     }
     out(OpCpp) << "}, ";
 
@@ -356,8 +371,9 @@ void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool 
     out(OpCpp) << "{";
     for (int p = 0; p < numParams; ++p) {
         out(OpCpp) << ((variant.op.implParams[p].flags & Param_Exact) ? "true" : "false");
-        if (p != numParams - 1)
+        if (p != numParams - 1) {
             out(OpCpp) << ", ";
+        }
     }
     out(OpCpp) << "}, ";
 
@@ -365,7 +381,7 @@ void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool 
     out(OpCpp) << "OpType_" << variant.op.retType << ", ";
 
     int adjust = doPad ? 4 : 0; // padded version has 4 extra bytes,
-                                // between the opcode and the first arg.
+    // between the opcode and the first arg.
     // Size..
     out(OpCpp) << (variant.size + adjust) << ", ";
 
@@ -373,8 +389,9 @@ void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool 
     out(OpCpp) << "{";
     for (int p = 0; p < numParams; ++p) {
         out(OpCpp) << (variant.paramOffsets[p] + adjust);
-        if (p != numParams - 1)
+        if (p != numParams - 1) {
             out(OpCpp) << ", ";
+        }
     }
 
     out(OpCpp) << "}, ";
@@ -388,19 +405,20 @@ void TableBuilder::dumpOpStructForVariant(const OperationVariant& variant, bool 
     // Whether this ends a basic block.
     out(OpCpp) << (variant.op.flags & Op_EndsBB ? "true" : "false");
 
-    if (needsComma)
+    if (needsComma) {
         out(OpCpp) << "},\n";
-    else
+    } else {
         out(OpCpp) << "}\n";
+    }
 }
 
-void TableBuilder::generateVariantImpl(const OperationVariant& variant)
+void TableBuilder::generateVariantImpl(const OperationVariant &variant)
 {
     mInd(16) << "pc += " << variant.size << ";\n";
     mInd(16) << "const unsigned char* localPC = pc;\n";
     int numParams = variant.paramIsIm.size();
     for (int p = 0; p < numParams; ++p) {
-        const Type& type  = variant.op.opParamTypes[p];
+        const Type &type  = variant.op.opParamTypes[p];
         bool        inReg = !variant.paramIsIm[p];
         int negPos = variant.paramOffsets[p] - variant.size;
 
@@ -420,7 +438,7 @@ void TableBuilder::generateVariantImpl(const OperationVariant& variant)
         }
 
         mInd(16) << variant.op.implParams[p].type.nativeName << " " << variant.op.implParams[p].name
-                     << " = ";
+                 << " = ";
         if (type == variant.op.implParams[p].type) {
             // We don't need a conversion, just fetch it directly into name..
             out(MaCpp) << accessString << ";\n";
@@ -446,4 +464,3 @@ void TableBuilder::generateVariantImpl(const OperationVariant& variant)
     out.printCode(out(MaCpp), 16, code, variant.op.codeLine);
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

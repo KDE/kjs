@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 2005 Apple Computer, Inc.
@@ -30,31 +29,36 @@
 #include <stdlib.h>
 #include <new>
 
+namespace WTF
+{
 
-namespace WTF {
+inline void *fastMalloc(size_t n)
+{
+    return malloc(n);
+}
 
-    inline void *fastMalloc(size_t n) {
-        return malloc(n);
-    }
+inline void *fastCalloc(size_t n_elements, size_t element_size)
+{
+    return calloc(n_elements, element_size);
+}
 
-    inline void *fastCalloc(size_t n_elements, size_t element_size) {
-        return calloc(n_elements, element_size);
-    }
+inline void fastFree(void *p)
+{
+    free(p);
+}
 
-    inline void fastFree(void* p) {
-        free(p);
-    }
+inline void *fastZeroedMalloc(size_t n)
+{
+    return calloc(n, 1);
+}
 
-    inline void *fastZeroedMalloc(size_t n) {
-        return calloc(n, 1);
-    }
-
-    inline void *fastRealloc(void* p, size_t n) {
-        return realloc(p, n);
-    }
+inline void *fastRealloc(void *p, size_t n)
+{
+    return realloc(p, n);
+}
 
 #if USE(MULTIPLE_THREADS)
-    inline void fastMallocRegisterThread(pthread_t) {}
+inline void fastMallocRegisterThread(pthread_t) {}
 #endif
 
 } // namespace WTF
@@ -64,6 +68,5 @@ using WTF::fastCalloc;
 using WTF::fastRealloc;
 using WTF::fastFree;
 using WTF::fastZeroedMalloc;
-
 
 #endif /* WTF_FastMalloc_h */

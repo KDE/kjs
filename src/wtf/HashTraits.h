@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  * Copyright (C) 2005, 2006, 2007, 2008 Apple Inc. All rights reserved.
  *
@@ -27,118 +26,186 @@
 #include <utility>
 #include <limits>
 
-namespace WTF {
+namespace WTF
+{
 
-    using std::pair;
-    using std::make_pair;
+using std::pair;
+using std::make_pair;
 
-    template<typename T> struct IsInteger           { static const bool value = false; };
-    template<> struct IsInteger<bool>               { static const bool value = true; };
-    template<> struct IsInteger<char>               { static const bool value = true; };
-    template<> struct IsInteger<signed char>        { static const bool value = true; };
-    template<> struct IsInteger<unsigned char>      { static const bool value = true; };
-    template<> struct IsInteger<short>              { static const bool value = true; };
-    template<> struct IsInteger<unsigned short>     { static const bool value = true; };
-    template<> struct IsInteger<int>                { static const bool value = true; };
-    template<> struct IsInteger<unsigned int>       { static const bool value = true; };
-    template<> struct IsInteger<long>               { static const bool value = true; };
-    template<> struct IsInteger<unsigned long>      { static const bool value = true; };
-    template<> struct IsInteger<long long>          { static const bool value = true; };
-    template<> struct IsInteger<unsigned long long> { static const bool value = true; };
+template<typename T> struct IsInteger           {
+    static const bool value = false;
+};
+template<> struct IsInteger<bool>               {
+    static const bool value = true;
+};
+template<> struct IsInteger<char>               {
+    static const bool value = true;
+};
+template<> struct IsInteger<signed char>        {
+    static const bool value = true;
+};
+template<> struct IsInteger<unsigned char>      {
+    static const bool value = true;
+};
+template<> struct IsInteger<short>              {
+    static const bool value = true;
+};
+template<> struct IsInteger<unsigned short>     {
+    static const bool value = true;
+};
+template<> struct IsInteger<int>                {
+    static const bool value = true;
+};
+template<> struct IsInteger<unsigned int>       {
+    static const bool value = true;
+};
+template<> struct IsInteger<long>               {
+    static const bool value = true;
+};
+template<> struct IsInteger<unsigned long>      {
+    static const bool value = true;
+};
+template<> struct IsInteger<long long>          {
+    static const bool value = true;
+};
+template<> struct IsInteger<unsigned long long> {
+    static const bool value = true;
+};
 
 #if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
-    template<> struct IsInteger<wchar_t>            { static const bool value = true; };
+template<> struct IsInteger<wchar_t>            {
+    static const bool value = true;
+};
 #endif
 
-    COMPILE_ASSERT(IsInteger<bool>::value, WTF_IsInteger_bool_true)
-    COMPILE_ASSERT(IsInteger<char>::value, WTF_IsInteger_char_true)
-    COMPILE_ASSERT(IsInteger<signed char>::value, WTF_IsInteger_signed_char_true)
-    COMPILE_ASSERT(IsInteger<unsigned char>::value, WTF_IsInteger_unsigned_char_true)
-    COMPILE_ASSERT(IsInteger<short>::value, WTF_IsInteger_short_true)
-    COMPILE_ASSERT(IsInteger<unsigned short>::value, WTF_IsInteger_unsigned_short_true)
-    COMPILE_ASSERT(IsInteger<int>::value, WTF_IsInteger_int_true)
-    COMPILE_ASSERT(IsInteger<unsigned int>::value, WTF_IsInteger_unsigned_int_true)
-    COMPILE_ASSERT(IsInteger<long>::value, WTF_IsInteger_long_true)
-    COMPILE_ASSERT(IsInteger<unsigned long>::value, WTF_IsInteger_unsigned_long_true)
-    COMPILE_ASSERT(IsInteger<long long>::value, WTF_IsInteger_long_long_true)
-    COMPILE_ASSERT(IsInteger<unsigned long long>::value, WTF_IsInteger_unsigned_long_long_true)
+COMPILE_ASSERT(IsInteger<bool>::value, WTF_IsInteger_bool_true)
+COMPILE_ASSERT(IsInteger<char>::value, WTF_IsInteger_char_true)
+COMPILE_ASSERT(IsInteger<signed char>::value, WTF_IsInteger_signed_char_true)
+COMPILE_ASSERT(IsInteger<unsigned char>::value, WTF_IsInteger_unsigned_char_true)
+COMPILE_ASSERT(IsInteger<short>::value, WTF_IsInteger_short_true)
+COMPILE_ASSERT(IsInteger<unsigned short>::value, WTF_IsInteger_unsigned_short_true)
+COMPILE_ASSERT(IsInteger<int>::value, WTF_IsInteger_int_true)
+COMPILE_ASSERT(IsInteger<unsigned int>::value, WTF_IsInteger_unsigned_int_true)
+COMPILE_ASSERT(IsInteger<long>::value, WTF_IsInteger_long_true)
+COMPILE_ASSERT(IsInteger<unsigned long>::value, WTF_IsInteger_unsigned_long_true)
+COMPILE_ASSERT(IsInteger<long long>::value, WTF_IsInteger_long_long_true)
+COMPILE_ASSERT(IsInteger<unsigned long long>::value, WTF_IsInteger_unsigned_long_long_true)
 
 #if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
-    COMPILE_ASSERT(IsInteger<wchar_t>::value, WTF_IsInteger_wchar_t_true)
+COMPILE_ASSERT(IsInteger<wchar_t>::value, WTF_IsInteger_wchar_t_true)
 #endif
 
-    COMPILE_ASSERT(!IsInteger<char*>::value, WTF_IsInteger_char_pointer_false)
-    COMPILE_ASSERT(!IsInteger<const char* >::value, WTF_IsInteger_const_char_pointer_false)
-    COMPILE_ASSERT(!IsInteger<volatile char* >::value, WTF_IsInteger_volatile_char_pointer__false)
-    COMPILE_ASSERT(!IsInteger<double>::value, WTF_IsInteger_double_false)
-    COMPILE_ASSERT(!IsInteger<float>::value, WTF_IsInteger_float_false)
+COMPILE_ASSERT(!IsInteger<char *>::value, WTF_IsInteger_char_pointer_false)
+COMPILE_ASSERT(!IsInteger<const char * >::value, WTF_IsInteger_const_char_pointer_false)
+COMPILE_ASSERT(!IsInteger<volatile char * >::value, WTF_IsInteger_volatile_char_pointer__false)
+COMPILE_ASSERT(!IsInteger<double>::value, WTF_IsInteger_double_false)
+COMPILE_ASSERT(!IsInteger<float>::value, WTF_IsInteger_float_false)
 
-    template<typename T> struct HashTraits;
+template<typename T> struct HashTraits;
 
-    template<bool isInteger, typename T> struct GenericHashTraitsBase;
+template<bool isInteger, typename T> struct GenericHashTraitsBase;
 
-    template<typename T> struct GenericHashTraitsBase<false, T> {
-        static const bool emptyValueIsZero = false;
-        static const bool needsDestruction = true;
-    };
+template<typename T> struct GenericHashTraitsBase<false, T> {
+    static const bool emptyValueIsZero = false;
+    static const bool needsDestruction = true;
+};
 
-    // default integer traits disallow both 0 and -1 as keys (max value instead of -1 for unsigned)
-    template<typename T> struct GenericHashTraitsBase<true, T> {
-        static const bool emptyValueIsZero = true;
-        static const bool needsDestruction = false;
-        static void constructDeletedValue(T* slot) { *slot = static_cast<T>(-1); }
-        static bool isDeletedValue(T value) { return value == static_cast<T>(-1); }
-    };
+// default integer traits disallow both 0 and -1 as keys (max value instead of -1 for unsigned)
+template<typename T> struct GenericHashTraitsBase<true, T> {
+    static const bool emptyValueIsZero = true;
+    static const bool needsDestruction = false;
+    static void constructDeletedValue(T *slot)
+    {
+        *slot = static_cast<T>(-1);
+    }
+    static bool isDeletedValue(T value)
+    {
+        return value == static_cast<T>(-1);
+    }
+};
 
-    template<typename T> struct GenericHashTraits : GenericHashTraitsBase<IsInteger<T>::value, T> {
-        typedef T TraitType;
-        static T emptyValue() { return T(); }
-    };
+template<typename T> struct GenericHashTraits : GenericHashTraitsBase<IsInteger<T>::value, T> {
+    typedef T TraitType;
+    static T emptyValue()
+    {
+        return T();
+    }
+};
 
-    template<typename T> struct HashTraits : GenericHashTraits<T> { };
+template<typename T> struct HashTraits : GenericHashTraits<T> { };
 
-    template<typename T> struct FloatHashTraits : GenericHashTraits<T> {
-        static const bool needsDestruction = false;
-        static T emptyValue() { return std::numeric_limits<T>::infinity(); }
-        static void constructDeletedValue(T* slot) { *slot = -std::numeric_limits<T>::infinity(); }
-        static bool isDeletedValue(T value) { return value == -std::numeric_limits<T>::infinity(); }
-    };
+template<typename T> struct FloatHashTraits : GenericHashTraits<T> {
+    static const bool needsDestruction = false;
+    static T emptyValue()
+    {
+        return std::numeric_limits<T>::infinity();
+    }
+    static void constructDeletedValue(T *slot)
+    {
+        *slot = -std::numeric_limits<T>::infinity();
+    }
+    static bool isDeletedValue(T value)
+    {
+        return value == -std::numeric_limits<T>::infinity();
+    }
+};
 
-    template<> struct HashTraits<float> : FloatHashTraits<float> { };
-    template<> struct HashTraits<double> : FloatHashTraits<double> { };
+template<> struct HashTraits<float> : FloatHashTraits<float> { };
+template<> struct HashTraits<double> : FloatHashTraits<double> { };
 
-    template<typename P> struct HashTraits<P*> : GenericHashTraits<P*> {
-        static const bool emptyValueIsZero = true;
-        static const bool needsDestruction = false;
-        static void constructDeletedValue(P** slot) { *slot = reinterpret_cast<P*>(-1); }
-        static bool isDeletedValue(P* value) { return value == reinterpret_cast<P*>(-1); }
-    };
+template<typename P> struct HashTraits<P *> : GenericHashTraits<P *> {
+    static const bool emptyValueIsZero = true;
+    static const bool needsDestruction = false;
+    static void constructDeletedValue(P **slot)
+    {
+        *slot = reinterpret_cast<P *>(-1);
+    }
+    static bool isDeletedValue(P *value)
+    {
+        return value == reinterpret_cast<P *>(-1);
+    }
+};
 
-    template<typename P> struct HashTraits<RefPtr<P> > : GenericHashTraits<RefPtr<P> > {
-        static const bool emptyValueIsZero = true;
-        static void constructDeletedValue(RefPtr<P>* slot) { new (slot) RefPtr<P>(HashTableDeletedValue); }
-        static bool isDeletedValue(const RefPtr<P>& value) { return value.isHashTableDeletedValue(); }
-    };
+template<typename P> struct HashTraits<RefPtr<P> > : GenericHashTraits<RefPtr<P> > {
+    static const bool emptyValueIsZero = true;
+    static void constructDeletedValue(RefPtr<P> *slot)
+    {
+        new(slot) RefPtr<P>(HashTableDeletedValue);
+    }
+    static bool isDeletedValue(const RefPtr<P> &value)
+    {
+        return value.isHashTableDeletedValue();
+    }
+};
 
-    // special traits for pairs, helpful for their use in HashMap implementation
+// special traits for pairs, helpful for their use in HashMap implementation
 
-    template<typename FirstTraitsArg, typename SecondTraitsArg>
-    struct PairHashTraits : GenericHashTraits<pair<typename FirstTraitsArg::TraitType, typename SecondTraitsArg::TraitType> > {
-        typedef FirstTraitsArg FirstTraits;
-        typedef SecondTraitsArg SecondTraits;
-        typedef pair<typename FirstTraits::TraitType, typename SecondTraits::TraitType> TraitType;
+template<typename FirstTraitsArg, typename SecondTraitsArg>
+struct PairHashTraits : GenericHashTraits<pair<typename FirstTraitsArg::TraitType, typename SecondTraitsArg::TraitType> > {
+    typedef FirstTraitsArg FirstTraits;
+    typedef SecondTraitsArg SecondTraits;
+    typedef pair<typename FirstTraits::TraitType, typename SecondTraits::TraitType> TraitType;
 
-        static const bool emptyValueIsZero = FirstTraits::emptyValueIsZero && SecondTraits::emptyValueIsZero;
-        static TraitType emptyValue() { return make_pair(FirstTraits::emptyValue(), SecondTraits::emptyValue()); }
+    static const bool emptyValueIsZero = FirstTraits::emptyValueIsZero && SecondTraits::emptyValueIsZero;
+    static TraitType emptyValue()
+    {
+        return make_pair(FirstTraits::emptyValue(), SecondTraits::emptyValue());
+    }
 
-        static const bool needsDestruction = FirstTraits::needsDestruction || SecondTraits::needsDestruction;
+    static const bool needsDestruction = FirstTraits::needsDestruction || SecondTraits::needsDestruction;
 
-        static void constructDeletedValue(TraitType* slot) { FirstTraits::constructDeletedValue(&slot->first); }
-        static bool isDeletedValue(const TraitType& value) { return FirstTraits::isDeletedValue(value.first); }
-    };
+    static void constructDeletedValue(TraitType *slot)
+    {
+        FirstTraits::constructDeletedValue(&slot->first);
+    }
+    static bool isDeletedValue(const TraitType &value)
+    {
+        return FirstTraits::isDeletedValue(value.first);
+    }
+};
 
-    template<typename First, typename Second>
-    struct HashTraits<pair<First, Second> > : public PairHashTraits<HashTraits<First>, HashTraits<Second> > { };
+template<typename First, typename Second>
+struct HashTraits<pair<First, Second> > : public PairHashTraits<HashTraits<First>, HashTraits<Second> > { };
 
 } // namespace WTF
 

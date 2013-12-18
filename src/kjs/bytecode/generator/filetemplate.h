@@ -34,13 +34,13 @@ using std::string;
 
 static inline bool stringEndsWith(string base, string suffix)
 {
-    if (base.length() < suffix.length())
+    if (base.length() < suffix.length()) {
         return false;
+    }
     return base.substr(base.length() - suffix.length()) == suffix;
 }
 
-struct FileTemplate
-{
+struct FileTemplate {
     FileTemplate(string inFileName, string outFileName):
         inFileName(inFileName), outFileName(outFileName)
     {
@@ -69,8 +69,9 @@ struct FileTemplate
 
     ~FileTemplate()
     {
-        if (isOK)
+        if (isOK) {
             handleUntilGenerate();
+        }
     }
 
     // Goes until @generate..
@@ -81,10 +82,11 @@ struct FileTemplate
             string line;
             getline(in, line);
             ++lines;
-            if (stringEndsWith(line, "@generate"))
+            if (stringEndsWith(line, "@generate")) {
                 break;
-            else
+            } else {
                 out << line << "\n";
+            }
         }
     }
 
@@ -103,11 +105,13 @@ struct FileTemplate
     ifstream in;
     ofstream out;
     bool         isOK;
-    bool ok() { return isOK; }
+    bool ok()
+    {
+        return isOK;
+    }
     int lines; // from the template
-    
+
 };
 
 #endif
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

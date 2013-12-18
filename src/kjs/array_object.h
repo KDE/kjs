@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -26,34 +25,42 @@
 #include "internal.h"
 #include "function_object.h"
 
-namespace KJS {
+namespace KJS
+{
 
- class ArrayPrototype : public ArrayInstance {
-  public:
+class ArrayPrototype : public ArrayInstance
+{
+public:
     ArrayPrototype(ExecState *exec,
-                      ObjectPrototype *objProto);
+                   ObjectPrototype *objProto);
     using KJS::ArrayInstance::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
-    virtual const ClassInfo *classInfo() const { return &info; }
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
-  };
+};
 
-  class ArrayProtoFunc : public InternalFunctionImp {
-  public:
-    ArrayProtoFunc(ExecState *exec, int i, int len, const Identifier& name);
+class ArrayProtoFunc : public InternalFunctionImp
+{
+public:
+    ArrayProtoFunc(ExecState *exec, int i, int len, const Identifier &name);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
     enum { ToString, ToLocaleString, Concat, Join, Pop, Push,
-          Reverse, Shift, Slice, Sort, Splice, UnShift,
-          Every, ForEach, Some, IndexOf, Filter, Map, LastIndexOf,
-          Reduce, ReduceRight };
-  private:
+           Reverse, Shift, Slice, Sort, Splice, UnShift,
+           Every, ForEach, Some, IndexOf, Filter, Map, LastIndexOf,
+           Reduce, ReduceRight
+         };
+private:
     int id;
-  };
+};
 
-  class ArrayObjectImp : public InternalFunctionImp {
-  public:
+class ArrayObjectImp : public InternalFunctionImp
+{
+public:
     ArrayObjectImp(ExecState *exec,
                    FunctionPrototype *funcProto,
                    ArrayPrototype *arrayProto);
@@ -63,7 +70,7 @@ namespace KJS {
     virtual JSObject *construct(ExecState *exec, const List &args);
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
-  };
+};
 
 } // namespace
 

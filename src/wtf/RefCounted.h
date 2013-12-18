@@ -24,9 +24,11 @@
 #include <wtf/Assertions.h>
 #include <wtf/Noncopyable.h>
 
-namespace WTF {
+namespace WTF
+{
 
-template<class T> class RefCounted : Noncopyable {
+template<class T> class RefCounted : Noncopyable
+{
 public:
     RefCounted(int initialRefCount = 1)
         : m_refCount(initialRefCount)
@@ -50,9 +52,10 @@ public:
 #ifndef NDEBUG
             m_deletionHasBegun = true;
 #endif
-            delete static_cast<T*>(this);
-        } else 
+            delete static_cast<T *>(this);
+        } else {
             --m_refCount;
+        }
     }
 
     bool hasOneRef()

@@ -27,16 +27,15 @@
 
 using std::min;
 
-namespace KJS {
+namespace KJS
+{
 
 // tunable parameters
 const int poolSize = 512;
 
-
 enum ListImpState { unusedInPool = 0, usedInPool, usedOnHeap, immortal };
 
-struct ListImp : ListImpBase
-{
+struct ListImp : ListImpBase {
     ListImpState state;
 
     union {
@@ -44,7 +43,7 @@ struct ListImp : ListImpBase
         ListImp *nextInFreeList;
     };
 
-    LocalStorageEntry values[inlineListValuesSize];    
+    LocalStorageEntry values[inlineListValuesSize];
 
 #if DUMP_STATISTICS
     int sizeHighWaterMark;
@@ -53,8 +52,7 @@ struct ListImp : ListImpBase
     void markValues();
 };
 
-struct HeapListImp : ListImp
-{
+struct HeapListImp : ListImp {
     HeapListImp *nextInHeapList;
     HeapListImp *prevInHeapList;
 };
@@ -74,7 +72,9 @@ static int listSizeHighWaterMark;
 static int numListsDestroyed;
 static int numListsBiggerThan[17];
 
-struct ListStatisticsExitLogger { ~ListStatisticsExitLogger(); };
+struct ListStatisticsExitLogger {
+    ~ListStatisticsExitLogger();
+};
 
 static ListStatisticsExitLogger logger;
 
@@ -88,9 +88,9 @@ ListStatisticsExitLogger::~ListStatisticsExitLogger()
         putc('\n', stdout);
         for (int i = 0; i < 17; i++) {
             printf("%.1f%% of the lists (%d) had more than %d element%s\n",
-                100.0 * numListsBiggerThan[i] / numListsDestroyed,
-                numListsBiggerThan[i],
-                i, i == 1 ? "" : "s");
+                   100.0 * numListsBiggerThan[i] / numListsDestroyed,
+                   numListsBiggerThan[i],
+                   i, i == 1 ? "" : "s");
         }
         putc('\n', stdout);
     }
@@ -101,8 +101,9 @@ ListStatisticsExitLogger::~ListStatisticsExitLogger()
 inline void ListImp::markValues()
 {
     for (int i = 0; i != size; ++i) {
-        if (!data[i].val.valueVal->marked())
+        if (!data[i].val.valueVal->marked()) {
             data[i].val.valueVal->mark();
+        }
     }
 }
 
@@ -123,7 +124,6 @@ void List::markProtectedLists()
     }
 }
 
-
 static inline ListImp *allocateListImp()
 {
     // Find a free one in the pool.
@@ -134,7 +134,7 @@ static inline ListImp *allocateListImp()
         poolUsed++;
         return imp;
     }
-    
+
     HeapListImp *imp = new HeapListImp;
     imp->state = usedOnHeap;
     // link into heap list
@@ -157,8 +157,9 @@ List::List() : _impBase(allocateListImp())
     imp->data     = imp->values;
 
 #if DUMP_STATISTICS
-    if (++numLists > numListsHighWaterMark)
+    if (++numLists > numListsHighWaterMark) {
         numListsHighWaterMark = numLists;
+    }
     imp->sizeHighWaterMark = 0;
 #endif
 }
@@ -166,20 +167,23 @@ List::List() : _impBase(allocateListImp())
 void List::release()
 {
     ListImp *imp = static_cast<ListImp *>(_impBase);
-    
+
 #if DUMP_STATISTICS
-    if (imp->size > imp->sizeHighWaterMark)
+    if (imp->size > imp->sizeHighWaterMark) {
         imp->sizeHighWaterMark = imp->size;
+    }
 
     --numLists;
     ++numListsDestroyed;
     for (int i = 0; i < 17; i++)
-        if (imp->sizeHighWaterMark > i)
+        if (imp->sizeHighWaterMark > i) {
             ++numListsBiggerThan[i];
+        }
 #endif
 
-    if (imp->capacity)
+    if (imp->capacity) {
         delete [] imp->data;
+    }
     imp->data = 0;
 
     if (imp->state == usedInPool) {
@@ -215,28 +219,31 @@ void List::appendSlowCase(JSValue *v)
     int i = imp->size++; // insert index/old size
 
 #if DUMP_STATISTICS
-    if (imp->size > listSizeHighWaterMark)
+    if (imp->size > listSizeHighWaterMark) {
         listSizeHighWaterMark = imp->size;
+    }
 #endif
 
     // If we got here, we need to use an out-of-line buffer.
-    
+
     if (i >= imp->capacity) {
         int newCapacity = i * 2;
 
-        LocalStorageEntry* newBuffer = new LocalStorageEntry[newCapacity];
+        LocalStorageEntry *newBuffer = new LocalStorageEntry[newCapacity];
 
         // Copy everything over
-        for (int c = 0; c < i; ++c)
+        for (int c = 0; c < i; ++c) {
             newBuffer[c] = imp->data[c];
+        }
 
-        if (imp->capacity) // had an old out-of-line buffer
+        if (imp->capacity) { // had an old out-of-line buffer
             delete[] imp->data;
+        }
 
         imp->data     = newBuffer;
         imp->capacity = newCapacity;
     }
-    
+
     imp->data[i].val.valueVal = v;
 }
 
@@ -247,12 +254,12 @@ List List::copy() const
     return copy;
 }
 
-void List::copyFrom(const List& other)
+void List::copyFrom(const List &other)
 {
-    // Assumption: we're empty (e.g. called from copy)   
-    ListImpBase* otherImp = other._impBase;
-    ListImp* ourImp       = static_cast<ListImp *>(_impBase);
-    
+    // Assumption: we're empty (e.g. called from copy)
+    ListImpBase *otherImp = other._impBase;
+    ListImp *ourImp       = static_cast<ListImp *>(_impBase);
+
     assert(ourImp->size == 0 && ourImp->capacity == 0);
 
     int size = otherImp->size;
@@ -266,23 +273,24 @@ void List::copyFrom(const List& other)
         ourImp->capacity = 0;
     }
 
-    for (int c = 0; c < size; ++c)
+    for (int c = 0; c < size; ++c) {
         ourImp->data[c] = otherImp->data[c];
+    }
 }
-
 
 List List::copyTail() const
 {
     List copy;
 
-    ListImpBase* inImp  = _impBase;
-    ListImp*     outImp = static_cast<ListImp *>(copy._impBase);
+    ListImpBase *inImp  = _impBase;
+    ListImp     *outImp = static_cast<ListImp *>(copy._impBase);
 
     int size      = inImp->size - 1;
 
-    if (size < 0)
-        size = 0; // copyTail on empty list.
-    
+    if (size < 0) {
+        size = 0;    // copyTail on empty list.
+    }
+
     outImp->size  = size;
 
     if (size > inlineListValuesSize) {
@@ -293,9 +301,10 @@ List List::copyTail() const
         outImp->capacity = 0;
     }
 
-    for (int c = 0; c < size; ++c)
-        outImp->data[c] = inImp->data[c+1];
-        
+    for (int c = 0; c < size; ++c) {
+        outImp->data[c] = inImp->data[c + 1];
+    }
+
     return copy;
 }
 
@@ -316,4 +325,3 @@ List &List::operator=(const List &b)
 
 } // namespace KJS
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

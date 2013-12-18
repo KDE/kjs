@@ -28,7 +28,7 @@
 
 using namespace KJS;
 
-KJSContext::KJSContext(KJSContextHandle* h)
+KJSContext::KJSContext(KJSContextHandle *h)
     : hnd(h)
 {
 }
@@ -38,11 +38,11 @@ bool KJSContext::hasException() const
     return EXECSTATE(this)->hadException();
 }
 
-KJSObject KJSContext::throwException(const QString& message) const
+KJSObject KJSContext::throwException(const QString &message) const
 {
-    ExecState* exec = EXECSTATE(this);
+    ExecState *exec = EXECSTATE(this);
 
-    JSValue* ex = Error::create(exec, GeneralError, toUString(message),
+    JSValue *ex = Error::create(exec, GeneralError, toUString(message),
                                 -1, -1, UString());
     exec->setException(ex);
 
@@ -51,8 +51,8 @@ KJSObject KJSContext::throwException(const QString& message) const
 
 KJSInterpreter KJSContext::interpreter()
 {
-    ExecState* exec = EXECSTATE(this);
-    Interpreter* ip = exec->dynamicInterpreter();
+    ExecState *exec = EXECSTATE(this);
+    Interpreter *ip = exec->dynamicInterpreter();
 
     return KJSInterpreter(INTERPRETER_HANDLE(ip));
 }

@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  *  Copyright (C) 2006 Apple Computer, Inc
  *
@@ -27,32 +26,47 @@
 #include <wtf/HashSet.h>
 #include <wtf/Vector.h>
 
-namespace KJS {
+namespace KJS
+{
 
-    class PropertyNameArray;
+class PropertyNameArray;
 
-    typedef Vector<Identifier>::const_iterator PropertyNameArrayIterator;
+typedef Vector<Identifier>::const_iterator PropertyNameArrayIterator;
 
-    class KJS_EXPORT PropertyNameArray {
-    public:
-        typedef PropertyNameArrayIterator iterator;
+class KJS_EXPORT PropertyNameArray
+{
+public:
+    typedef PropertyNameArrayIterator iterator;
 
-        void add(const Identifier&);
-        iterator begin() const { return m_vector.begin(); }
-        iterator end() const { return m_vector.end(); }
-        int size() const { return m_vector.size(); }
+    void add(const Identifier &);
+    iterator begin() const
+    {
+        return m_vector.begin();
+    }
+    iterator end() const
+    {
+        return m_vector.end();
+    }
+    int size() const
+    {
+        return m_vector.size();
+    }
 
-        Identifier& operator[](unsigned i) { return m_vector[i]; }
-        const Identifier& operator[](unsigned i) const { return m_vector[i]; }
-            
-    private:
-        typedef HashSet<UString::Rep*, PtrHash<UString::Rep*> > IdentifierSet;
-        IdentifierSet m_set;
-        Vector<Identifier> m_vector;
-    };
+    Identifier &operator[](unsigned i)
+    {
+        return m_vector[i];
+    }
+    const Identifier &operator[](unsigned i) const
+    {
+        return m_vector[i];
+    }
 
+private:
+    typedef HashSet<UString::Rep *, PtrHash<UString::Rep *> > IdentifierSet;
+    IdentifierSet m_set;
+    Vector<Identifier> m_vector;
+};
 
 } // namespace KJS
-
 
 #endif // KJS_PROPERTY_NAME_ARRAY_H

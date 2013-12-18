@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -27,32 +26,34 @@
 #include <wtf/HashMap.h>
 #include "protect.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class DebuggerImp;
-  class Interpreter;
-  class ExecState;
-  class JSObject;
-  class JSValue;
-  class UString;
-  class List;
-  class FunctionBodyNode;
+class DebuggerImp;
+class Interpreter;
+class ExecState;
+class JSObject;
+class JSValue;
+class UString;
+class List;
+class FunctionBodyNode;
 
-  /**
-   * @internal
-   *
-   * Provides an interface which receives notification about various
-   * script-execution related events such as statement execution and function
-   * calls.
-   *
-   * WARNING: This interface is still a work in progress and is not yet
-   * officially publicly available. It is likely to change in binary incompatible
-   * (and possibly source incompatible) ways in future versions. It is
-   * anticipated that at some stage the interface will be frozen and made
-   * available for general use.
-   */
-  class KJS_EXPORT Debugger {
-  public:
+/**
+ * @internal
+ *
+ * Provides an interface which receives notification about various
+ * script-execution related events such as statement execution and function
+ * calls.
+ *
+ * WARNING: This interface is still a work in progress and is not yet
+ * officially publicly available. It is likely to change in binary incompatible
+ * (and possibly source incompatible) ways in future versions. It is
+ * anticipated that at some stage the interface will be frozen and made
+ * available for general use.
+ */
+class KJS_EXPORT Debugger
+{
+public:
 
     /**
      * Creates a new debugger
@@ -65,7 +66,10 @@ namespace KJS {
      */
     virtual ~Debugger();
 
-    DebuggerImp *imp() const { return rep; }
+    DebuggerImp *imp() const
+    {
+        return rep;
+    }
 
     /**
      * Attaches the debugger to specified interpreter. This will cause this
@@ -188,7 +192,7 @@ namespace KJS {
      * be aborted
      */
     virtual bool enterContext(ExecState *exec, int sourceId, int lineno,
-                           JSObject *function, const List &args);
+                              JSObject *function, const List &args);
 
     /**
      * Called when the inteprreter exits an execution context. This always
@@ -207,7 +211,6 @@ namespace KJS {
     virtual bool exitContext(ExecState *exec, int sourceId, int lineno,
                              JSObject *function);
 
-
     // Override this and return true if you want the debugger to report
     // pretty-printed versions of the source.
     virtual bool shouldReindentSources() const;
@@ -219,22 +222,21 @@ namespace KJS {
     // The two methods below call the events but also keep track/use of line # information
     // so we can associate it with exceptions
     void reportAtStatement(ExecState *exec, int sourceId, int firstLine, int lastLine);
-    void reportException  (ExecState *exec, JSValue *exception);
+    void reportException(ExecState *exec, JSValue *exception);
 
     // This notifies the debugger of source being parsed, reindenting it if need be.
-    void reportSourceParsed(ExecState *exec, FunctionBodyNode *body, int sourceId, UString sourceURL, 
-                              const UString &source, int startingLineNumber, int errorLine, const UString &errorMsg);
-  private:
+    void reportSourceParsed(ExecState *exec, FunctionBodyNode *body, int sourceId, UString sourceURL,
+                            const UString &source, int startingLineNumber, int errorLine, const UString &errorMsg);
+private:
     DebuggerImp *rep;
-    HashMap<Interpreter*, ProtectedPtr<JSValue> > latestExceptions;
+    HashMap<Interpreter *, ProtectedPtr<JSValue> > latestExceptions;
     int lastLineRan;
     int lastSourceParsed; // Needed for attributing syntax exceptions at top-level
-  public:
+public:
     static int debuggersPresent;
-  };
+};
 
 }
 
 #endif
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

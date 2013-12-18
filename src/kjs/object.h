@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -34,22 +33,23 @@
 #include <wtf/AlwaysInline.h>
 #include "propertydescriptor.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  struct HashTable;
-  struct HashEntry;
-  struct ListImp;
-  class InternalFunctionImp;
-  class PropertyNameArray;
+struct HashTable;
+struct HashEntry;
+struct ListImp;
+class InternalFunctionImp;
+class PropertyNameArray;
 
-  /**
-   * Class Information
-   */
-  struct ClassInfo {
+/**
+ * Class Information
+ */
+struct ClassInfo {
     /**
      * A string denoting the class name. Example: "Window".
      */
-    const char* className;
+    const char *className;
     /**
      * Pointer to the class information of the base class.
      * 0L if there is none.
@@ -63,18 +63,22 @@ namespace KJS {
      * Reserved for future extension.
      */
     void *dummy;
-  };
+};
 
-  // This is an internal value object which stores getter and setter functions
-  // for a property.
-  class GetterSetterImp : public JSCell {
-  public:
-    JSType type() const { return GetterSetterType; }
+// This is an internal value object which stores getter and setter functions
+// for a property.
+class GetterSetterImp : public JSCell
+{
+public:
+    JSType type() const
+    {
+        return GetterSetterType;
+    }
 
     GetterSetterImp() : getter(0), setter(0) { }
 
     virtual JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState*, double& number, JSValue*& value);
+    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
     virtual bool toBoolean(ExecState *exec) const;
     virtual double toNumber(ExecState *exec) const;
     virtual UString toString(ExecState *exec) const;
@@ -82,24 +86,37 @@ namespace KJS {
 
     virtual void mark();
 
-    JSObject *getGetter() { return getter; }
-    void setGetter(JSObject *g) { getter = g; }
-    JSObject *getSetter() { return setter; }
-    void setSetter(JSObject *s) { setter = s; }
+    JSObject *getGetter()
+    {
+        return getter;
+    }
+    void setGetter(JSObject *g)
+    {
+        getter = g;
+    }
+    JSObject *getSetter()
+    {
+        return setter;
+    }
+    void setSetter(JSObject *s)
+    {
+        setter = s;
+    }
 
-  private:
+private:
     JSObject *getter;
     JSObject *setter;
-  };
+};
 
-  class KJS_EXPORT JSObject : public JSCell {
-  public:
+class KJS_EXPORT JSObject : public JSCell
+{
+public:
     /**
      * Creates a new JSObject with the specified prototype
      *
      * @param proto The prototype
      */
-    explicit JSObject(JSValue* proto);
+    explicit JSObject(JSValue *proto);
 
     /**
      * Creates a new JSObject with a prototype of jsNull()
@@ -223,14 +240,14 @@ namespace KJS {
     JSValue *get(ExecState *exec, const Identifier &propertyName) const;
     JSValue *get(ExecState *exec, unsigned propertyName) const;
 
-    bool getPropertySlot(ExecState *, const Identifier&, PropertySlot&);
-    bool getPropertySlot(ExecState *, unsigned, PropertySlot&);
+    bool getPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    bool getPropertySlot(ExecState *, unsigned, PropertySlot &);
     // Fills the PropertyDescriptor looking the ownPropertys and all prototypes until found.
-    bool getPropertyDescriptor(ExecState*, const Identifier& propertyName, PropertyDescriptor&);
+    bool getPropertyDescriptor(ExecState *, const Identifier &propertyName, PropertyDescriptor &);
 
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
-    virtual bool getOwnPropertySlot(ExecState *, unsigned index, PropertySlot&);
-    virtual bool getOwnPropertyDescriptor(ExecState*, const Identifier&, PropertyDescriptor&);
+    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    virtual bool getOwnPropertySlot(ExecState *, unsigned index, PropertySlot &);
+    virtual bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &);
 
     /**
      * Sets the specified property.
@@ -355,9 +372,8 @@ namespace KJS {
     /**
      * Implementation of the [[Construct]] internal property
      */
-    virtual JSObject* construct(ExecState* exec, const List& args);
-    virtual JSObject* construct(ExecState* exec, const List& args, const Identifier& functionName, const UString& sourceURL, int lineNumber);
-
+    virtual JSObject *construct(ExecState *exec, const List &args);
+    virtual JSObject *construct(ExecState *exec, const List &args, const Identifier &functionName, const UString &sourceURL, int lineNumber);
 
     /**
      * If this object represents a value, e.g. is a wrapper around a primitive,
@@ -366,12 +382,12 @@ namespace KJS {
      *
      * The returned objects will use default prototypes from targetCtx
      */
-    virtual JSObject* valueClone(Interpreter* targetCtx) const;
+    virtual JSObject *valueClone(Interpreter *targetCtx) const;
 
     /**
      * Whether or not this object should be considered a function for the purpose
      * of the typeof operator. Normally this is the same as implementsCall(),
-     * which is what the default implementation delegates too, 
+     * which is what the default implementation delegates too,
      * but in some cases compatibility dictates that the object both be callable
      * and call itself an object and not a function. In this case, this method should
      * be overridden as well
@@ -419,20 +435,23 @@ namespace KJS {
      */
     virtual bool hasInstance(ExecState *exec, JSValue *value);
 
-    void getPropertyNames(ExecState*, PropertyNameArray&, PropertyMap::PropertyMode mode = PropertyMap::ExcludeDontEnumProperties);
-    virtual void getOwnPropertyNames(ExecState*, PropertyNameArray&, PropertyMap::PropertyMode mode);
+    void getPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode = PropertyMap::ExcludeDontEnumProperties);
+    virtual void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode);
 
     virtual JSValue *toPrimitive(ExecState *exec, JSType preferredType = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState*, double& number, JSValue*& value);
+    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
     virtual bool toBoolean(ExecState *exec) const;
     virtual double toNumber(ExecState *exec) const;
     virtual UString toString(ExecState *exec) const;
     virtual JSObject *toObject(ExecState *exec) const;
 
-    virtual bool getPropertyAttributes(const Identifier& propertyName, unsigned& attributes) const;
+    virtual bool getPropertyAttributes(const Identifier &propertyName, unsigned &attributes) const;
 
     // Returns whether the object should be treated as undefined when doing equality comparisons
-    virtual bool masqueradeAsUndefined() const { return false; }
+    virtual bool masqueradeAsUndefined() const
+    {
+        return false;
+    }
 
     // This get function only looks at the property map for Object.
     // It is virtual because for all custom-data classes we want to by-pass
@@ -440,16 +459,22 @@ namespace KJS {
     // Object::defineOwnProperty to directly get GetterSetterImp and update it.
     // This is used e.g. by lookupOrCreateFunction (to cache a function, we don't want
     // to look up in the prototype, it might already exist there)
-    virtual JSValue *getDirect(const Identifier& propertyName) const
-        { return _prop.get(propertyName); }
-    JSValue **getDirectLocation(const Identifier& propertyName)
-        { return _prop.getLocation(propertyName); }
+    virtual JSValue *getDirect(const Identifier &propertyName) const
+    {
+        return _prop.get(propertyName);
+    }
+    JSValue **getDirectLocation(const Identifier &propertyName)
+    {
+        return _prop.getLocation(propertyName);
+    }
 
     // If this method returns non-0, there is already a property
     // with name propertyName that's not readonly and not a setter-getter
     // which can be updated via the returned pointer.
-    JSValue **getDirectWriteLocation(const Identifier& propertyName)
-        { return _prop.getWriteLocation(propertyName); }
+    JSValue **getDirectWriteLocation(const Identifier &propertyName)
+    {
+        return _prop.getWriteLocation(propertyName);
+    }
 
     // This function is virtual to directly store, by-pass the prototype, values
     // for all custom-data classes like the Array. For example an Array with a prototype
@@ -458,72 +483,99 @@ namespace KJS {
     // This is for example called in Object::defineOwnProperty to directly store the values.
     // Same for removeDirect.
     virtual void putDirect(const Identifier &propertyName, JSValue *value, int attr = 0)
-        { _prop.put(propertyName, value, attr); }
+    {
+        _prop.put(propertyName, value, attr);
+    }
     virtual void putDirect(const Identifier &propertyName, int value, int attr = 0);
     virtual void removeDirect(const Identifier &propertyName);
 
     // convenience to add a function property under the function's own built-in name
-    void putDirectFunction(InternalFunctionImp*, int attr = 0);
+    void putDirectFunction(InternalFunctionImp *, int attr = 0);
 
-    void fillGetterPropertySlot(PropertySlot& slot, JSValue **location);
-    void fillDirectLocationSlot(PropertySlot& slot, JSValue **location);
+    void fillGetterPropertySlot(PropertySlot &slot, JSValue **location);
+    void fillDirectLocationSlot(PropertySlot &slot, JSValue **location);
 
-    void defineGetter(ExecState *exec, const Identifier& propertyName, JSObject *getterFunc);
-    void defineSetter(ExecState *exec, const Identifier& propertyName, JSObject *setterFunc);
+    void defineGetter(ExecState *exec, const Identifier &propertyName, JSObject *getterFunc);
+    void defineSetter(ExecState *exec, const Identifier &propertyName, JSObject *setterFunc);
 
-    virtual bool defineOwnProperty(ExecState* exec, const Identifier& propertyName, PropertyDescriptor& desc, bool shouldThrow);
+    virtual bool defineOwnProperty(ExecState *exec, const Identifier &propertyName, PropertyDescriptor &desc, bool shouldThrow);
 
     void preventExtensions();
-    bool isExtensible() { return _prop.isExtensible(); }
+    bool isExtensible()
+    {
+        return _prop.isExtensible();
+    }
 
     /**
      * Remove all properties from this object.
      * This doesn't take DontDelete into account, and isn't in the ECMA spec.
      * It's simply a quick way to remove everything stored in the property map.
      */
-    void clearProperties() { _prop.clear(); }
+    void clearProperties()
+    {
+        _prop.clear();
+    }
 
-    void saveProperties(SavedProperties &p) const { _prop.save(p); }
-    void restoreProperties(const SavedProperties &p) { _prop.restore(p); }
+    void saveProperties(SavedProperties &p) const
+    {
+        _prop.save(p);
+    }
+    void restoreProperties(const SavedProperties &p)
+    {
+        _prop.restore(p);
+    }
 
-    virtual bool isActivation()   const { return false; }
-    virtual bool isGlobalObject() const { return false; }
+    virtual bool isActivation()   const
+    {
+        return false;
+    }
+    virtual bool isGlobalObject() const
+    {
+        return false;
+    }
 
     // This is used to keep track of whether scope object have local
     // variables introduced by something other than 'var'
-    bool isLocalInjected()  const { return _prop.m_objLocalInjected; }
-    void setLocalInjected()       { _prop.m_objLocalInjected = true; }
+    bool isLocalInjected()  const
+    {
+        return _prop.m_objLocalInjected;
+    }
+    void setLocalInjected()
+    {
+        _prop.m_objLocalInjected = true;
+    }
 
-  protected:
+protected:
     PropertyMap _prop;
-  private:
+private:
 
-
-    const HashEntry* findPropertyHashEntry( const Identifier& propertyName ) const;
+    const HashEntry *findPropertyHashEntry(const Identifier &propertyName) const;
     JSValue *_proto;
 #ifdef WIN32
-    JSObject(const JSObject&);
-    JSObject& operator=(const JSObject&);
+    JSObject(const JSObject &);
+    JSObject &operator=(const JSObject &);
 #endif
-  };
+};
 
-  /**
-   * Types of Native Errors available. For custom errors, GeneralError
-   * should be used.
-   */
-  enum ErrorType { GeneralError   = 0,
-                   EvalError      = 1,
-                   RangeError     = 2,
-                   ReferenceError = 3,
-                   SyntaxError    = 4,
-                   TypeError      = 5,
-                   URIError       = 6};
+/**
+ * Types of Native Errors available. For custom errors, GeneralError
+ * should be used.
+ */
+enum ErrorType { GeneralError   = 0,
+                 EvalError      = 1,
+                 RangeError     = 2,
+                 ReferenceError = 3,
+                 SyntaxError    = 4,
+                 TypeError      = 5,
+                 URIError       = 6
+               };
 
-  /**
-   * @short Factory methods for error objects.
-   */
-  class KJS_EXPORT Error {
-  public:
+/**
+ * @short Factory methods for error objects.
+ */
+class KJS_EXPORT Error
+{
+public:
     /**
      * Factory method for error objects.
      *
@@ -540,22 +592,22 @@ namespace KJS {
     /**
      * Array of error names corresponding to ErrorType
      */
-    static const char * const * const errorNames;
-  };
+    static const char *const *const errorNames;
+};
 
 KJS_EXPORT JSObject *throwError(ExecState *, ErrorType, const UString &message, int lineNumber, int sourceId, const UString &sourceURL);
 KJS_EXPORT JSObject *throwError(ExecState *, ErrorType, const UString &message);
 KJS_EXPORT JSObject *throwError(ExecState *, ErrorType, const char *message);
 KJS_EXPORT JSObject *throwError(ExecState *, ErrorType);
 
-inline JSObject::JSObject(JSValue* proto)
+inline JSObject::JSObject(JSValue *proto)
     : _proto(proto)
 {
     assert(proto);
 }
 
 inline JSObject::JSObject()
-    :_proto(jsNull())
+    : _proto(jsNull())
 {}
 
 inline JSValue *JSObject::prototype() const
@@ -572,19 +624,21 @@ inline void JSObject::setPrototype(JSValue *proto)
 inline bool JSObject::inherits(const ClassInfo *info) const
 {
     for (const ClassInfo *ci = classInfo(); ci; ci = ci->parentClass)
-        if (ci == info)
+        if (ci == info) {
             return true;
+        }
     return false;
 }
 
-inline void JSObject::fillDirectLocationSlot(PropertySlot& slot,
-                                             JSValue **location)
+inline void JSObject::fillDirectLocationSlot(PropertySlot &slot,
+        JSValue **location)
 {
     if (_prop.hasGetterSetterProperties() &&
-        (*location)->type() == GetterSetterType)
+            (*location)->type() == GetterSetterType) {
         fillGetterPropertySlot(slot, location);
-    else
+    } else {
         slot.setValueSlot(this, location);
+    }
 }
 
 // this method is here to be after the inline declaration of JSObject::inherits
@@ -601,35 +655,38 @@ inline bool JSValue::isObject(const ClassInfo *c) const
 
 // It may seem crazy to inline a function this large but it makes a big difference
 // since this is function very hot in variable lookup
-inline bool JSObject::getPropertySlot(ExecState *exec, const Identifier& propertyName, PropertySlot& slot)
+inline bool JSObject::getPropertySlot(ExecState *exec, const Identifier &propertyName, PropertySlot &slot)
 {
     JSObject *object = this;
     while (true) {
-        if (object->getOwnPropertySlot(exec, propertyName, slot))
+        if (object->getOwnPropertySlot(exec, propertyName, slot)) {
             return true;
+        }
 
         JSValue *proto = object->_proto;
-        if (!proto->isObject())
+        if (!proto->isObject()) {
             return false;
+        }
 
         object = static_cast<JSObject *>(proto);
     }
 }
 
-inline void JSObject::getPropertyNames(ExecState* exec, PropertyNameArray& propertyNames, PropertyMap::PropertyMode mode)
+inline void JSObject::getPropertyNames(ExecState *exec, PropertyNameArray &propertyNames, PropertyMap::PropertyMode mode)
 {
-  for (JSObject* cur = this; cur; cur = cur->_proto->getObject())
-    cur->getOwnPropertyNames(exec, propertyNames, mode);
+    for (JSObject *cur = this; cur; cur = cur->_proto->getObject()) {
+        cur->getOwnPropertyNames(exec, propertyNames, mode);
+    }
 }
 
-inline JSValue* JSObject::toPrimitive(ExecState* exec, JSType preferredType) const
+inline JSValue *JSObject::toPrimitive(ExecState *exec, JSType preferredType) const
 {
     return defaultValue(exec, preferredType);
 }
 
-inline JSValue* JSObject::call(ExecState *exec, JSObject *thisObj, const List &args)
+inline JSValue *JSObject::call(ExecState *exec, JSObject *thisObj, const List &args)
 {
-	return callAsFunction(exec, thisObj, args);
+    return callAsFunction(exec, thisObj, args);
 }
 
 } // namespace

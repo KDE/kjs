@@ -42,7 +42,8 @@ using std::max;
 #define checkConsistency() ((void)0)
 #endif
 
-namespace KJS {
+namespace KJS
+{
 
 // Choose a number for the following so that most property maps are smaller,
 // but it's not going to blow out the stack to allocate this number of pointers.
@@ -55,7 +56,9 @@ static int numCollisions;
 static int numRehashes;
 static int numRemoves;
 
-struct PropertyMapStatisticsExitLogger { ~PropertyMapStatisticsExitLogger(); };
+struct PropertyMapStatisticsExitLogger {
+    ~PropertyMapStatisticsExitLogger();
+};
 
 static PropertyMapStatisticsExitLogger logger;
 
@@ -74,8 +77,7 @@ PropertyMapStatisticsExitLogger::~PropertyMapStatisticsExitLogger()
 // were inserted into the property map. It's vital that getEnumerablePropertyNames
 // return the properties in the order they were added for compatibility with other
 // browsers' JavaScript implementations.
-struct PropertyMapHashTable
-{
+struct PropertyMapHashTable {
     int sizeMask;
     int size;
     int keyCount;
@@ -84,7 +86,8 @@ struct PropertyMapHashTable
     PropertyMapHashTableEntry entries[1];
 };
 
-class SavedProperty {
+class SavedProperty
+{
 public:
     Identifier key;
     ProtectedPtr<JSValue> value;
@@ -97,10 +100,13 @@ SavedProperties::~SavedProperties() { }
 // Algorithm concepts from Algorithms in C++, Sedgewick.
 
 // This is a method rather than a variable to work around <rdar://problem/4462053>
-static inline UString::Rep* deletedSentinel() { return reinterpret_cast<UString::Rep*>(0x1); }
+static inline UString::Rep *deletedSentinel()
+{
+    return reinterpret_cast<UString::Rep *>(0x1);
+}
 
 // Returns true if the key is not null or the deleted sentinel, false otherwise
-static inline bool isValid(UString::Rep* key)
+static inline bool isValid(UString::Rep *key)
 {
     return !!(reinterpret_cast<uintptr_t>(key) & ~0x1);
 }
@@ -110,8 +116,9 @@ PropertyMap::~PropertyMap()
     if (!m_usingTable) {
 #if USE_SINGLE_ENTRY
         UString::Rep *key = m_singleEntryKey;
-        if (key)
+        if (key) {
             key->deref();
+        }
 #endif
         return;
     }
@@ -121,10 +128,12 @@ PropertyMap::~PropertyMap()
     for (int i = 0; i < minimumKeysToProcess; i++) {
         UString::Rep *key = entries[i].key;
         if (key) {
-            if (key != deletedSentinel())
+            if (key != deletedSentinel()) {
                 key->deref();
-        } else
+            }
+        } else {
             ++minimumKeysToProcess;
+        }
     }
     fastFree(m_u.table);
 }
@@ -158,10 +167,11 @@ void PropertyMap::clear()
 
 bool PropertyMap::isEmpty() const
 {
-    if (!m_usingTable)
+    if (!m_usingTable) {
         return !m_singleEntryKey;
-    else
+    } else {
         return !m_u.table->keyCount;
+    }
 }
 
 JSValue *PropertyMap::get(const Identifier &name, unsigned &attributes) const
@@ -195,8 +205,9 @@ JSValue *PropertyMap::get(const Identifier &name, unsigned &attributes) const
             attributes = entries[i].attributes;
             return entries[i].value;
         }
-        if (k == 0)
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
@@ -214,8 +225,9 @@ JSValue *PropertyMap::get(const Identifier &name) const
     if (!m_usingTable) {
 #if USE_SINGLE_ENTRY
         UString::Rep *key = m_singleEntryKey;
-        if (rep == key)
+        if (rep == key) {
             return m_u.singleEntryValue;
+        }
 #endif
         return 0;
     }
@@ -230,10 +242,12 @@ JSValue *PropertyMap::get(const Identifier &name) const
     numCollisions += entries[i].key && entries[i].key != rep;
 #endif
     while (UString::Rep *key = entries[i].key) {
-        if (rep == key)
+        if (rep == key) {
             return entries[i].value;
-        if (k == 0)
+        }
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
@@ -251,8 +265,9 @@ JSValue **PropertyMap::getLocation(const Identifier &name)
     if (!m_usingTable) {
 #if USE_SINGLE_ENTRY
         UString::Rep *key = m_singleEntryKey;
-        if (rep == key)
+        if (rep == key) {
             return &m_u.singleEntryValue;
+        }
 #endif
         return 0;
     }
@@ -267,10 +282,12 @@ JSValue **PropertyMap::getLocation(const Identifier &name)
     numCollisions += entries[i].key && entries[i].key != rep;
 #endif
     while (UString::Rep *key = entries[i].key) {
-        if (rep == key)
+        if (rep == key) {
             return &entries[i].value;
-        if (k == 0)
+        }
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
@@ -287,8 +304,9 @@ JSValue **PropertyMap::getWriteLocation(const Identifier &name)
 
     if (!m_usingTable) {
         UString::Rep *key = m_singleEntryKey;
-        if (rep == key && !(m_singleEntryAttributes & (ReadOnly | GetterSetter)))
+        if (rep == key && !(m_singleEntryAttributes & (ReadOnly | GetterSetter))) {
             return &m_u.singleEntryValue;
+        }
         return 0;
     }
 
@@ -303,13 +321,15 @@ JSValue **PropertyMap::getWriteLocation(const Identifier &name)
 #endif
     while (UString::Rep *key = entries[i].key) {
         if (rep == key) {
-            if (entries[i].attributes & (ReadOnly | GetterSetter))
+            if (entries[i].attributes & (ReadOnly | GetterSetter)) {
                 return 0;
-            else
+            } else {
                 return &entries[i].value;
+            }
         }
-        if (k == 0)
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
@@ -321,19 +341,24 @@ JSValue **PropertyMap::getWriteLocation(const Identifier &name)
 #if DEBUG_PROPERTIES
 static void printAttributes(int attributes)
 {
-    if (attributes == 0)
+    if (attributes == 0) {
         printf("None");
-    else {
-        if (attributes & ReadOnly)
+    } else {
+        if (attributes & ReadOnly) {
             printf("ReadOnly ");
-        if (attributes & DontEnum)
+        }
+        if (attributes & DontEnum) {
             printf("DontEnum ");
-        if (attributes & DontDelete)
+        }
+        if (attributes & DontDelete) {
             printf("DontDelete ");
-        if (attributes & Internal)
+        }
+        if (attributes & Internal) {
             printf("Internal ");
-        if (attributes & Function)
+        }
+        if (attributes & Function) {
             printf("Function ");
+        }
     }
 }
 #endif
@@ -372,8 +397,9 @@ void PropertyMap::put(const Identifier &name, JSValue *value, int attributes, bo
     }
 #endif
 
-    if (!m_usingTable || m_u.table->keyCount * 2 >= m_u.table->size)
+    if (!m_usingTable || m_u.table->keyCount * 2 >= m_u.table->size) {
         expand();
+    }
 
     unsigned h = rep->hash();
     int sizeMask = m_u.table->sizeMask;
@@ -388,8 +414,9 @@ void PropertyMap::put(const Identifier &name, JSValue *value, int attributes, bo
 #endif
     while (UString::Rep *key = entries[i].key) {
         if (rep == key) {
-            if (roCheck && (entries[i].attributes & ReadOnly))
+            if (roCheck && (entries[i].attributes & ReadOnly)) {
                 return;
+            }
             // Put a new value in an existing hash table entry.
             entries[i].value = value;
             // Attributes are intentionally not updated.
@@ -400,8 +427,9 @@ void PropertyMap::put(const Identifier &name, JSValue *value, int attributes, bo
             foundDeletedElement = true;
             deletedElementIndex = i;
         }
-        if (k == 0)
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
@@ -440,8 +468,9 @@ void PropertyMap::insert(UString::Rep *key, JSValue *value, int attributes, int 
 #endif
     while (entries[i].key) {
         assert(entries[i].key != deletedSentinel());
-        if (k == 0)
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
@@ -456,10 +485,11 @@ void PropertyMap::insert(UString::Rep *key, JSValue *value, int attributes, int 
 
 void PropertyMap::expand()
 {
-    if (!m_usingTable)
+    if (!m_usingTable) {
         createTable();
-    else
+    } else {
         rehash(m_u.table->size * 2);
+    }
 }
 
 void PropertyMap::rehash()
@@ -479,7 +509,7 @@ void PropertyMap::createTable()
     checkConsistency();
 
 #if USE_SINGLE_ENTRY
-    JSValue* oldSingleEntryValue = m_u.singleEntryValue;
+    JSValue *oldSingleEntryValue = m_u.singleEntryValue;
 #endif
 
     m_u.table = (Table *)fastCalloc(1, sizeof(Table) + (newTableSize - 1) * sizeof(Entry));
@@ -507,7 +537,7 @@ void PropertyMap::rehash(int newTableSize)
 
     checkConsistency();
 
-    Table* oldTable = m_u.table;
+    Table *oldTable = m_u.table;
     int oldTableSize = oldTable->size;
     int oldTableKeyCount = oldTable->keyCount;
 
@@ -567,17 +597,20 @@ void PropertyMap::remove(const Identifier &name)
     numCollisions += entries[i].key && entries[i].key != rep;
 #endif
     while ((key = entries[i].key)) {
-        if (rep == key)
+        if (rep == key) {
             break;
-        if (k == 0)
+        }
+        if (k == 0) {
             k = 1 | (h % sizeMask);
+        }
         i = (i + k) & sizeMask;
 #if DUMP_STATISTICS
         ++numRehashes;
 #endif
     }
-    if (!key)
+    if (!key) {
         return;
+    }
 
     // Replace this one element with the deleted sentinel. Also set value to 0 and attributes to DontEnum
     // to help callers that iterate all keys not have to check for the sentinel.
@@ -590,8 +623,9 @@ void PropertyMap::remove(const Identifier &name)
     --m_u.table->keyCount;
     ++m_u.table->sentinelCount;
 
-    if (m_u.table->sentinelCount * 4 >= m_u.table->size)
+    if (m_u.table->sentinelCount * 4 >= m_u.table->size) {
         rehash();
+    }
 
     checkConsistency();
 }
@@ -602,8 +636,9 @@ void PropertyMap::mark() const
 #if USE_SINGLE_ENTRY
         if (m_singleEntryKey) {
             JSValue *v = m_u.singleEntryValue;
-            if (!v->marked())
-              v->mark();
+            if (!v->marked()) {
+                v->mark();
+            }
         }
 #endif
         return;
@@ -614,8 +649,9 @@ void PropertyMap::mark() const
     for (int i = 0; i < minimumKeysToProcess; i++) {
         JSValue *v = entries[i].value;
         if (v) {
-            if (!v->marked())
-              v->mark();
+            if (!v->marked()) {
+                v->mark();
+            }
         } else {
             ++minimumKeysToProcess;
         }
@@ -624,12 +660,14 @@ void PropertyMap::mark() const
 
 static int comparePropertyMapEntryIndices(const void *a, const void *b)
 {
-    int ia = static_cast<PropertyMapHashTableEntry * const *>(a)[0]->index;
-    int ib = static_cast<PropertyMapHashTableEntry * const *>(b)[0]->index;
-    if (ia < ib)
+    int ia = static_cast<PropertyMapHashTableEntry *const *>(a)[0]->index;
+    int ib = static_cast<PropertyMapHashTableEntry *const *>(b)[0]->index;
+    if (ia < ib) {
         return -1;
-    if (ia > ib)
+    }
+    if (ia > ib) {
         return +1;
+    }
     return 0;
 }
 
@@ -644,43 +682,47 @@ bool PropertyMap::containsGettersOrSetters() const
     }
 
     for (int i = 0; i != m_u.table->size; ++i) {
-        if (m_u.table->entries[i].attributes & GetterSetter)
+        if (m_u.table->entries[i].attributes & GetterSetter) {
             return true;
+        }
     }
 
     return false;
 }
 
-void PropertyMap::getPropertyNames(PropertyNameArray& propertyNames, PropertyMode mode) const
+void PropertyMap::getPropertyNames(PropertyNameArray &propertyNames, PropertyMode mode) const
 {
     if (!m_usingTable) {
 #if USE_SINGLE_ENTRY
         UString::Rep *key = m_singleEntryKey;
-        if (key && checkEnumerable(m_singleEntryAttributes, mode))
+        if (key && checkEnumerable(m_singleEntryAttributes, mode)) {
             propertyNames.add(Identifier(key));
+        }
 #endif
         return;
     }
 
     // Allocate a buffer to use to sort the keys.
-    Vector<Entry*, smallMapThreshold> sortedEnumerables(m_u.table->keyCount);
+    Vector<Entry *, smallMapThreshold> sortedEnumerables(m_u.table->keyCount);
 
     // Get pointers to the enumerable entries in the buffer.
-    Entry** p = sortedEnumerables.data();
+    Entry **p = sortedEnumerables.data();
     int size = m_u.table->size;
-    Entry* entries = m_u.table->entries;
+    Entry *entries = m_u.table->entries;
     for (int i = 0; i != size; ++i) {
-        Entry* e = &entries[i];
-        if (e->key && checkEnumerable(e->attributes, mode))
+        Entry *e = &entries[i];
+        if (e->key && checkEnumerable(e->attributes, mode)) {
             *p++ = e;
+        }
     }
 
     // Sort the entries by index.
-    qsort(sortedEnumerables.data(), p - sortedEnumerables.data(), sizeof(Entry*), comparePropertyMapEntryIndices);
+    qsort(sortedEnumerables.data(), p - sortedEnumerables.data(), sizeof(Entry *), comparePropertyMapEntryIndices);
 
     // Put the keys of the sorted entries into the list.
-    for (Entry** q = sortedEnumerables.data(); q != p; ++q)
+    for (Entry **q = sortedEnumerables.data(); q != p; ++q) {
         propertyNames.add(Identifier(q[0]->key));
+    }
 }
 
 void PropertyMap::save(SavedProperties &p) const
@@ -689,22 +731,25 @@ void PropertyMap::save(SavedProperties &p) const
 
     if (!m_usingTable) {
 #if USE_SINGLE_ENTRY
-        if (m_singleEntryKey && !(m_singleEntryAttributes & (ReadOnly | Function)))
+        if (m_singleEntryKey && !(m_singleEntryAttributes & (ReadOnly | Function))) {
             ++count;
+        }
 #endif
     } else {
         int size = m_u.table->size;
         Entry *entries = m_u.table->entries;
         for (int i = 0; i != size; ++i)
-            if (isValid(entries[i].key) && !(entries[i].attributes & (ReadOnly | Function)))
+            if (isValid(entries[i].key) && !(entries[i].attributes & (ReadOnly | Function))) {
                 ++count;
+            }
     }
 
     p._properties.clear();
     p._count = count;
 
-    if (count == 0)
+    if (count == 0) {
         return;
+    }
 
     p._properties.set(new SavedProperty [count]);
 
@@ -724,25 +769,26 @@ void PropertyMap::save(SavedProperties &p) const
         // Another possibility would be to save the indices.
 
         // Allocate a buffer to use to sort the keys.
-        Vector<Entry*, smallMapThreshold> sortedEntries(count);
+        Vector<Entry *, smallMapThreshold> sortedEntries(count);
 
         // Get pointers to the entries in the buffer.
-        Entry** p = sortedEntries.data();
+        Entry **p = sortedEntries.data();
         int size = m_u.table->size;
-        Entry* entries = m_u.table->entries;
+        Entry *entries = m_u.table->entries;
         for (int i = 0; i != size; ++i) {
             Entry *e = &entries[i];
-            if (isValid(e->key) && !(e->attributes & (ReadOnly | Function)))
+            if (isValid(e->key) && !(e->attributes & (ReadOnly | Function))) {
                 *p++ = e;
+            }
         }
         assert(p - sortedEntries.data() == count);
 
         // Sort the entries by index.
-        qsort(sortedEntries.data(), p - sortedEntries.data(), sizeof(Entry*), comparePropertyMapEntryIndices);
+        qsort(sortedEntries.data(), p - sortedEntries.data(), sizeof(Entry *), comparePropertyMapEntryIndices);
 
         // Put the sorted entries into the saved properties list.
-        for (Entry** q = sortedEntries.data(); q != p; ++q, ++prop) {
-            Entry* e = *q;
+        for (Entry **q = sortedEntries.data(); q != p; ++q, ++prop) {
+            Entry *e = *q;
             prop->key = Identifier(e->key);
             prop->value = e->value;
             prop->attributes = e->attributes;
@@ -752,23 +798,26 @@ void PropertyMap::save(SavedProperties &p) const
 
 void PropertyMap::restore(const SavedProperties &p)
 {
-    for (int i = 0; i != p._count; ++i)
+    for (int i = 0; i != p._count; ++i) {
         put(p._properties[i].key, p._properties[i].value, p._properties[i].attributes);
+    }
 }
 
 #if DO_CONSISTENCY_CHECK
 
 void PropertyMap::checkConsistency()
 {
-    if (!m_usingTable)
+    if (!m_usingTable) {
         return;
+    }
 
     int count = 0;
     int sentinelCount = 0;
     for (int j = 0; j != m_u.table->size; ++j) {
         UString::Rep *rep = m_u.table->entries[j].key;
-        if (!rep)
+        if (!rep) {
             continue;
+        }
         if (rep == deletedSentinel()) {
             ++sentinelCount;
             continue;
@@ -777,10 +826,12 @@ void PropertyMap::checkConsistency()
         int i = h & m_u.table->sizeMask;
         int k = 0;
         while (UString::Rep *key = m_u.table->entries[i].key) {
-            if (rep == key)
+            if (rep == key) {
                 break;
-            if (k == 0)
+            }
+            if (k == 0) {
                 k = 1 | (h % m_u.table->sizeMask);
+            }
             i = (i + k) & m_u.table->sizeMask;
         }
         assert(i == j);

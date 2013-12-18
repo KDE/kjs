@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 2006 Harri Porten (porten@kde.org)
@@ -46,7 +45,7 @@ enum ExitCode { ErrorNone,
                 ErrorMissingArg,
                 ErrorReadFile,
                 ErrorEval
-};
+              };
 
 using std::strcmp;
 
@@ -58,31 +57,31 @@ static void printUsage(const char *app)
             "Usage: %s\n"
             "  [ -h | -help | --help ]\n"
             "  [ -e <statement> | <script> ]\n"
-	    "  [-v | -version | --version]\n",
+            "  [-v | -version | --version]\n",
             app);
 }
 
-static UString readFile(const char* fileName)
+static UString readFile(const char *fileName)
 {
     int fd = open(fileName, O_RDONLY);
     if (fd < 0) {
-	fprintf(stderr, "Error opening %s", fileName);
-	return UString();
+        fprintf(stderr, "Error opening %s", fileName);
+        return UString();
     }
     struct stat buf;
     if (fstat(fd, &buf) == -1) {
         fprintf(stderr, "Error stat'ing %s", fileName);
-	close(fd);
-	return UString();
+        close(fd);
+        return UString();
     }
     int siz = buf.st_size;
-    char* c = new char[siz + 1];
+    char *c = new char[siz + 1];
     int dataRead = read(fd, c, siz);
     if (dataRead == -1) {
         fprintf(stderr, "Error reading from %s", fileName);
-	delete[] c;
-	close(fd);
-	return UString();
+        delete[] c;
+        close(fd);
+        return UString();
     }
     c[dataRead] = '\0';
     UString s = c;
@@ -92,17 +91,25 @@ static UString readFile(const char* fileName)
 
 static ExitCode evaluateFile(Interpreter *interp, const char *fileName);
 
-class GlobalImp : public JSGlobalObject {
+class GlobalImp : public JSGlobalObject
+{
 public:
-    virtual UString className() const { return "global"; }
+    virtual UString className() const
+    {
+        return "global";
+    }
 };
 
-class TestFunctionImp : public JSObject {
+class TestFunctionImp : public JSObject
+{
 public:
     TestFunctionImp(int i, int length);
-    virtual bool implementsCall() const { return true; }
-    virtual JSValue* callAsFunction(ExecState* exec,
-                                    JSObject* thisObj, const List &args);
+    virtual bool implementsCall() const
+    {
+        return true;
+    }
+    virtual JSValue *callAsFunction(ExecState *exec,
+                                    JSObject *thisObj, const List &args);
     enum { Print, Quit, Load, GC };
 
 private:
@@ -115,9 +122,9 @@ TestFunctionImp::TestFunctionImp(int i, int length)
     putDirect(Identifier("length"), length, DontDelete | ReadOnly | DontEnum);
 }
 
-JSValue* TestFunctionImp::callAsFunction(ExecState* exec,
-                                         JSObject* /* thisObj */,
-                                         const List &args)
+JSValue *TestFunctionImp::callAsFunction(ExecState *exec,
+        JSObject * /* thisObj */,
+        const List &args)
 {
     switch (id) {
     case Print:
@@ -138,7 +145,7 @@ JSValue* TestFunctionImp::callAsFunction(ExecState* exec,
 }
 
 static ExitCode evaluateString(Interpreter *interp, const char *fileName,
-                               const UString& code,
+                               const UString &code,
                                bool printResult = false)
 {
     ExecState *exec = interp->globalExec();
@@ -147,19 +154,21 @@ static ExitCode evaluateString(Interpreter *interp, const char *fileName,
 
     if (res.complType() == Throw) {
         CString msg = res.value()->toString(exec).UTF8String();
-        JSObject* resObj = res.value()->toObject(exec);
+        JSObject *resObj = res.value()->toObject(exec);
         CString message = resObj->toString(exec).UTF8String();
         int line = resObj->toObject(exec)->get(exec, "line")->toUInt32(exec);
 
-        if (fileName)
+        if (fileName) {
             fprintf(stderr, "%s (line %d): ", fileName, line);
+        }
         fprintf(stderr, "%s\n", msg.c_str());
         return ErrorEval;
     } else if (printResult) {
         if (res.isValueCompletion() && !res.value()->isUndefined()) {
             CString s8 = res.value()->toString(exec).UTF8String();
-            if (s8.size() != 0)
+            if (s8.size() != 0) {
                 fprintf(stdout, "%s\n", s8.c_str());
+            }
         }
     }
 
@@ -169,8 +178,9 @@ static ExitCode evaluateString(Interpreter *interp, const char *fileName,
 static ExitCode evaluateFile(Interpreter *interp, const char *fileName)
 {
     UString code = readFile(fileName);
-    if (code.isNull())
+    if (code.isNull()) {
         return ErrorReadFile;
+    }
 
     return evaluateString(interp, fileName, code);
 }
@@ -178,11 +188,12 @@ static ExitCode evaluateFile(Interpreter *interp, const char *fileName)
 // primitive readline-like function
 static char *readLine(const char *prompt)
 {
-    if (prompt)
+    if (prompt) {
         fprintf(stdout, "%s", prompt);
+    }
 
     const int bsize = 2 << 10;
-    char *buffer = static_cast<char*>(malloc(bsize));
+    char *buffer = static_cast<char *>(malloc(bsize));
     char *s = fgets(buffer, bsize, stdin);
     if (s == 0) {
         // EOF
@@ -204,11 +215,11 @@ static ExitCode evaluateInteractive(Interpreter *interp)
     return ErrorNone;
 }
 
-static ExitCode parseArgs(int argc, char** argv)
+static ExitCode parseArgs(int argc, char **argv)
 {
     JSLock lock;
 
-    GlobalImp* global = new GlobalImp();
+    GlobalImp *global = new GlobalImp();
 
     // create interpreter
     RefPtr<Interpreter> interp = new Interpreter(global);
@@ -219,10 +230,10 @@ static ExitCode parseArgs(int argc, char** argv)
                 new TestFunctionImp(TestFunctionImp::Print, 1));
     global->put(gexec, "quit",
                 new TestFunctionImp(TestFunctionImp::Quit, 0));
-     global->put(gexec, "load",
-                 new TestFunctionImp(TestFunctionImp::Load, 1));
-     global->put(gexec, "gc",
-                 new TestFunctionImp(TestFunctionImp::GC, 0));
+    global->put(gexec, "load",
+                new TestFunctionImp(TestFunctionImp::Load, 1));
+    global->put(gexec, "gc",
+                new TestFunctionImp(TestFunctionImp::GC, 0));
 
     // enable package support
     StandardGlobalPackage package;
@@ -232,13 +243,13 @@ static ExitCode parseArgs(int argc, char** argv)
     int ai = 1;
     bool ranOtherScript = false;
     for (ai = 1; ai < argc; ++ai) {
-        const char* a = argv[ai];
-        if (strcmp(a, "-v" ) == 0 || strcmp(a, "-version") == 0 ||
-            strcmp(a, "--version") == 0) {
-             printf("KDE: %s\n", KJS_VERSION_STRING);
-             return ErrorNone;
-        } else if (strcmp(a, "-h" ) == 0 || strcmp(a, "-help") == 0 ||
-            strcmp(a, "--help") == 0) {
+        const char *a = argv[ai];
+        if (strcmp(a, "-v") == 0 || strcmp(a, "-version") == 0 ||
+                strcmp(a, "--version") == 0) {
+            printf("KDE: %s\n", KJS_VERSION_STRING);
+            return ErrorNone;
+        } else if (strcmp(a, "-h") == 0 || strcmp(a, "-help") == 0 ||
+                   strcmp(a, "--help") == 0) {
             printUsage(argv[0]);
             return ErrorNone;
         } else if (strcmp(a, "-e") == 0) {
@@ -257,8 +268,9 @@ static ExitCode parseArgs(int argc, char** argv)
                 return ErrorMissingArg;
             }
             ExitCode result = evaluateFile(interp.get(), argv[ai]);
-            if (result != ErrorNone)
+            if (result != ErrorNone) {
                 return result;
+            }
             ranOtherScript = true;
         } else if (a[0] == '-') {
             fprintf(stderr, "Unknown switch %s.\n", a);
@@ -271,8 +283,9 @@ static ExitCode parseArgs(int argc, char** argv)
     }
 
     // ###
-    if (argc > ai)
+    if (argc > ai) {
         fprintf(stderr, "Warning: ignoring extra arguments\n");
+    }
 
     if (script) {
         return evaluateFile(interp.get(), script);
@@ -284,7 +297,7 @@ static ExitCode parseArgs(int argc, char** argv)
     return ErrorNone;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     return int(parseArgs(argc, argv));
 }

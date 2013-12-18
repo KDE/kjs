@@ -20,7 +20,6 @@
 
 #include <wtf/Platform.h>
 
-
 #ifndef ALWAYS_INLINE
 #if COMPILER(GCC) && defined(NDEBUG) &&  __GNUC__ > 3
 #define ALWAYS_INLINE inline __attribute__ ((__always_inline__))
@@ -38,7 +37,6 @@
 #define ALWAYS_INLINE_INTO
 #endif
 #endif
-
 
 #ifndef NEVER_INLINE
 #if COMPILER(GCC) &&  __GNUC__ > 3

@@ -30,7 +30,8 @@
 
 #include <vector>
 
-namespace KJS {
+namespace KJS
+{
 
 class JSValue;
 class ExecState;
@@ -46,9 +47,9 @@ public:
         FailedStackLimitExceeded
     };
 
-    JSONStringify(ExecState* exec, JSValue* replacer, JSValue* spacer);
+    JSONStringify(ExecState *exec, JSValue *replacer, JSValue *spacer);
 
-    JSValue* stringify(ExecState* exec, JSValue* object, StringifyState& state);
+    JSValue *stringify(ExecState *exec, JSValue *object, StringifyState &state);
 
 private:
     enum ReplacerType {
@@ -57,20 +58,20 @@ private:
         Array
     };
 
-    UString stringifyObject(KJS::ExecState* exec, KJS::JSValue* object, KJS::JSValue* propertyName, KJS::JSObject* holder);
-    UString quotedString(ExecState* exec, const UString& string);
-    UString stringifyValue(ExecState* exec, JSValue* object, JSValue* propertyName, JSObject* holder);
+    UString stringifyObject(KJS::ExecState *exec, KJS::JSValue *object, KJS::JSValue *propertyName, KJS::JSObject *holder);
+    UString quotedString(ExecState *exec, const UString &string);
+    UString stringifyValue(ExecState *exec, JSValue *object, JSValue *propertyName, JSObject *holder);
 
-    bool isWhiteListed(const Identifier& propertyName);
+    bool isWhiteListed(const Identifier &propertyName);
 
     StringifyState m_state;
     ReplacerType m_replacerType;
-    JSObject* m_replacerObject;
+    JSObject *m_replacerObject;
     WTF::HashSet<Identifier> m_whitelistNames;
     UString m_spacer;
 
     //Object Stack for cyclic detection
-    std::vector<JSValue*> m_objectStack;
+    std::vector<JSValue *> m_objectStack;
 
     bool m_rootIsUndefined;
     bool m_emtpySpacer;

@@ -24,25 +24,31 @@
 
 #include "function_object.h"
 
-namespace KJS {
+namespace KJS
+{
 
-class JSONObjectImp : public JSObject {
+class JSONObjectImp : public JSObject
+{
 public:
     JSONObjectImp(ExecState *exec,
                   ObjectPrototype *objProto);
 
     using KJS::JSObject::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
     enum { Parse, Stringify };
 };
 
-class JSONFuncImp : public InternalFunctionImp {
+class JSONFuncImp : public InternalFunctionImp
+{
 public:
-    JSONFuncImp(ExecState *exec, int i, int l, const Identifier&);
-    virtual JSValue *callAsFunction(ExecState*, JSObject*, const List&);
+    JSONFuncImp(ExecState *exec, int i, int l, const Identifier &);
+    virtual JSValue *callAsFunction(ExecState *, JSObject *, const List &);
 private:
     int id;
 };

@@ -48,11 +48,11 @@ public:
      */
     KJSObject at(int idx) const;
 private:
-    KJSArguments(const KJSArguments&); // undefined
-    KJSArguments& operator=(const KJSArguments&); // undefined
+    KJSArguments(const KJSArguments &); // undefined
+    KJSArguments &operator=(const KJSArguments &); // undefined
 
-    KJSArguments(const KJSArgumentsHandle* h) : hnd(h) { }
-    const KJSArgumentsHandle* hnd;
+    KJSArguments(const KJSArgumentsHandle *h) : hnd(h) { }
+    const KJSArgumentsHandle *hnd;
 };
 
 #endif

@@ -73,13 +73,14 @@ public:
 
         Token() : type(Error), value("Uninitialized token") {}
         Token(TokenType t): type(t) {}
-        Token(TokenType t, const string& v, int line = -1): type(t), value(v), lineNum(line) {}
+        Token(TokenType t, const string &v, int line = -1): type(t), value(v), lineNum(line) {}
 
-        bool isKeyword() const {
+        bool isKeyword() const
+        {
             return type > EndOfFile;
         }
 
-        string toString(Lexer* lex)
+        string toString(Lexer *lex)
         {
             switch (type) {
             case LBrace:
@@ -116,24 +117,28 @@ public:
             case Number:
                 return value;
             default: {
-                    // keywords
-                    for (map<string, TokenType>::iterator it = lex->keywords.begin();
-                         it != lex->keywords.end(); ++it) {
+                // keywords
+                for (map<string, TokenType>::iterator it = lex->keywords.begin();
+                        it != lex->keywords.end(); ++it) {
 
-                         if (it->second == type)
-                            return it->first;
+                    if (it->second == type) {
+                        return it->first;
                     }
-                    return "???";
-                } // default :
+                }
+                return "???";
+            } // default :
             } // switch(type)
         }
     };
 
-    Lexer(istream* _stream);
+    Lexer(istream *_stream);
 
     Token nextToken();
 
-    int lineNumber() const { return lineNum; }
+    int lineNumber() const
+    {
+        return lineNum;
+    }
 private:
     friend struct Token;
     Token lexComment();
@@ -141,7 +146,7 @@ private:
     char peekNext();
     char getNext();
 
-    istream* stream;
+    istream *stream;
 
     bool  charLoaded;
     char  nextChar;
@@ -151,4 +156,3 @@ private:
 };
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

@@ -27,105 +27,147 @@
 #include <wtf/HashFunctions.h>
 #include <wtf/HashTraits.h>
 
-namespace KJS {
+namespace KJS
+{
 
-  /**
-   * Represents an Identifier for a Javascript object.
-   */
-    class KJS_EXPORT Identifier {
-        friend class PropertyMap;
-    public:
-	/**
-	* Creates an empty identifier
-	*/
-        Identifier() { }
-	/**
-	* Creates an identifier with the name of the string
-	* @code
-	* KJS::Identifier method("someJSMethod");
-	* @endcode
-	*/
-        Identifier(const char* s) : _ustring(add(s)) { }
-        Identifier(const UChar* s, int length) : _ustring(add(s, length)) { }
-        explicit Identifier(UString::Rep* rep) : _ustring(add(rep)) { }
-        explicit Identifier(const UString& s) : _ustring(add(s.rep())) { }
+/**
+ * Represents an Identifier for a Javascript object.
+ */
+class KJS_EXPORT Identifier
+{
+    friend class PropertyMap;
+public:
+    /**
+    * Creates an empty identifier
+    */
+    Identifier() { }
+    /**
+    * Creates an identifier with the name of the string
+    * @code
+    * KJS::Identifier method("someJSMethod");
+    * @endcode
+    */
+    Identifier(const char *s) : _ustring(add(s)) { }
+    Identifier(const UChar *s, int length) : _ustring(add(s, length)) { }
+    explicit Identifier(UString::Rep *rep) : _ustring(add(rep)) { }
+    explicit Identifier(const UString &s) : _ustring(add(s.rep())) { }
 
+    /**
+    * returns a UString of the identifier
+    */
+    const UString &ustring() const
+    {
+        return _ustring;
+    }
+    KJS_EXTERNAL_EXPORT DOM::DOMString domString() const;
+    /**
+    * returns a QString of the identifier
+    */
+    KJS_EXTERNAL_EXPORT QString qstring() const;
 
-	/**
-	* returns a UString of the identifier
-	*/
-        const UString& ustring() const { return _ustring; }
-        KJS_EXTERNAL_EXPORT DOM::DOMString domString() const;
-        /**
-	* returns a QString of the identifier
-	*/
-        KJS_EXTERNAL_EXPORT QString qstring() const;
+    /**
+    * returns a UChar pointer to the string of the identifier with a size defined by size().
+    */
+    const UChar *data() const
+    {
+        return _ustring.data();
+    }
+    /**
+    * The size of the UChar string returned.
+    */
+    int size() const
+    {
+        return _ustring.size();
+    }
 
-	/**
-	* returns a UChar pointer to the string of the identifier with a size defined by size().
-	*/
-        const UChar* data() const { return _ustring.data(); }
-	/**
-	* The size of the UChar string returned.
-	*/
-        int size() const { return _ustring.size(); }
+    /**
+    * Char * of the identifier's string.
+    */
+    const char *ascii() const
+    {
+        return _ustring.ascii();
+    }
 
-	/**
-	* Char * of the identifier's string.
-	*/
-        const char* ascii() const { return _ustring.ascii(); }
+    static Identifier from(unsigned y)
+    {
+        return Identifier(UString::from(y));
+    }
 
-        static Identifier from(unsigned y) { return Identifier(UString::from(y)); }
+    /**
+    * Returns the identfiers state of being unset.
+    */
+    bool isNull() const
+    {
+        return _ustring.isNull();
+    }
+    /**
+    * Returns that the identifiers string is set, but is empty.
+    */
+    bool isEmpty() const
+    {
+        return _ustring.isEmpty();
+    }
 
-	/**
-	* Returns the identfiers state of being unset.
-	*/
-        bool isNull() const { return _ustring.isNull(); }
-	/**
-	* Returns that the identifiers string is set, but is empty.
-	*/
-        bool isEmpty() const { return _ustring.isEmpty(); }
+    uint32_t toStrictUInt32(bool *ok) const
+    {
+        return _ustring.toStrictUInt32(ok);
+    }
+    unsigned toArrayIndex(bool *ok) const
+    {
+        return _ustring.toArrayIndex(ok);
+    }
+    double toDouble() const
+    {
+        return _ustring.toDouble();
+    }
 
-        uint32_t toStrictUInt32(bool* ok) const { return _ustring.toStrictUInt32(ok); }
-        unsigned toArrayIndex(bool* ok) const { return _ustring.toArrayIndex(ok); }
-        double toDouble() const { return _ustring.toDouble(); }
+    friend bool operator==(const Identifier &, const Identifier &);
+    friend bool operator!=(const Identifier &, const Identifier &);
 
-        friend bool operator==(const Identifier&, const Identifier&);
-        friend bool operator!=(const Identifier&, const Identifier&);
+    friend bool operator==(const Identifier &, const char *);
 
-        friend bool operator==(const Identifier&, const char*);
+    static void remove(UString::Rep *);
+    static bool equal(const UString::Rep *, const char *);
+    static bool equal(const UString::Rep *, const UChar *, int length);
 
-        static void remove(UString::Rep*);
-        static bool equal(const UString::Rep*, const char*);
-        static bool equal(const UString::Rep*, const UChar*, int length);
+private:
+    UString _ustring;
 
-    private:
-        UString _ustring;
+    static bool equal(const Identifier &a, const Identifier &b)
+    {
+        return a._ustring.rep() == b._ustring.rep();
+    }
+    static bool equal(const Identifier &a, const char *b)
+    {
+        return equal(a._ustring.rep(), b);
+    }
 
-        static bool equal(const Identifier& a, const Identifier& b)
-            { return a._ustring.rep() == b._ustring.rep(); }
-        static bool equal(const Identifier& a, const char* b)
-            { return equal(a._ustring.rep(), b); }
-
-        static PassRefPtr<UString::Rep> add(const char*);
-        static PassRefPtr<UString::Rep> add(const UChar*, int length);
-        static PassRefPtr<UString::Rep> add(UString::Rep* r)
-        {
-            if (r->isIdentifier)
-                return r;
-            return addSlowCase(r);
+    static PassRefPtr<UString::Rep> add(const char *);
+    static PassRefPtr<UString::Rep> add(const UChar *, int length);
+    static PassRefPtr<UString::Rep> add(UString::Rep *r)
+    {
+        if (r->isIdentifier) {
+            return r;
         }
-        static PassRefPtr<UString::Rep> addSlowCase(UString::Rep *r);
-    };
+        return addSlowCase(r);
+    }
+    static PassRefPtr<UString::Rep> addSlowCase(UString::Rep *r);
+};
 
-    inline bool operator==(const Identifier& a, const Identifier& b)
-        { return Identifier::equal(a, b); }
+inline bool operator==(const Identifier &a, const Identifier &b)
+{
+    return Identifier::equal(a, b);
+}
 
-    inline bool operator!=(const Identifier& a, const Identifier& b)
-        { return !Identifier::equal(a, b); }
+inline bool operator!=(const Identifier &a, const Identifier &b)
+{
+    return !Identifier::equal(a, b);
+}
 
-    inline bool operator==(const Identifier& a, const char* b)
-        { return Identifier::equal(a, b); }
+inline bool operator==(const Identifier &a, const char *b)
+{
+    return Identifier::equal(a, b);
+}
 
 } // namespace KJS
 

@@ -69,11 +69,11 @@ public:
     /**
      * Constructs on object from another one
      */
-    KJSObject(const KJSObject& o);
+    KJSObject(const KJSObject &o);
     /**
      * Assigns another JS object references to this one.
      */
-    KJSObject& operator=(const KJSObject& o);
+    KJSObject &operator=(const KJSObject &o);
     /**
      * Destructs this object freeing any references it might have held.
      */
@@ -107,63 +107,62 @@ public:
      * Returns this value converted to a boolean. If the conversion
      * fails the context will have an exception set.
      */
-    bool toBoolean(KJSContext* ctx);
+    bool toBoolean(KJSContext *ctx);
     /**
      * Returns this value converted to a number. If the conversion
      * fails the context will have an exception set.
      */
-    double toNumber(KJSContext* ctx);
+    double toNumber(KJSContext *ctx);
     /**
      * Returns this value converted to a 32-bit integer number. NaN,
      * positive and negative Infinity will be converted to 0. If the
      * conversion fails the context will have an exception set.
      */
-    int toInt32(KJSContext* ctx);
+    int toInt32(KJSContext *ctx);
     /**
      * Returns this value converted to a string. If the conversion
      * fails the context will have an exception set.
      */
-    QString toString(KJSContext* ctx);
+    QString toString(KJSContext *ctx);
     /**
      * Reads the specified property from this object. This operation
      * might throw an exception.
      */
-    KJSObject property(KJSContext* ctx, const QString& name);
+    KJSObject property(KJSContext *ctx, const QString &name);
     /**
      * Sets the specified property on this object. This operation
      * might throw an exception.
      */
-    void setProperty(KJSContext* ctx, const QString& name,
-                     const KJSObject& value);
+    void setProperty(KJSContext *ctx, const QString &name,
+                     const KJSObject &value);
     /**
      * @overload
      */
-    void setProperty(KJSContext* ctx, const QString& name, bool value);
+    void setProperty(KJSContext *ctx, const QString &name, bool value);
     /**
      * @overload
      */
-    void setProperty(KJSContext* ctx, const QString& name, double value);
+    void setProperty(KJSContext *ctx, const QString &name, double value);
     /**
      * @overload
      */
-    void setProperty(KJSContext* ctx, const QString& name, int value);
+    void setProperty(KJSContext *ctx, const QString &name, int value);
     /**
      * @overload
      */
-    void setProperty(KJSContext* ctx, const QString& name,
+    void setProperty(KJSContext *ctx, const QString &name,
                      const QString &value);
     /**
      * @overload
      *
      * Accepts a Latin1 encoded, null-terminated string.
      */
-    void setProperty(KJSContext* ctx, const QString& name,
-                     const char* value);
-
+    void setProperty(KJSContext *ctx, const QString &name,
+                     const char *value);
 
 private:
-    KJSObject(KJSObjectHandle* h) : hnd(h) { }
-    KJSObjectHandle* hnd;
+    KJSObject(KJSObjectHandle *h) : hnd(h) { }
+    KJSObjectHandle *hnd;
 };
 
 /**
@@ -233,7 +232,7 @@ public:
     /**
      * Constructs a string object.
      */
-    KJSString(const QString& s);
+    KJSString(const QString &s);
     /**
      * Constructs a string object from an Latin1 encoded,
      * null-terminated string. Note the limited input character range
@@ -241,7 +240,7 @@ public:
      *
      * @overload
      */
-    KJSString(const char* s);
+    KJSString(const char *s);
 };
 
 /**
@@ -255,7 +254,7 @@ public:
     /**
      * Constructs an array object with the specified length.
      */
-    KJSArray(KJSContext* ctx, int len = 0);
+    KJSArray(KJSContext *ctx, int len = 0);
 };
 
 /**
@@ -269,7 +268,7 @@ public:
     /**
      * Constructs a date object from the specified date and time.
      */
-    KJSDate(KJSContext* ctx, const QDateTime& dt);
+    KJSDate(KJSContext *ctx, const QDateTime &dt);
 };
 
 /**
@@ -288,7 +287,7 @@ public:
     KJSGlobalObject();
 
 private:
-    KJSGlobalObject(KJSObjectHandle* h) : KJSObject(h) { }
+    KJSGlobalObject(KJSObjectHandle *h) : KJSObject(h) { }
 };
 
 #endif

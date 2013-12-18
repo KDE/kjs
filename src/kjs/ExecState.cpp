@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -30,17 +29,19 @@
 #include "nodes.h"
 #include "debugger.h"
 
-namespace KJS {
-
-Interpreter* ExecState::lexicalInterpreter() const
+namespace KJS
 {
-    JSObject* outerScope = scopeChain().bottom();
+
+Interpreter *ExecState::lexicalInterpreter() const
+{
+    JSObject *outerScope = scopeChain().bottom();
     assert(outerScope->isGlobalObject());
 
-    Interpreter* result = static_cast<JSGlobalObject*>(outerScope)->interpreter();
+    Interpreter *result = static_cast<JSGlobalObject *>(outerScope)->interpreter();
 
-    if (!result)
+    if (!result) {
         return dynamicInterpreter();
+    }
 
     return result;
 }
@@ -55,24 +56,27 @@ void ExecState::markSelf()
         // we may create function object in declaration elaboration stage, before
         // compilation and set up of this
         size_t size                = m_localStoreSize;
-        LocalStorageEntry* entries = m_localStore;
+        LocalStorageEntry *entries = m_localStore;
 
         for (size_t i = 0; i < size; ++i) {
-            JSValue* value = entries[i].val.valueVal;
-            if (!(entries[i].attributes & DontMark) && !value->marked())
+            JSValue *value = entries[i].val.valueVal;
+            if (!(entries[i].attributes & DontMark) && !value->marked()) {
                 value->mark();
+            }
         }
     }
 
     for (size_t i = 0; i < m_deferredCompletions.size(); ++i) {
-        JSValue* e = m_deferredCompletions[i].value();
-        if (e && !e->marked())
+        JSValue *e = m_deferredCompletions[i].value();
+        if (e && !e->marked()) {
             e->mark();
+        }
     }
 
-    JSValue* e = m_completion.value();
-    if (e && !e->marked())
+    JSValue *e = m_completion.value();
+    if (e && !e->marked()) {
         e->mark();
+    }
 
     scope.mark();
 
@@ -85,21 +89,22 @@ void ExecState::markSelf()
 
 void ExecState::mark()
 {
-    for (ExecState* exec = this; exec; exec = exec->m_callingExec)
+    for (ExecState *exec = this; exec; exec = exec->m_callingExec) {
         exec->markSelf();
+    }
 }
 
-ExecState::ExecState(Interpreter* intp, ExecState* save) :
-  m_interpreter(intp),
-  m_propertyNames(CommonIdentifiers::shared()),
-  m_callingExec(0),
-  m_savedExec(save),
-  m_currentBody(0),
-  m_function(0),
-  m_localStore(0),
-  m_pcBase(0),
-  m_pc(0),
-  m_machineLocalStore(0)
+ExecState::ExecState(Interpreter *intp, ExecState *save) :
+    m_interpreter(intp),
+    m_propertyNames(CommonIdentifiers::shared()),
+    m_callingExec(0),
+    m_savedExec(save),
+    m_currentBody(0),
+    m_function(0),
+    m_localStore(0),
+    m_pcBase(0),
+    m_pc(0),
+    m_machineLocalStore(0)
 {
     /**
      The reason we need m_savedExec and can't just be content with m_callingExec is two-fold.
@@ -107,10 +112,11 @@ ExecState::ExecState(Interpreter* intp, ExecState* save) :
      on globalExec. When that happens, we still need to be able to mark the previous call-chain.
      Also, it is possible for the client to call Interpreter::evaluate again; and we still
      need to mark things from the outside when that happens
-   */
+    */
 
-    if (m_callingExec && m_savedExec && m_callingExec != m_savedExec)
+    if (m_callingExec && m_savedExec && m_callingExec != m_savedExec) {
         assert(m_callingExec == intp->globalExec());
+    }
     m_interpreter->setExecState(this);
 }
 
@@ -129,8 +135,7 @@ void ExecState::popExceptionHandler()
     m_exceptionHandlers.removeLast();
 }
 
-
-JSValue* ExecState::reactivateCompletion(bool insideTryFinally)
+JSValue *ExecState::reactivateCompletion(bool insideTryFinally)
 {
     // First, unwind and get the old completion..
     ASSERT(m_exceptionHandlers.last().type == RemoveDeferred);
@@ -161,14 +166,14 @@ JSValue* ExecState::reactivateCompletion(bool insideTryFinally)
     return 0;
 }
 
-void ExecState::setException(JSValue* e)
+void ExecState::setException(JSValue *e)
 {
-    if (e)
+    if (e) {
         setAbruptCompletion(Completion(Throw, e));
-    else
+    } else {
         clearException();
+    }
 }
-
 
 void ExecState::setAbruptCompletion(Completion comp)
 {
@@ -186,9 +191,10 @@ void ExecState::setAbruptCompletion(Completion comp)
     }
 
     // Trace to debugger if needed.
-    Debugger* dbg = dynamicInterpreter()->debugger();
-    if (dbg && comp.complType() == Throw)
+    Debugger *dbg = dynamicInterpreter()->debugger();
+    if (dbg && comp.complType() == Throw) {
         dbg->reportException(this, comp.value());
+    }
 
     m_completion = comp;
 
@@ -236,7 +242,7 @@ void ExecState::quietUnwind(int depth)
     }
 }
 
-GlobalExecState::GlobalExecState(Interpreter* intp, JSGlobalObject* glob): ExecState(intp, 0 /* nothing else constructed yet*/)
+GlobalExecState::GlobalExecState(Interpreter *intp, JSGlobalObject *glob): ExecState(intp, 0 /* nothing else constructed yet*/)
 {
     scope.push(glob);
     m_codeType  = GlobalCode;
@@ -244,9 +250,9 @@ GlobalExecState::GlobalExecState(Interpreter* intp, JSGlobalObject* glob): ExecS
     m_thisVal  = glob;
 }
 
-InterpreterExecState::InterpreterExecState(Interpreter* intp, JSGlobalObject* glob,
-                                           JSObject* thisObject, ProgramNode* body):
-  ExecState(intp, intp->execState())
+InterpreterExecState::InterpreterExecState(Interpreter *intp, JSGlobalObject *glob,
+        JSObject *thisObject, ProgramNode *body):
+    ExecState(intp, intp->execState())
 {
     m_currentBody = body;
     scope.push(glob);
@@ -257,9 +263,9 @@ InterpreterExecState::InterpreterExecState(Interpreter* intp, JSGlobalObject* gl
     m_thisVal  = thisObject;
 }
 
-EvalExecState::EvalExecState(Interpreter* intp, JSGlobalObject* glob,
-                             ProgramNode* body, ExecState* callingExecState):
-  ExecState(intp, intp->execState())
+EvalExecState::EvalExecState(Interpreter *intp, JSGlobalObject *glob,
+                             ProgramNode *body, ExecState *callingExecState):
+    ExecState(intp, intp->execState())
 {
     m_currentBody = body;
     m_codeType    = EvalCode;
@@ -280,9 +286,9 @@ EvalExecState::EvalExecState(Interpreter* intp, JSGlobalObject* glob,
     scope.push(glob);
 }
 
-FunctionExecState::FunctionExecState(Interpreter* intp, JSObject* thisObject,
-                                     FunctionBodyNode* body, ExecState* callingExecState,
-                                     FunctionImp* function): ExecState(intp, intp->execState())
+FunctionExecState::FunctionExecState(Interpreter *intp, JSObject *thisObject,
+                                     FunctionBodyNode *body, ExecState *callingExecState,
+                                     FunctionImp *function): ExecState(intp, intp->execState())
 {
     m_function    = function;
     m_currentBody = body;
@@ -291,11 +297,11 @@ FunctionExecState::FunctionExecState(Interpreter* intp, JSObject* thisObject,
     m_callingExec = callingExecState;
     scope = function->scope(); // Activation will push itself when setting up
     m_variable = m_interpreter->getRecycledActivation();// TODO: DontDelete ? (ECMA 10.2.3)
-    if (!m_variable)
+    if (!m_variable) {
         m_variable = new ActivationImp();
+    }
     m_thisVal  = thisObject;
 }
 
 } // namespace KJS
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

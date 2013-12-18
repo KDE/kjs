@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 4 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -30,77 +29,84 @@
 #include <wtf/RefPtr.h>
 #include <wtf/Vector.h>
 
-namespace KJS {
+namespace KJS
+{
 
-    class Node;
-    class FunctionBodyNode;
-    class ProgramNode;
-    class UString;
+class Node;
+class FunctionBodyNode;
+class ProgramNode;
+class UString;
 
-    struct UChar;
+struct UChar;
 
-    /**
-     * @internal
-     *
-     * Parses ECMAScript source code and converts into ProgramNode objects, which
-     * represent the root of a parse tree. The tree is then semantically
-     * checked with a semantic analyzer. This class provides a convenient
-     * workaround for the problem of the bison parser working in a static context.
-     */
-    class Parser : Noncopyable {
-    public:
-        PassRefPtr<ProgramNode> parseProgram(const UString& sourceURL, int startingLineNumber,
-            const UChar* code, unsigned length,
-            int* sourceId = 0, int* errLine = 0, UString* errMsg = 0);
+/**
+ * @internal
+ *
+ * Parses ECMAScript source code and converts into ProgramNode objects, which
+ * represent the root of a parse tree. The tree is then semantically
+ * checked with a semantic analyzer. This class provides a convenient
+ * workaround for the problem of the bison parser working in a static context.
+ */
+class Parser : Noncopyable
+{
+public:
+    PassRefPtr<ProgramNode> parseProgram(const UString &sourceURL, int startingLineNumber,
+                                         const UChar *code, unsigned length,
+                                         int *sourceId = 0, int *errLine = 0, UString *errMsg = 0);
 
-        PassRefPtr<FunctionBodyNode> parseFunctionBody(const UString& sourceURL, int startingLineNumber,
-            const UChar* code, unsigned length,
-            int* sourceId = 0, int* errLine = 0, UString* errMsg = 0);
+    PassRefPtr<FunctionBodyNode> parseFunctionBody(const UString &sourceURL, int startingLineNumber,
+            const UChar *code, unsigned length,
+            int *sourceId = 0, int *errLine = 0, UString *errMsg = 0);
 
-        int sourceId() { return m_sourceId; }
-
-        void didFinishParsing(PassRefPtr<ProgramNode>);
-
-        static void noteNodeCycle(Node*);
-        static void removeNodeCycle(Node*);
-
-        // We keep track of various flags about the function body we're
-        // tracking on a stack; the FunctionBody ctor pops them off
-        // when we're done parsing and are making the body node.
-        void pushFunctionContext(unsigned initialFlags);
-        void setFunctionFlags(unsigned newFlags);
-        unsigned popFunctionContext();
-
-    private:
-        friend Parser& parser();
-
-        Parser(); // Use parser() instead.
-        void parse(const UString& sourceURL, int startingLineNumber,
-            const UChar* code, unsigned length,
-            int* sourceId = 0, int* errLine = 0, UString* errMsg = 0);
-
-        int m_sourceId;
-        RefPtr<ProgramNode> m_progNode;
-        WTF::Vector<unsigned, 8> m_functionFlags;
-    };
-
-    Parser& parser(); // Returns the singleton JavaScript parser.
-
-    inline void Parser::pushFunctionContext(unsigned initialFlags) {
-        m_functionFlags.append(initialFlags);
+    int sourceId()
+    {
+        return m_sourceId;
     }
 
-    inline void Parser::setFunctionFlags(unsigned newFlags) {
-        m_functionFlags.last() |= newFlags;
-    }
+    void didFinishParsing(PassRefPtr<ProgramNode>);
 
-    inline unsigned Parser::popFunctionContext() {
-        unsigned flags = m_functionFlags.last();
-        m_functionFlags.removeLast();
-        return flags;
-    }
+    static void noteNodeCycle(Node *);
+    static void removeNodeCycle(Node *);
+
+    // We keep track of various flags about the function body we're
+    // tracking on a stack; the FunctionBody ctor pops them off
+    // when we're done parsing and are making the body node.
+    void pushFunctionContext(unsigned initialFlags);
+    void setFunctionFlags(unsigned newFlags);
+    unsigned popFunctionContext();
+
+private:
+    friend Parser &parser();
+
+    Parser(); // Use parser() instead.
+    void parse(const UString &sourceURL, int startingLineNumber,
+               const UChar *code, unsigned length,
+               int *sourceId = 0, int *errLine = 0, UString *errMsg = 0);
+
+    int m_sourceId;
+    RefPtr<ProgramNode> m_progNode;
+    WTF::Vector<unsigned, 8> m_functionFlags;
+};
+
+Parser &parser(); // Returns the singleton JavaScript parser.
+
+inline void Parser::pushFunctionContext(unsigned initialFlags)
+{
+    m_functionFlags.append(initialFlags);
+}
+
+inline void Parser::setFunctionFlags(unsigned newFlags)
+{
+    m_functionFlags.last() |= newFlags;
+}
+
+inline unsigned Parser::popFunctionContext()
+{
+    unsigned flags = m_functionFlags.last();
+    m_functionFlags.removeLast();
+    return flags;
+}
 
 } // namespace KJS
 
 #endif // Parser_h
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

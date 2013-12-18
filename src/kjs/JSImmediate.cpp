@@ -22,16 +22,17 @@
 #include "JSImmediate.h"
 #include "object.h"
 
-namespace KJS {
+namespace KJS
+{
 
 JSObject *JSImmediate::toObject(const JSValue *v, ExecState *exec)
 {
     assert(isImmediate(v));
-    if (v == jsNull())
+    if (v == jsNull()) {
         return throwError(exec, TypeError, "Null value");
-    else if (v == jsUndefined())
+    } else if (v == jsUndefined()) {
         return throwError(exec, TypeError, "Undefined value");
-    else if (isBoolean(v)) {
+    } else if (isBoolean(v)) {
         List args;
         args.append(const_cast<JSValue *>(v));
         return exec->lexicalInterpreter()->builtinBoolean()->construct(exec, args);
@@ -46,20 +47,21 @@ JSObject *JSImmediate::toObject(const JSValue *v, ExecState *exec)
 UString JSImmediate::toString(const JSValue *v)
 {
     ASSERT(isImmediate(v));
-    
-    if (v == jsNull())
+
+    if (v == jsNull()) {
         return "null";
-    else if (v == jsUndefined())
+    } else if (v == jsUndefined()) {
         return "undefined";
-    else if (v == jsBoolean(true))
+    } else if (v == jsBoolean(true)) {
         return "true";
-    else if (v == jsBoolean(false))
+    } else if (v == jsBoolean(false)) {
         return "false";
-    else {
+    } else {
         assert(isNumber(v));
         double d = toDouble(v);
-        if (d == 0.0) // +0.0 or -0.0
+        if (d == 0.0) { // +0.0 or -0.0
             return "0";
+        }
         return UString::from(d);
     }
 }
@@ -67,10 +69,11 @@ UString JSImmediate::toString(const JSValue *v)
 JSType JSImmediate::type(const JSValue *v)
 {
     ASSERT(isImmediate(v));
-    
+
     uintptr_t tag = getTag(v);
-    if (tag == UndefinedType)
+    if (tag == UndefinedType) {
         return v == jsUndefined() ? UndefinedType : NullType;
+    }
     return static_cast<JSType>(tag);
 }
 

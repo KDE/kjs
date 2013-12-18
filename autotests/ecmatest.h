@@ -14,17 +14,18 @@
 
 #include <QtCore/QObject>
 
-class ECMAscriptTest : public QObject {
-  Q_OBJECT
+class ECMAscriptTest : public QObject
+{
+    Q_OBJECT
 private Q_SLOTS:
-  void initTestCase();
-  void runAllTests();
-  void runAllTests_data();
-  void cleanup();
-  void cleanupTestCase();
+    void initTestCase();
+    void runAllTests();
+    void runAllTests_data();
+    void cleanup();
+    void cleanupTestCase();
 private:
-  unsigned int m_passed;
-  unsigned int m_failed;
+    unsigned int m_passed;
+    unsigned int m_failed;
 };
 
 #endif /* ECMATEST_H */

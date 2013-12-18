@@ -38,12 +38,13 @@ using namespace std;
 static unsigned neededBits(unsigned vals)
 {
     unsigned bits = 1;
-    while ((1U << bits) < vals)
+    while ((1U << bits) < vals) {
         ++bits;
+    }
     return bits;
 }
 
-TypeTable::TypeTable(TableBuilder* instrBuilder, CodePrinter& out):
+TypeTable::TypeTable(TableBuilder *instrBuilder, CodePrinter &out):
     instrBuilder(instrBuilder), out(out)
 {
     // Builtin stuff...
@@ -60,20 +61,20 @@ void TypeTable::generateCode()
     // Types... First we just want to list them
     Enum typesEnum("OpType", "OpType_", typeNames);
     typesEnum.printDeclaration(out(OpH));
-    typesEnum.printDefinition (out(OpCpp));
+    typesEnum.printDefinition(out(OpCpp));
 
     // Also, print out the width array...
     Array widths(out(OpCpp), "const bool", "opTypeIsAlign8");
     for (unsigned t = 0; t < typeNames.size(); ++t) {
-        const Type& type = types[typeNames[t]];
-        widths.item(type.alignTo8() ? "true": "false", type.name);
+        const Type &type = types[typeNames[t]];
+        widths.item(type.alignTo8() ? "true" : "false", type.name);
     }
     widths.endArray();
 
     // Conversion ops. Those go entirely in the .cpp
     Enum convOps("ConvOp", "Conv_", conversionNames);
     convOps.printDeclaration(out(OpH));
-    convOps.printDefinition (out(OpCpp));
+    convOps.printDefinition(out(OpCpp));
 
     out(OpCpp) << "struct ConvInfo {\n";
     out(OpCpp) << "    ConvOp routine;\n";
@@ -95,8 +96,9 @@ void TypeTable::generateCode()
 
     // Emit inline conversion helpers based on the [[ code ]] specified
     // in codes.def
-    for (unsigned c = 0; c < imConversionList.size(); ++c)
+    for (unsigned c = 0; c < imConversionList.size(); ++c) {
         printConversionRoutine(imConversionList[c]);
+    }
 
     // Now we generate a helper that invokes those.
     out(OpCpp) << "static bool emitImmediateConversion(ConvOp convType, OpValue* original, OpValue& out)\n{\n";
@@ -106,7 +108,7 @@ void TypeTable::generateCode()
     out(OpCpp) << "        out = *original;\n";
     out(OpCpp) << "        break;\n";
     for (unsigned c = 0; c < imConversionList.size(); ++c) {
-        const ConversionInfo& inf = imConversionList[c];
+        const ConversionInfo &inf = imConversionList[c];
         out(OpCpp) << "    case Conv_" << inf.name << ":\n";
         out(OpCpp) << "        out.type = OpType_" << inf.to.name << ";\n";
         out(OpCpp) << "        out.value." << inf.to.field() << " = "
@@ -129,7 +131,7 @@ void TypeTable::generateCode()
     out(OpCpp) << "        out = *original;\n";
     out(OpCpp) << "        break;\n";
     for (unsigned c = 0; c < rgConversionList.size(); ++c) {
-        const ConversionInfo& inf = rgConversionList[c];
+        const ConversionInfo &inf = rgConversionList[c];
         out(OpCpp) << "    case Conv_" << inf.name << ":\n";
         out(OpCpp) << "        CodeGen::emitOp(comp, Op_" << inf.name << ", &out, original);\n";
         out(OpCpp) << "        break;\n";
@@ -141,7 +143,7 @@ void TypeTable::generateCode()
     out(OpCpp) << "}\n\n";
 }
 
-void TypeTable::printConversionInfo(Array& outArr, map<string, map<string, ConversionInfo> >& table, bool reg)
+void TypeTable::printConversionInfo(Array &outArr, map<string, map<string, ConversionInfo> > &table, bool reg)
 {
     unsigned numBits = neededBits(types.size());
     unsigned fullRange = 1 << numBits;
@@ -157,21 +159,23 @@ void TypeTable::printConversionInfo(Array& outArr, map<string, map<string, Conve
                 // registers. For immediate, we only require source, since dest will just go
                 // into local value.
                 bool representable;
-                if (reg)
+                if (reg) {
                     representable = types[fromName].hasReg() && types[toName].hasReg();
-                else
+                } else {
                     representable = types[fromName].hasImm();
+                }
 
                 if (from == to) {
                     item = "{Conv_NoOp, 0}";
                 } else if (table[fromName].find(toName) != table[fromName].end() && representable) {
-                    const ConversionInfo& inf = table[fromName][toName];
+                    const ConversionInfo &inf = table[fromName][toName];
 
                     item = "{Conv_" + inf.name + ", ";
-                    if (inf.flags & Conv_Checked)
+                    if (inf.flags & Conv_Checked) {
                         item += "Cost_Checked";
-                    else
+                    } else {
                         item += CodePrinter::stringFromInt(reg ? inf.cost : 0);
+                    }
                     item += "}"; // krazy:exclude=doublequote_chars
                 } else {
                     item = "{Conv_NoConversion, Cost_NoConversion}";
@@ -185,17 +189,17 @@ void TypeTable::printConversionInfo(Array& outArr, map<string, map<string, Conve
     } // for from..
 }
 
-void TypeTable::printConversionRoutine(const ConversionInfo& conversion)
+void TypeTable::printConversionRoutine(const ConversionInfo &conversion)
 {
     out(OpH) << "ALWAYS_INLINE " << conversion.to.nativeName << " convert" << conversion.name
-         << "(ExecState* exec, " << conversion.from.nativeName << " in)\n";
+             << "(ExecState* exec, " << conversion.from.nativeName << " in)\n";
     out(OpH) << "{\n";
     out(OpH) << "    (void)exec;\n";
     out.printCode(out(OpH), 4, conversion.impl, conversion.codeLine);
     out(OpH) << "}\n\n";
 }
 
-void TypeTable::handleType(const string& type, const string& nativeName, unsigned flags)
+void TypeTable::handleType(const string &type, const string &nativeName, unsigned flags)
 {
     typeNames.push_back(type);
     Type t;
@@ -205,13 +209,13 @@ void TypeTable::handleType(const string& type, const string& nativeName, unsigne
     types[type] = t;
 }
 
-static string capitalized(const string& in)
+static string capitalized(const string &in)
 {
     return WTF::toASCIIUpper(in[0]) + in.substr(1);
 }
 
-void TypeTable::handleConversion(const string& code, int codeLine,
-                                 unsigned flags, const string& from, const string& to,
+void TypeTable::handleConversion(const string &code, int codeLine,
+                                 unsigned flags, const string &from, const string &to,
                                  int tileCost, int registerCost)
 {
     // Compute the conversion names. The register one (if any) would also create an operation.
@@ -258,30 +262,31 @@ void TypeTable::handleConversion(const string& code, int codeLine,
     }
 }
 
-Type TypeTable::resolveType(const string& type)
+Type TypeTable::resolveType(const string &type)
 {
-    if (types.find(type) != types.end())
+    if (types.find(type) != types.end()) {
         return types[type];
-    else
+    } else {
         out.issueError("Unknown type:" + type);
+    }
 
     // return something in nonvoid function
     Type t;
     return t;
 }
 
-vector<Type> TypeTable::resolveSignature(const StringList& in)
+vector<Type> TypeTable::resolveSignature(const StringList &in)
 {
     vector<Type> sig;
-    for (unsigned c = 0; c < in.size(); ++c)
+    for (unsigned c = 0; c < in.size(); ++c) {
         sig.push_back(resolveType(in[c]));
+    }
 
     return sig;
 }
 
-ConversionInfo TypeTable::immConv(const Type& from, const Type& to)
+ConversionInfo TypeTable::immConv(const Type &from, const Type &to)
 {
     return imConversions[from.name][to.name];
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

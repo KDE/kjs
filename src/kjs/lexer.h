@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -28,20 +27,31 @@
 #include <wtf/Vector.h>
 #include <wtf/Noncopyable.h>
 
-namespace KJS {
+namespace KJS
+{
 
-  class Identifier;
-  class RegExp;
+class Identifier;
+class RegExp;
 
-  class Lexer : Noncopyable {
-  public:
+class Lexer : Noncopyable
+{
+public:
     void setCode(const UString &sourceURL, int startingLineNumber, const UChar *c, unsigned int len);
     int lex();
 
-    int lineNo() const { return yylineno; }
-    UString sourceURL() const { return m_sourceURL; }
+    int lineNo() const
+    {
+        return yylineno;
+    }
+    UString sourceURL() const
+    {
+        return m_sourceURL;
+    }
 
-    bool prevTerminator() const { return terminator; }
+    bool prevTerminator() const
+    {
+        return terminator;
+    }
 
     enum State { Start,
                  IdentifierOrKeyword,
@@ -71,12 +81,19 @@ namespace KJS {
                  InHexEscape,
                  InUnicodeEscape,
                  Other,
-                 Bad };
+                 Bad
+               };
 
     bool scanRegExp();
-    const UString& pattern() const { return m_pattern; }
-    const UString& flags() const { return m_flags; }
- 
+    const UString &pattern() const
+    {
+        return m_pattern;
+    }
+    const UString &flags() const
+    {
+        return m_flags;
+    }
+
     static unsigned char convertHex(int);
     static unsigned char convertHex(int c1, int c2);
     static UChar convertUnicode(int c1, int c2, int c3, int c4);
@@ -84,15 +101,18 @@ namespace KJS {
     static bool isIdentPart(int);
     static bool isHexDigit(int);
 
-    bool sawError() const { return error; }
+    bool sawError() const
+    {
+        return error;
+    }
 
     void clear();
 
     static void setIdentStartChecker(bool (*f)(int c));
     static void setIdentPartChecker(bool (*f)(int c));
 
-  private:
-    friend Lexer& lexer();
+private:
+    friend Lexer &lexer();
     Lexer();
 
     int yylineno;
@@ -129,8 +149,8 @@ namespace KJS {
     void record16(int c);
     void record16(UChar c);
 
-    KJS::Identifier* makeIdentifier(const Vector<UChar>& buffer);
-    UString* makeUString(const Vector<UChar>& buffer);
+    KJS::Identifier *makeIdentifier(const Vector<UChar> &buffer);
+    UString *makeUString(const Vector<UChar> &buffer);
 
     const UChar *code;
     unsigned int length;
@@ -143,14 +163,14 @@ namespace KJS {
     // current and following unicode characters (int to allow for -1 for end-of-file marker)
     int current, next1, next2, next3;
 
-    Vector<UString*> m_strings;
-    Vector<KJS::Identifier*> m_identifiers;
-    
+    Vector<UString *> m_strings;
+    Vector<KJS::Identifier *> m_identifiers;
+
     UString m_pattern;
     UString m_flags;
-  };
-  
-  Lexer& lexer(); // Returns the singletone JavaScript lexer.
+};
+
+Lexer &lexer(); // Returns the singletone JavaScript lexer.
 
 } // namespace KJS
 

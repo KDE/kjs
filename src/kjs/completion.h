@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -27,58 +26,72 @@
 
 #include "CommonIdentifiers.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  typedef unsigned Addr; // ### should there be some separare types h?
-  
-  class Node;
-  class JSValue;
+typedef unsigned Addr; // ### should there be some separare types h?
 
-  /**
-   * Completion types.
-   */
-  enum ComplType { Normal, Break, Continue, ReturnValue, Throw, Interrupted };
+class Node;
+class JSValue;
 
-  /**
-   * Completion objects are used to convey the return status and value
-   * from functions.
-   *
-   * See FunctionImp::execute()
-   *
-   * @see FunctionImp
-   *
-   * @short Handle for a Completion type.
-   */
-  class KJS_EXPORT Completion {
-  public:
-    explicit Completion(ComplType c = Normal, JSValue *v = NULL, Addr t = 0 )
+/**
+ * Completion types.
+ */
+enum ComplType { Normal, Break, Continue, ReturnValue, Throw, Interrupted };
+
+/**
+ * Completion objects are used to convey the return status and value
+ * from functions.
+ *
+ * See FunctionImp::execute()
+ *
+ * @see FunctionImp
+ *
+ * @short Handle for a Completion type.
+ */
+class KJS_EXPORT Completion
+{
+public:
+    explicit Completion(ComplType c = Normal, JSValue *v = NULL, Addr t = 0)
         : comp(c), val(v), tar(t) { }
 
     /**
      * Returns the type of this completion.
      */
-    ComplType complType() const { return comp; }
+    ComplType complType() const
+    {
+        return comp;
+    }
 
     /**
      * Returns the value of this completion if it is of type
      * value-completion, 0 otherwise.
      */
-    JSValue *value() const { return val; }
+    JSValue *value() const
+    {
+        return val;
+    }
 
-     /**
-     * Returns the address a break or a continue statement targets
-     */
-    Addr target() const { return tar; }
+    /**
+    * Returns the address a break or a continue statement targets
+    */
+    Addr target() const
+    {
+        return tar;
+    }
 
     /**
      * Returns true if this is a value completion, false otherwise.
      */
-    bool isValueCompletion() const { return !!val; }
-  private:
+    bool isValueCompletion() const
+    {
+        return !!val;
+    }
+private:
     ComplType comp;
     JSValue *val;
     Addr tar;
-  };
+};
 
 }
 

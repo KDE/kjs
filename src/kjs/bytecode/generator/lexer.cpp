@@ -33,7 +33,7 @@ using namespace WTF;
 
 const char EndOfFileChar = 0;
 
-Lexer::Lexer(istream* _stream): stream(_stream), charLoaded(false), lineNum(0)
+Lexer::Lexer(istream *_stream): stream(_stream), charLoaded(false), lineNum(0)
 {
     keywords["type"]        = Type;
     keywords["conversion" ] = Conversion;
@@ -59,10 +59,10 @@ Lexer::Token Lexer::lexComment()
         // Multi-line comment --- scan until  */
         do {
             in = getNext();
-            if (in == EndOfFileChar)
+            if (in == EndOfFileChar) {
                 return Token(Error, "Unterminated multiline comment");
-        }
-        while (!(in == '*' && peekNext() == '/'));
+            }
+        } while (!(in == '*' && peekNext() == '/'));
         getNext(); // Eat the /
     } else {
         return Token(Error, string("/ can only start comments, but is followed by: ") + in);
@@ -79,72 +79,79 @@ Lexer::Token Lexer::nextToken()
     // Skip any whitespace characters..
     do {
         begin = getNext();
-    }
-    while (isspace(begin));
+    } while (isspace(begin));
 
-    if (begin == EndOfFileChar)
+    if (begin == EndOfFileChar) {
         return Token(EndOfFile);
+    }
 
     // Check for simple chars..
-    if (begin == '{')
+    if (begin == '{') {
         return Token(LBrace);
-    else if (begin == '}')
+    } else if (begin == '}') {
         return Token(RBrace);
-    if (begin == '(')
+    }
+    if (begin == '(') {
         return Token(LParen);
-    else if (begin == ')')
+    } else if (begin == ')') {
         return Token(RParen);
-    else if (begin == ':') {
+    } else if (begin == ':') {
         if (peekNext() != ':') {
             return Token(Colon);
         } else {
             getNext();
             return Token(Scope);
         }
-    } else if (begin == ';')
+    } else if (begin == ';') {
         return Token(SemiColon);
-    else if (begin == '*')
+    } else if (begin == '*') {
         return Token(Star);
-    else if (begin == ',')
+    } else if (begin == ',') {
         return Token(Comma);
-    else if (begin == ']')
+    } else if (begin == ']') {
         return Token(RBracket);
-    else if (begin == '[' && peekNext() != '[')
+    } else if (begin == '[' && peekNext() != '[') {
         return Token(LBracket);
+    }
 
     // =>
     if (begin == '=') {
         char c2 = getNext();
-        if (c2 == '>')
+        if (c2 == '>') {
             return Token(Arrow);
-        else
+        } else {
             return Token(Error, "- not part of ->");
+        }
     }
 
     // Check for comments..
-    if (begin == '/')
+    if (begin == '/') {
         return lexComment();
+    }
 
     // Numbers
     if (isASCIIDigit(begin)) {
         string text;
         text += begin;
-        while (isASCIIDigit(peekNext()))
+        while (isASCIIDigit(peekNext())) {
             text += getNext();
+        }
         return Token(Number, text);
     }
 
     // Code..
     if (begin == '[') {
         char next = getNext();
-        if (next != '[')
+        if (next != '[') {
             return Token(Error, string("[ continued with:") + next);
+        }
         int line = lineNumber();
         string text;
-        while(true) {
+        while (true) {
             char letter = getNext();
-            if (letter == EndOfFileChar)
+            if (letter == EndOfFileChar) {
                 return Token(Error, "Unterminated code fragment");
+            }
             if (letter == ']' && peekNext() == ']') {
                 getNext(); //Eat 2nd ']'
                 return Token(Code, text, line);
@@ -157,12 +164,14 @@ Lexer::Token Lexer::nextToken()
     if (isASCIIAlpha(begin)) {
         string text;
         text = begin;
-        while (isASCIIAlphanumeric(peekNext()) || peekNext() == '_')
+        while (isASCIIAlphanumeric(peekNext()) || peekNext() == '_') {
             text += getNext();
+        }
 
         TokenType t = Ident;
-        if (keywords.find(text) != keywords.end())
+        if (keywords.find(text) != keywords.end()) {
             t = keywords[text];
+        }
         return Token(t, text);
     } else {
         return Token(Error, string("Invalid start of token:") + begin);
@@ -171,16 +180,19 @@ Lexer::Token Lexer::nextToken()
 
 char Lexer::peekNext()
 {
-    if (charLoaded)
+    if (charLoaded) {
         return nextChar;
+    }
 
     nextChar = stream->get();
 
-    if (stream->eof())
+    if (stream->eof()) {
         return EndOfFileChar;
+    }
 
-    if (nextChar == '\n')
+    if (nextChar == '\n') {
         ++lineNum;
+    }
     charLoaded = true;
     return nextChar;
 }
@@ -201,10 +213,10 @@ char Lexer::getNext()
         return EndOfFileChar;
     }
 
-    if (in == '\n')
+    if (in == '\n') {
         ++lineNum;
+    }
 
     return in;
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

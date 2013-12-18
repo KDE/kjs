@@ -45,11 +45,11 @@ public:
     /**
      * Constructs a copy of another result object.
      */
-    KJSResult(const KJSResult&);
+    KJSResult(const KJSResult &);
     /**
      * Assigns the properties of another result object to this one.
      */
-    KJSResult& operator=(const KJSResult&);
+    KJSResult &operator=(const KJSResult &);
     /**
      * Frees resources held by this result object.
      */
@@ -71,7 +71,7 @@ public:
     KJSObject value() const;
 
 private:
-    KJSResultHandle* hnd;
+    KJSResultHandle *hnd;
 };
 
 /**
@@ -92,15 +92,15 @@ public:
     /**
      * Constructs an interpreter with a custom global object.
      */
-    KJSInterpreter(const KJSGlobalObject& global);
+    KJSInterpreter(const KJSGlobalObject &global);
     /**
      * Creates a copy of another interpreter.
      */
-    KJSInterpreter(const KJSInterpreter& other);
+    KJSInterpreter(const KJSInterpreter &other);
     /**
      * Assign another interpreter instance to this object.
      */
-    KJSInterpreter& operator=(const KJSInterpreter& other);
+    KJSInterpreter &operator=(const KJSInterpreter &other);
     /**
      * Destructs this interpreter and frees resources it has
      * allocated. This renders any still existing objects referencing
@@ -111,11 +111,11 @@ public:
     /**
      * Returns a handle to the global execution context.
      */
-    KJSContext* globalContext();
+    KJSContext *globalContext();
     /**
      * @overload
      */
-    const KJSContext* globalContext() const;
+    const KJSContext *globalContext() const;
     /**
      * Returns the object that is used as the global object during all
      * script execution performed by this interpreter,
@@ -127,14 +127,14 @@ public:
      * to provide information about the origin of a parse error or
      * runtime exception.
      */
-    KJSResult evaluate(const QString& sourceURL, int startingLineNumber,
-                       const QString& code,
-                       KJSObject* thisValue = 0);
+    KJSResult evaluate(const QString &sourceURL, int startingLineNumber,
+                       const QString &code,
+                       KJSObject *thisValue = 0);
     /**
      *  @overload
      */
-    KJSResult evaluate(const QString& code,
-                       KJSObject* thisValue = 0);
+    KJSResult evaluate(const QString &code,
+                       KJSObject *thisValue = 0);
 
     /**
      * Reformat the given script code to an easy to read format with
@@ -151,11 +151,11 @@ public:
      * @return Returns true if the reformatting was successful, false
      * on a parse error.
      */
-    static bool normalizeCode(const QString& codeIn, QString* codeOut,
-                              int* errLine = 0, QString* errMsg = 0);
+    static bool normalizeCode(const QString &codeIn, QString *codeOut,
+                              int *errLine = 0, QString *errMsg = 0);
 private:
-    KJSInterpreter(KJSInterpreterHandle* h);
-    KJSInterpreterHandle* hnd;
+    KJSInterpreter(KJSInterpreterHandle *h);
+    KJSInterpreterHandle *hnd;
     KJSContext globCtx;
 };
 

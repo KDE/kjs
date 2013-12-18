@@ -41,8 +41,7 @@ enum OpFlags {
     Op_Hint   = 2
 };
 
-struct Parameter
-{
+struct Parameter {
     string   name;
     string   typeName; // name of the type of the parameter, set by the parser
     Type     type;     // the actual type of the parameter, resolved by the TableBuilder.
@@ -54,7 +53,7 @@ struct Parameter
 class Parser
 {
 public:
-    Parser(istream* stream);
+    Parser(istream *stream);
     virtual ~Parser();
 
     void parse();
@@ -62,30 +61,30 @@ private:
     // Note: signatures here are just a list of strings;
     // the last one is the return type
 
-    virtual void handleType(const string& type, const string& nativeName, unsigned flags) = 0;
+    virtual void handleType(const string &type, const string &nativeName, unsigned flags) = 0;
 
-    virtual void handleConversion(const string& runtimeRoutine, int codeLine,
-                                  unsigned flags, const string& from, const string& to,
+    virtual void handleConversion(const string &runtimeRoutine, int codeLine,
+                                  unsigned flags, const string &from, const string &to,
                                   int tileCost, int registerCost) = 0;
-           
-    virtual void handleOperation(const string& name, unsigned flags) = 0;
-    virtual void handleImpl(const string& fnName, const string& code, int codeLine, int cost,
-                            const string& retType, vector<Parameter> sig) = 0;
-    virtual void handleTile(const string& fnName, StringList sig) = 0;
+
+    virtual void handleOperation(const string &name, unsigned flags) = 0;
+    virtual void handleImpl(const string &fnName, const string &code, int codeLine, int cost,
+                            const string &retType, vector<Parameter> sig) = 0;
+    virtual void handleTile(const string &fnName, StringList sig) = 0;
 
     struct Flag {
-        const char* name;
+        const char *name;
         unsigned    value;
     };
 
     // Matches flags specified as a zero-terminated pair array above,
     // and returns their or. In syntax, they look like
     // [flag1, flag2, flag3] and are optional.
-    unsigned matchFlags(const Flag* permittedFlags);
+    unsigned matchFlags(const Flag *permittedFlags);
 
     // These unconditionally parse items of given type.
     string matchIdentifier();
-    void   matchCode(std::string* stringOut, int* lineOut);
+    void   matchCode(std::string *stringOut, int *lineOut);
     int    matchNumber();
     void   match(Lexer::TokenType t);
 
@@ -102,16 +101,15 @@ private:
     bool tokenLoaded;
     Lexer::Token nextToken;
 
-    void issueError(const string& msg);
+    void issueError(const string &msg);
 
     bool   hadError;
 
-    Lexer* lexer;
+    Lexer *lexer;
 
     Lexer::Token peekNext();
     Lexer::Token getNext();
 };
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;
 

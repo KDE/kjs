@@ -32,21 +32,34 @@
 #include "ustring.h"
 #include <wtf/AlwaysInline.h>
 
-namespace KJS {
+namespace KJS
+{
 
-    struct IdentifierRepHash : PtrHash<RefPtr<UString::Rep> > {
-        static unsigned hash(const RefPtr<UString::Rep>& key) { return key->computedHash(); }    
-        static unsigned hash(UString::Rep* key) { return key->computedHash(); }
-    };
+struct IdentifierRepHash : PtrHash<RefPtr<UString::Rep> > {
+    static unsigned hash(const RefPtr<UString::Rep> &key)
+    {
+        return key->computedHash();
+    }
+    static unsigned hash(UString::Rep *key)
+    {
+        return key->computedHash();
+    }
+};
 
-    static ALWAYS_INLINE size_t missingSymbolMarker() { return std::numeric_limits<size_t>::max(); }
+static ALWAYS_INLINE size_t missingSymbolMarker()
+{
+    return std::numeric_limits<size_t>::max();
+}
 
-    struct SymbolTableIndexHashTraits : HashTraits<size_t>  {
-        static const bool emptyValueIsZero = false;
-        static size_t emptyValue() { return missingSymbolMarker(); }
-    };
+struct SymbolTableIndexHashTraits : HashTraits<size_t>  {
+    static const bool emptyValueIsZero = false;
+    static size_t emptyValue()
+    {
+        return missingSymbolMarker();
+    }
+};
 
-    typedef HashMap<RefPtr<UString::Rep>, size_t, IdentifierRepHash, HashTraits<RefPtr<UString::Rep> >, SymbolTableIndexHashTraits> SymbolTable;
+typedef HashMap<RefPtr<UString::Rep>, size_t, IdentifierRepHash, HashTraits<RefPtr<UString::Rep> >, SymbolTableIndexHashTraits> SymbolTable;
 } // namespace KJS
 
 #endif // SymbolTable_h

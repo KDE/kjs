@@ -36,14 +36,15 @@ typedef std::vector<string> StringList;
 
 // This class generates a declaration for an enum,
 // and also declares & defines instrospection tables.
-class Enum {
+class Enum
+{
 public:
-    Enum(const string& name, const string& prefix, StringList values):
+    Enum(const string &name, const string &prefix, StringList values):
         name(name), prefix(prefix), values(values)
     {}
 
-    void printDeclaration(ostream& cppStream);
-    void printDefinition (ostream& hStream);
+    void printDeclaration(ostream &cppStream);
+    void printDefinition(ostream &hStream);
 private:
     string name;
     string prefix;
@@ -51,14 +52,15 @@ private:
 };
 
 // A helper for bracing, commas, etc., of constant array tables
-class Array {
+class Array
+{
 public:
-    Array(ostream& out, const std::string& type, const std::string &name);
-    void item(const std::string& val, const std::string& pendingComment = "");
+    Array(ostream &out, const std::string &type, const std::string &name);
+    void item(const std::string &val, const std::string &pendingComment = "");
     void endArray();
     ~Array();
 private:
-    ostream&    out;
+    ostream    &out;
     std::string comment;
     bool ended, first;
 };
@@ -72,34 +74,34 @@ enum CodeStream {
 class CodePrinter
 {
 public:
-    CodePrinter(ostream* hStream, ostream* cppStream, ostream* mStream):
+    CodePrinter(ostream *hStream, ostream *cppStream, ostream *mStream):
         hStream(hStream), cppStream(cppStream), mStream(mStream) {}
 
-    void printCode(ostream& out, int baseIndent, const string& code, int baseLine);
+    void printCode(ostream &out, int baseIndent, const string &code, int baseLine);
 
-    ostream& operator()(CodeStream stream) {
+    ostream &operator()(CodeStream stream)
+    {
         switch (stream) {
-            case OpH:
-                return *hStream;
-            case OpCpp:
-                return *cppStream;
-            default:
-                return *mStream;
+        case OpH:
+            return *hStream;
+        case OpCpp:
+            return *cppStream;
+        default:
+            return *mStream;
         }
     }
 
     static std::string stringFromInt(int val);
 
     // Indented print to machine.cpp.
-    ostream& mInd(int ind);
+    ostream &mInd(int ind);
 
-    void issueError(const string& err);
-    
+    void issueError(const string &err);
+
 private:
-    ostream* hStream;
-    ostream* cppStream;
-    ostream* mStream;
+    ostream *hStream;
+    ostream *cppStream;
+    ostream *mStream;
 };
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

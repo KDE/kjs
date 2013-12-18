@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  *  Copyright (C) 2005, 2006, 2007 Apple Inc. All rights reserved.
  *
@@ -24,164 +23,212 @@
 
 #include <wtf/AlwaysInline.h>
 
-namespace WTF {
+namespace WTF
+{
 
-    template<typename T> class RefPtr;
-    template<typename T> class PassRefPtr;
-    template <typename T> PassRefPtr<T> adoptRef(T*);
+template<typename T> class RefPtr;
+template<typename T> class PassRefPtr;
+template <typename T> PassRefPtr<T> adoptRef(T *);
 
-    template<typename T> class PassRefPtr {
-    public:
-        PassRefPtr() : m_ptr(0) {}
-        PassRefPtr(T* ptr) : m_ptr(ptr) { if (ptr) ptr->ref(); }
-        // It somewhat breaks the type system to allow transfer of ownership out of
-        // a const PassRefPtr. However, it makes it much easier to work with PassRefPtr
-        // temporaries, and we don't really have a need to use real const PassRefPtrs 
-        // anyway.
-        PassRefPtr(const PassRefPtr& o) : m_ptr(o.releaseRef()) {}
-        template <typename U> PassRefPtr(const PassRefPtr<U>& o) : m_ptr(o.releaseRef()) { }
-
-        ALWAYS_INLINE ~PassRefPtr() { if (T* ptr = m_ptr) ptr->deref(); }
-        
-        template <class U> 
-        PassRefPtr(const RefPtr<U>& o) : m_ptr(o.get()) { if (T* ptr = m_ptr) ptr->ref(); }
-        
-        T* get() const { return m_ptr; }
-
-        void clear() { if (T* ptr = m_ptr) ptr->deref(); m_ptr = 0; }
-        T* releaseRef() const { T* tmp = m_ptr; m_ptr = 0; return tmp; }
-
-        T& operator*() const { return *m_ptr; }
-        T* operator->() const { return m_ptr; }
-        
-        bool operator!() const { return !m_ptr; }
-
-        // This conversion operator allows implicit conversion to bool but not to other integer types.
-        typedef T* PassRefPtr::*UnspecifiedBoolType;
-        operator UnspecifiedBoolType() const { return m_ptr ? &PassRefPtr::m_ptr : 0; }
-        
-        PassRefPtr& operator=(T*);
-        PassRefPtr& operator=(const PassRefPtr&);
-        template <typename U> PassRefPtr& operator=(const PassRefPtr<U>&);
-        template <typename U> PassRefPtr& operator=(const RefPtr<U>&);
-
-        friend PassRefPtr adoptRef<T>(T*);
-    private:
-        // adopting constructor
-        PassRefPtr(T* ptr, bool) : m_ptr(ptr) {}
-        mutable T* m_ptr;
-    };
-    
-    template <typename T> template <typename U> inline PassRefPtr<T>& PassRefPtr<T>::operator=(const RefPtr<U>& o) 
+template<typename T> class PassRefPtr
+{
+public:
+    PassRefPtr() : m_ptr(0) {}
+    PassRefPtr(T *ptr) : m_ptr(ptr)
     {
-        T* optr = o.get();
-        if (optr)
-            optr->ref();
-        T* ptr = m_ptr;
-        m_ptr = optr;
-        if (ptr)
+        if (ptr) {
+            ptr->ref();
+        }
+    }
+    // It somewhat breaks the type system to allow transfer of ownership out of
+    // a const PassRefPtr. However, it makes it much easier to work with PassRefPtr
+    // temporaries, and we don't really have a need to use real const PassRefPtrs
+    // anyway.
+    PassRefPtr(const PassRefPtr &o) : m_ptr(o.releaseRef()) {}
+    template <typename U> PassRefPtr(const PassRefPtr<U> &o) : m_ptr(o.releaseRef()) { }
+
+    ALWAYS_INLINE ~PassRefPtr()
+    {
+        if (T *ptr = m_ptr) {
             ptr->deref();
-        return *this;
+        }
     }
-    
-    template <typename T> inline PassRefPtr<T>& PassRefPtr<T>::operator=(T* optr)
+
+    template <class U>
+    PassRefPtr(const RefPtr<U> &o) : m_ptr(o.get())
     {
-        if (optr)
-            optr->ref();
-        T* ptr = m_ptr;
-        m_ptr = optr;
-        if (ptr)
+        if (T *ptr = m_ptr) {
+            ptr->ref();
+        }
+    }
+
+    T *get() const
+    {
+        return m_ptr;
+    }
+
+    void clear()
+    {
+        if (T *ptr = m_ptr) {
             ptr->deref();
-        return *this;
+        } m_ptr = 0;
     }
-
-    template <typename T> inline PassRefPtr<T>& PassRefPtr<T>::operator=(const PassRefPtr<T>& ref)
+    T *releaseRef() const
     {
-        T* ptr = m_ptr;
-        m_ptr = ref.releaseRef();
-        if (ptr)
-            ptr->deref();
-        return *this;
+        T *tmp = m_ptr;
+        m_ptr = 0;
+        return tmp;
     }
-    
-    template <typename T> template <typename U> inline PassRefPtr<T>& PassRefPtr<T>::operator=(const PassRefPtr<U>& ref)
+
+    T &operator*() const
     {
-        T* ptr = m_ptr;
-        m_ptr = ref.releaseRef();
-        if (ptr)
-            ptr->deref();
-        return *this;
+        return *m_ptr;
     }
-    
-    template <typename T, typename U> inline bool operator==(const PassRefPtr<T>& a, const PassRefPtr<U>& b) 
-    { 
-        return a.get() == b.get(); 
-    }
-
-    template <typename T, typename U> inline bool operator==(const PassRefPtr<T>& a, const RefPtr<U>& b) 
-    { 
-        return a.get() == b.get(); 
-    }
-
-    template <typename T, typename U> inline bool operator==(const RefPtr<T>& a, const PassRefPtr<U>& b) 
-    { 
-        return a.get() == b.get(); 
-    }
-
-    template <typename T, typename U> inline bool operator==(const PassRefPtr<T>& a, U* b) 
-    { 
-        return a.get() == b; 
-    }
-    
-    template <typename T, typename U> inline bool operator==(T* a, const PassRefPtr<U>& b) 
+    T *operator->() const
     {
-        return a == b.get(); 
-    }
-    
-    template <typename T, typename U> inline bool operator!=(const PassRefPtr<T>& a, const PassRefPtr<U>& b) 
-    { 
-        return a.get() != b.get(); 
+        return m_ptr;
     }
 
-    template <typename T, typename U> inline bool operator!=(const PassRefPtr<T>& a, const RefPtr<U>& b) 
-    { 
-        return a.get() != b.get(); 
-    }
-
-    template <typename T, typename U> inline bool operator!=(const RefPtr<T>& a, const PassRefPtr<U>& b) 
-    { 
-        return a.get() != b.get(); 
-    }
-
-    template <typename T, typename U> inline bool operator!=(const PassRefPtr<T>& a, U* b)
+    bool operator!() const
     {
-        return a.get() != b; 
+        return !m_ptr;
     }
 
-    template <typename T, typename U> inline bool operator!=(T* a, const PassRefPtr<U>& b) 
-    { 
-        return a != b.get(); 
-    }
-    
-    template <typename T> inline PassRefPtr<T> adoptRef(T* p)
+    // This conversion operator allows implicit conversion to bool but not to other integer types.
+    typedef T *PassRefPtr::*UnspecifiedBoolType;
+    operator UnspecifiedBoolType() const
     {
-        return PassRefPtr<T>(p, true);
+        return m_ptr ? &PassRefPtr::m_ptr : 0;
     }
 
-    template <typename T, typename U> inline PassRefPtr<T> static_pointer_cast(const PassRefPtr<U>& p) 
-    { 
-        return adoptRef(static_cast<T*>(p.releaseRef())); 
-    }
+    PassRefPtr &operator=(T *);
+    PassRefPtr &operator=(const PassRefPtr &);
+    template <typename U> PassRefPtr &operator=(const PassRefPtr<U> &);
+    template <typename U> PassRefPtr &operator=(const RefPtr<U> &);
 
-    template <typename T, typename U> inline PassRefPtr<T> const_pointer_cast(const PassRefPtr<U>& p) 
-    { 
-        return adoptRef(const_cast<T*>(p.releaseRef())); 
-    }
+    friend PassRefPtr adoptRef<T>(T *);
+private:
+    // adopting constructor
+    PassRefPtr(T *ptr, bool) : m_ptr(ptr) {}
+    mutable T *m_ptr;
+};
 
-    template <typename T> inline T* getPtr(const PassRefPtr<T>& p)
-    {
-        return p.get();
+template <typename T> template <typename U> inline PassRefPtr<T> &PassRefPtr<T>::operator=(const RefPtr<U> &o)
+{
+    T *optr = o.get();
+    if (optr) {
+        optr->ref();
     }
+    T *ptr = m_ptr;
+    m_ptr = optr;
+    if (ptr) {
+        ptr->deref();
+    }
+    return *this;
+}
+
+template <typename T> inline PassRefPtr<T> &PassRefPtr<T>::operator=(T *optr)
+{
+    if (optr) {
+        optr->ref();
+    }
+    T *ptr = m_ptr;
+    m_ptr = optr;
+    if (ptr) {
+        ptr->deref();
+    }
+    return *this;
+}
+
+template <typename T> inline PassRefPtr<T> &PassRefPtr<T>::operator=(const PassRefPtr<T> &ref)
+{
+    T *ptr = m_ptr;
+    m_ptr = ref.releaseRef();
+    if (ptr) {
+        ptr->deref();
+    }
+    return *this;
+}
+
+template <typename T> template <typename U> inline PassRefPtr<T> &PassRefPtr<T>::operator=(const PassRefPtr<U> &ref)
+{
+    T *ptr = m_ptr;
+    m_ptr = ref.releaseRef();
+    if (ptr) {
+        ptr->deref();
+    }
+    return *this;
+}
+
+template <typename T, typename U> inline bool operator==(const PassRefPtr<T> &a, const PassRefPtr<U> &b)
+{
+    return a.get() == b.get();
+}
+
+template <typename T, typename U> inline bool operator==(const PassRefPtr<T> &a, const RefPtr<U> &b)
+{
+    return a.get() == b.get();
+}
+
+template <typename T, typename U> inline bool operator==(const RefPtr<T> &a, const PassRefPtr<U> &b)
+{
+    return a.get() == b.get();
+}
+
+template <typename T, typename U> inline bool operator==(const PassRefPtr<T> &a, U *b)
+{
+    return a.get() == b;
+}
+
+template <typename T, typename U> inline bool operator==(T *a, const PassRefPtr<U> &b)
+{
+    return a == b.get();
+}
+
+template <typename T, typename U> inline bool operator!=(const PassRefPtr<T> &a, const PassRefPtr<U> &b)
+{
+    return a.get() != b.get();
+}
+
+template <typename T, typename U> inline bool operator!=(const PassRefPtr<T> &a, const RefPtr<U> &b)
+{
+    return a.get() != b.get();
+}
+
+template <typename T, typename U> inline bool operator!=(const RefPtr<T> &a, const PassRefPtr<U> &b)
+{
+    return a.get() != b.get();
+}
+
+template <typename T, typename U> inline bool operator!=(const PassRefPtr<T> &a, U *b)
+{
+    return a.get() != b;
+}
+
+template <typename T, typename U> inline bool operator!=(T *a, const PassRefPtr<U> &b)
+{
+    return a != b.get();
+}
+
+template <typename T> inline PassRefPtr<T> adoptRef(T *p)
+{
+    return PassRefPtr<T>(p, true);
+}
+
+template <typename T, typename U> inline PassRefPtr<T> static_pointer_cast(const PassRefPtr<U> &p)
+{
+    return adoptRef(static_cast<T *>(p.releaseRef()));
+}
+
+template <typename T, typename U> inline PassRefPtr<T> const_pointer_cast(const PassRefPtr<U> &p)
+{
+    return adoptRef(const_cast<T *>(p.releaseRef()));
+}
+
+template <typename T> inline T *getPtr(const PassRefPtr<T> &p)
+{
+    return p.get();
+}
 
 } // namespace WTF
 

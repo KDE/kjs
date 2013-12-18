@@ -23,13 +23,14 @@
 
 #include <stddef.h>
 
-namespace WTF {
-    template<typename T> class ListRefPtr;
-    template<typename T> class OwnArrayPtr;
-    template<typename T> class OwnPtr;
-    template<typename T> class PassRefPtr;
-    template<typename T> class RefPtr;
-    template<typename T, size_t inlineCapacity> class Vector;
+namespace WTF
+{
+template<typename T> class ListRefPtr;
+template<typename T> class OwnArrayPtr;
+template<typename T> class OwnPtr;
+template<typename T> class PassRefPtr;
+template<typename T> class RefPtr;
+template<typename T, size_t inlineCapacity> class Vector;
 }
 
 using WTF::ListRefPtr;

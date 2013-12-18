@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  *  Copyright (C) 2006 Maks Orlovich <maksim@kde.org>
  *  Copyright (C) 2006 Apple Computer, Inc.
@@ -25,72 +24,73 @@
 
 #include "object.h"
 
-namespace KJS {
-    
-    /** 
-        This class is used as a base for classes such as String,
-        Number, Boolean and Date which which are wrappers for primitive
-       types. These classes stores the internal value, which is the
-       actual value represented by the wrapper objects.
-    */ 
-    class JSWrapperObject : public JSObject {
-    public:
-        JSWrapperObject(JSValue* proto);
-        
-        /**
-         * Returns the internal value of the object. This is used for objects such
-         * as String and Boolean which are wrappers for native types. The interal
-         * value is the actual value represented by the wrapper objects.
-         *
-         * @see ECMA 8.6.2
-         * @return The internal value of the object
-         */
-        JSValue* internalValue() const;
-        
-        /**
-         * Sets the internal value of the object
-         *
-         * @see internalValue()
-         *
-         * @param v The new internal value
-         */
-        void setInternalValue(JSValue* v);
+namespace KJS
+{
 
-        virtual void mark();
+/**
+    This class is used as a base for classes such as String,
+    Number, Boolean and Date which which are wrappers for primitive
+   types. These classes stores the internal value, which is the
+   actual value represented by the wrapper objects.
+*/
+class JSWrapperObject : public JSObject
+{
+public:
+    JSWrapperObject(JSValue *proto);
 
-        /**
-         * Returns the prototype this object had during construction
-         */
-        JSValue* originalProto() const;
-    private:
-        JSValue* m_internalValue;
-        JSValue* m_originalProto;
-    };
-    
-    inline JSWrapperObject::JSWrapperObject(JSValue* proto)
-        : JSObject(proto)
-        , m_internalValue(0)
-        , m_originalProto(proto)
-    {
-    }
-    
-    inline JSValue* JSWrapperObject::internalValue() const
-    {
-        return m_internalValue;
-    }
+    /**
+     * Returns the internal value of the object. This is used for objects such
+     * as String and Boolean which are wrappers for native types. The interal
+     * value is the actual value represented by the wrapper objects.
+     *
+     * @see ECMA 8.6.2
+     * @return The internal value of the object
+     */
+    JSValue *internalValue() const;
 
-    inline JSValue* JSWrapperObject::originalProto() const
-    {
-        return m_originalProto;
-    }    
-    
-    inline void JSWrapperObject::setInternalValue(JSValue* v)
-    {
-        ASSERT(v);
-        m_internalValue = v;
-    }
+    /**
+     * Sets the internal value of the object
+     *
+     * @see internalValue()
+     *
+     * @param v The new internal value
+     */
+    void setInternalValue(JSValue *v);
+
+    virtual void mark();
+
+    /**
+     * Returns the prototype this object had during construction
+     */
+    JSValue *originalProto() const;
+private:
+    JSValue *m_internalValue;
+    JSValue *m_originalProto;
+};
+
+inline JSWrapperObject::JSWrapperObject(JSValue *proto)
+    : JSObject(proto)
+    , m_internalValue(0)
+    , m_originalProto(proto)
+{
+}
+
+inline JSValue *JSWrapperObject::internalValue() const
+{
+    return m_internalValue;
+}
+
+inline JSValue *JSWrapperObject::originalProto() const
+{
+    return m_originalProto;
+}
+
+inline void JSWrapperObject::setInternalValue(JSValue *v)
+{
+    ASSERT(v);
+    m_internalValue = v;
+}
 
 } // namespace KJS
 
 #endif // KJS_JSWrapperObject_h
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

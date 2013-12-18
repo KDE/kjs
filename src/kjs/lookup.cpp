@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -31,64 +30,69 @@ using namespace KJS;
 
 static inline bool keysMatch(const UChar *c, unsigned len, const char *s)
 {
-  const char* end = s + len;
-  for (; s != end; c++, s++)
-    if (c->uc != (unsigned char)*s)
-      return false;
-  return *s == 0;
+    const char *end = s + len;
+    for (; s != end; c++, s++)
+        if (c->uc != (unsigned char)*s) {
+            return false;
+        }
+    return *s == 0;
 }
 
-static inline const HashEntry* findEntry(const struct HashTable *table, unsigned int hash,
-                                         const UChar *c, unsigned int len )
+static inline const HashEntry *findEntry(const struct HashTable *table, unsigned int hash,
+        const UChar *c, unsigned int len)
 {
 #ifndef NDEBUG
-  if (table->type != 2) {
-    fprintf(stderr, "KJS: Unknown hash table version.\n");
-    return 0;
-  }
+    if (table->type != 2) {
+        fprintf(stderr, "KJS: Unknown hash table version.\n");
+        return 0;
+    }
 #endif
-  ASSERT(table->hashSize != 0);
-    
-  hash %= table->hashSize;
+    ASSERT(table->hashSize != 0);
 
-  const HashEntry *e = &table->entries[hash];
+    hash %= table->hashSize;
 
-  // empty bucket ?
-  if (!e->s)
+    const HashEntry *e = &table->entries[hash];
+
+    // empty bucket ?
+    if (!e->s) {
+        return 0;
+    }
+
+    do {
+        // compare strings
+        if (keysMatch(c, len, e->s)) {
+            return e;
+        }
+
+        // try next bucket
+        e = e->next;
+    } while (e);
     return 0;
-
-  do {
-    // compare strings
-    if (keysMatch(c, len, e->s))
-      return e;
-
-    // try next bucket
-    e = e->next;
-  } while (e);
-  return 0;
 }
 
-const HashEntry* Lookup::findEntry(const struct HashTable *table,
-                                   const Identifier &s )
+const HashEntry *Lookup::findEntry(const struct HashTable *table,
+                                   const Identifier &s)
 {
-  const HashEntry* entry = ::findEntry(table, s.ustring().rep()->hash(), s.data(), s.size());
-  return entry;
+    const HashEntry *entry = ::findEntry(table, s.ustring().rep()->hash(), s.data(), s.size());
+    return entry;
 }
 
 int Lookup::find(const struct HashTable *table,
                  const UChar *c, unsigned int len)
 {
-  const HashEntry *entry = ::findEntry(table, UString::Rep::computeHash(c, len), c, len);
-  if (entry)
-    return entry->value;
-  return -1;
+    const HashEntry *entry = ::findEntry(table, UString::Rep::computeHash(c, len), c, len);
+    if (entry) {
+        return entry->value;
+    }
+    return -1;
 }
 
 int Lookup::find(const struct HashTable *table, const Identifier &s)
 {
-  //printf("looking for:%s\n", s.ascii());
-  const HashEntry *entry = ::findEntry(table, s.ustring().rep()->hash(), s.data(), s.size());
-  if (entry)
-    return entry->value;
-  return -1;
+    //printf("looking for:%s\n", s.ascii());
+    const HashEntry *entry = ::findEntry(table, s.ustring().rep()->hash(), s.data(), s.size());
+    if (entry) {
+        return entry->value;
+    }
+    return -1;
 }

@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 4 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -35,28 +34,29 @@
 
 extern int kjsyyparse();
 
-namespace KJS {
+namespace KJS
+{
 
 Parser::Parser()
     : m_sourceId(0)
 {
 }
 
-PassRefPtr<ProgramNode> Parser::parseProgram(const UString& sourceURL, int startingLineNumber,
-    const UChar* code, unsigned length,
-    int* sourceId, int* errLine, UString* errMsg)
+PassRefPtr<ProgramNode> Parser::parseProgram(const UString &sourceURL, int startingLineNumber,
+        const UChar *code, unsigned length,
+        int *sourceId, int *errLine, UString *errMsg)
 {
     parse(sourceURL, startingLineNumber, code, length, sourceId, errLine, errMsg);
     return m_progNode.release();
 }
 
-static HashSet<Node*>* nodeCycles;
-
+static HashSet<Node *> *nodeCycles;
 
 void Parser::noteNodeCycle(Node *node)
 {
-    if (!nodeCycles)
-        nodeCycles = new HashSet<Node*>;
+    if (!nodeCycles) {
+        nodeCycles = new HashSet<Node *>;
+    }
     nodeCycles->add(node);
 }
 
@@ -69,41 +69,45 @@ void Parser::removeNodeCycle(Node *node)
 static void clearNewNodes()
 {
     if (nodeCycles) {
-        for (HashSet<Node*>::iterator it = nodeCycles->begin(); it != nodeCycles->end(); ++it)
+        for (HashSet<Node *>::iterator it = nodeCycles->begin(); it != nodeCycles->end(); ++it) {
             (*it)->breakCycle();
+        }
         delete nodeCycles;
         nodeCycles = 0;
     }
     Node::clearNewNodes();
 }
 
-PassRefPtr<FunctionBodyNode> Parser::parseFunctionBody(const UString& sourceURL, int startingLineNumber,
-    const UChar* code, unsigned length,
-    int* sourceId, int* errLine, UString* errMsg)
+PassRefPtr<FunctionBodyNode> Parser::parseFunctionBody(const UString &sourceURL, int startingLineNumber,
+        const UChar *code, unsigned length,
+        int *sourceId, int *errLine, UString *errMsg)
 {
     parse(sourceURL, startingLineNumber, code, length, sourceId, errLine, errMsg);
     return m_progNode.release();
 }
 
-void Parser::parse(const UString& sourceURL, int startingLineNumber,
-    const UChar* code, unsigned length,
-    int* sourceId, int* errLine, UString* errMsg)
+void Parser::parse(const UString &sourceURL, int startingLineNumber,
+                   const UChar *code, unsigned length,
+                   int *sourceId, int *errLine, UString *errMsg)
 {
     pushFunctionContext(0);
-    
+
     ASSERT(!m_progNode);
 
-    if (errLine)
+    if (errLine) {
         *errLine = -1;
-    if (errMsg)
+    }
+    if (errMsg) {
         *errMsg = 0;
+    }
 
-    Lexer& lexer = KJS::lexer();
+    Lexer &lexer = KJS::lexer();
 
     lexer.setCode(sourceURL, startingLineNumber, code, length);
     m_sourceId++;
-    if (sourceId)
+    if (sourceId) {
         *sourceId = m_sourceId;
+    }
 
     // Enable this and the #define YYDEBUG in grammar.y to debug a parse error
     //extern int kjsyydebug;
@@ -117,16 +121,18 @@ void Parser::parse(const UString& sourceURL, int startingLineNumber,
     clearNewNodes();
 
     if (parseError || lexError) {
-        if (errLine)
+        if (errLine) {
             *errLine = lexer.lineNo();
-        if (errMsg)
+        }
+        if (errMsg) {
             *errMsg = "Parse error";
+        }
         m_progNode = 0;
         return;
     }
 
 #ifdef KJS_VERBOSE
-  fprintf( stderr, "%s\n", m_progNode->toString().ascii() );
+    fprintf(stderr, "%s\n", m_progNode->toString().ascii());
 #endif
 }
 
@@ -135,7 +141,7 @@ void Parser::didFinishParsing(PassRefPtr<ProgramNode> progNode)
     m_progNode = progNode;
 }
 
-Parser& parser()
+Parser &parser()
 {
     // ASSERT(JSLock::currentThreadIsHoldingLock());
 

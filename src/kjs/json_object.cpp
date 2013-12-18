@@ -41,8 +41,7 @@ const ClassInfo JSONObjectImp::info = { "JSON", 0, &jsonTable, 0 };
 @end
 */
 
-
-JSONObjectImp::JSONObjectImp(ExecState*, ObjectPrototype *objProto)
+JSONObjectImp::JSONObjectImp(ExecState *, ObjectPrototype *objProto)
     : JSObject(objProto)
 {
 }
@@ -55,131 +54,140 @@ bool JSONObjectImp::getOwnPropertySlot(ExecState *exec, const Identifier &proper
 
 // ------------------------------ JSONFuncImp --------------------------------
 
-JSONFuncImp::JSONFuncImp(ExecState* exec, int i, int l, const Identifier& name)
-    : InternalFunctionImp(static_cast<FunctionPrototype*>(exec->lexicalInterpreter()->builtinFunctionPrototype()), name),
+JSONFuncImp::JSONFuncImp(ExecState *exec, int i, int l, const Identifier &name)
+    : InternalFunctionImp(static_cast<FunctionPrototype *>(exec->lexicalInterpreter()->builtinFunctionPrototype()), name),
       id(i)
 {
-    putDirect(exec->propertyNames().length, l, DontDelete|ReadOnly|DontEnum);
+    putDirect(exec->propertyNames().length, l, DontDelete | ReadOnly | DontEnum);
 }
 
-static void reviver(ExecState* exec, JSValue* value, JSObject* func)
+static void reviver(ExecState *exec, JSValue *value, JSObject *func)
 {
-    if (exec->hadException())
+    if (exec->hadException()) {
         return;
+    }
 
     JSType type = value->type();
     switch (type) {
-        case ObjectType: {
-            JSObject* obj = value->getObject();
-            bool isArray = obj->inherits(&ArrayInstance::info);
-            bool validArrayIndex = false;
+    case ObjectType: {
+        JSObject *obj = value->getObject();
+        bool isArray = obj->inherits(&ArrayInstance::info);
+        bool validArrayIndex = false;
 
-            PropertyNameArray names;
-            obj->getOwnPropertyNames(exec, names, KJS::PropertyMap::ExcludeDontEnumProperties);
-            const int nameSize = names.size();
-            for (int i = 0; i < nameSize; ++i) {
-                // For Array only take properties that are valid Array indexes
-                if (isArray) {
-                    names[i].toArrayIndex(&validArrayIndex);
-                    if (!validArrayIndex)
-                        continue;
-                }
-
-                JSValue* val = obj->get(exec, names[i]);
-
-                List args;
-                args.append(jsString(names[i].ustring()));
-                args.append(val);
-
-                JSValue* ret = func->call(exec, obj, args);
-                if (exec->hadException())
-                    return;
-                if (ret->isUndefined())
-                    obj->deleteProperty(exec, names[i]);
-                else {
-                    obj->put(exec, names[i], ret);
-                    reviver(exec, ret, func);
+        PropertyNameArray names;
+        obj->getOwnPropertyNames(exec, names, KJS::PropertyMap::ExcludeDontEnumProperties);
+        const int nameSize = names.size();
+        for (int i = 0; i < nameSize; ++i) {
+            // For Array only take properties that are valid Array indexes
+            if (isArray) {
+                names[i].toArrayIndex(&validArrayIndex);
+                if (!validArrayIndex) {
+                    continue;
                 }
             }
-            break;
+
+            JSValue *val = obj->get(exec, names[i]);
+
+            List args;
+            args.append(jsString(names[i].ustring()));
+            args.append(val);
+
+            JSValue *ret = func->call(exec, obj, args);
+            if (exec->hadException()) {
+                return;
+            }
+            if (ret->isUndefined()) {
+                obj->deleteProperty(exec, names[i]);
+            } else {
+                obj->put(exec, names[i], ret);
+                reviver(exec, ret, func);
+            }
         }
-        case NullType:
-        case NumberType:
-        case BooleanType:
-        case StringType:
-            break;
-        case UnspecifiedType:
-        case GetterSetterType:
-        case UndefinedType:
-            // should never be reached, as JSON doesn't know them
-            // and we only have json data here
-            ASSERT_NOT_REACHED();
-            break;
+        break;
+    }
+    case NullType:
+    case NumberType:
+    case BooleanType:
+    case StringType:
+        break;
+    case UnspecifiedType:
+    case GetterSetterType:
+    case UndefinedType:
+        // should never be reached, as JSON doesn't know them
+        // and we only have json data here
+        ASSERT_NOT_REACHED();
+        break;
     }
 }
 
-JSValue *JSONFuncImp::callAsFunction(ExecState* exec, JSObject* /*thisObj*/, const List& args)
+JSValue *JSONFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, const List &args)
 {
     switch (id) {
-        case JSONObjectImp::Parse: {
-            if (args.size() < 1)
-                return throwError(exec, SyntaxError, "Invalid JSON Syntax");
+    case JSONObjectImp::Parse: {
+        if (args.size() < 1) {
+            return throwError(exec, SyntaxError, "Invalid JSON Syntax");
+        }
 
-            JSONParser parser(args[0]->toString(exec));
-            if (exec->hadException())
-                return jsUndefined();
-            JSValue* val = parser.tryParse(exec);
+        JSONParser parser(args[0]->toString(exec));
+        if (exec->hadException()) {
+            return jsUndefined();
+        }
+        JSValue *val = parser.tryParse(exec);
 
-            if (!val)
-                return throwError(exec, SyntaxError, "Invalid JSON Syntax");
+        if (!val) {
+            return throwError(exec, SyntaxError, "Invalid JSON Syntax");
+        }
 
-            if (args.size() < 2)
-                return val;
-
-            JSValue* func = args[1];
-            if (func->implementsCall()) {
-                JSObject* function = func->getObject();
-
-                List args;
-                args.append(jsString(""));
-                args.append(val);
-
-                JSObject* jsobjectArg = val->toObject(exec);
-                if (exec->hadException())
-                    return jsUndefined();
-                JSValue* ret = function->call(exec, jsobjectArg, args);
-                if (ret->isUndefined())
-                    return ret;
-                else {
-                    reviver(exec, ret, function);
-                    if (exec->hadException())
-                        return jsUndefined();
-                }
-            }
-
+        if (args.size() < 2) {
             return val;
         }
-        case JSONObjectImp::Stringify: {
-            JSValue* object = args[0];
-            JSONStringify stringifier(exec, args[1], args[2]);
 
-            JSONStringify::StringifyState state;
-            JSValue* ret = stringifier.stringify(exec, object, state);
-            switch (state) {
-                case JSONStringify::Success:
-                    return ret;
-                case JSONStringify::FailedCyclic:
-                    return throwError(exec, TypeError, "cyclic object value");
-                case JSONStringify::FailedStackLimitExceeded:
-                    return throwError(exec, TypeError, "object stack limit exceeded");
-                case JSONStringify::FailedException:
-                    //stringify already got an exception
+        JSValue *func = args[1];
+        if (func->implementsCall()) {
+            JSObject *function = func->getObject();
+
+            List args;
+            args.append(jsString(""));
+            args.append(val);
+
+            JSObject *jsobjectArg = val->toObject(exec);
+            if (exec->hadException()) {
+                return jsUndefined();
+            }
+            JSValue *ret = function->call(exec, jsobjectArg, args);
+            if (ret->isUndefined()) {
+                return ret;
+            } else {
+                reviver(exec, ret, function);
+                if (exec->hadException()) {
                     return jsUndefined();
+                }
             }
         }
-        default:
-            ASSERT_NOT_REACHED();
+
+        return val;
+    }
+    case JSONObjectImp::Stringify: {
+        JSValue *object = args[0];
+        JSONStringify stringifier(exec, args[1], args[2]);
+
+        JSONStringify::StringifyState state;
+        JSValue *ret = stringifier.stringify(exec, object, state);
+        switch (state) {
+        case JSONStringify::Success:
+            return ret;
+        case JSONStringify::FailedCyclic:
+            return throwError(exec, TypeError, "cyclic object value");
+        case JSONStringify::FailedStackLimitExceeded:
+            return throwError(exec, TypeError, "object stack limit exceeded");
+        case JSONStringify::FailedException:
+            //stringify already got an exception
+            return jsUndefined();
+        }
+    }
+    default:
+        ASSERT_NOT_REACHED();
     }
 
-  return jsUndefined();
+    return jsUndefined();
 }

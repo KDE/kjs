@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -43,46 +42,69 @@ extern "C" { // bug with some libc5 distributions
 
 #include "ustring.h"
 
-namespace KJS {
+namespace KJS
+{
 
-
-  // Represents a strign re-encoded to whatever PCRE can handle
-  class RegExpStringContext {
-  public:
-    explicit RegExpStringContext(const UString& pattern);
+// Represents a strign re-encoded to whatever PCRE can handle
+class RegExpStringContext
+{
+public:
+    explicit RegExpStringContext(const UString &pattern);
     ~RegExpStringContext();
 
-    char* buffer() const { return _buffer; }
-    int   bufferSize() const { return _bufferSize; }
-    int   originalPos(int c) const { return _originalPos[c]; }
+    char *buffer() const
+    {
+        return _buffer;
+    }
+    int   bufferSize() const
+    {
+        return _bufferSize;
+    }
+    int   originalPos(int c) const
+    {
+        return _originalPos[c];
+    }
 
-  private:
+private:
     // Cached encoding info...
-    char* _buffer;
-    int*  _originalPos;
+    char *_buffer;
+    int  *_originalPos;
     int   _bufferSize;
 
-    void prepareUtf8  (const UString& s);
-    void prepareASCII (const UString& s);
+    void prepareUtf8(const UString &s);
+    void prepareASCII(const UString &s);
 #ifndef NDEBUG
-  public:
+public:
     UString _originalS; // the original string, used for sanity-checking
 #endif
-  };
+};
 
-  class RegExp {
-  public:
+class RegExp
+{
+public:
     enum { None = 0, Global = 1, IgnoreCase = 2, Multiline = 4 };
 
     explicit RegExp(const UString &pattern, char flags = None);
     ~RegExp();
 
-    char flags() const { return _flags; }
-    bool isValid() const { return _valid; }
+    char flags() const
+    {
+        return _flags;
+    }
+    bool isValid() const
+    {
+        return _valid;
+    }
 
-    UString match(const RegExpStringContext& c, const UString& s, bool *error, int i, int *pos = 0, int **ovector = 0);
-    unsigned subPatterns() const { return _numSubPatterns; }
-    UString  pattern() const { return _pat; }
+    UString match(const RegExpStringContext &c, const UString &s, bool *error, int i, int *pos = 0, int **ovector = 0);
+    unsigned subPatterns() const
+    {
+        return _numSubPatterns;
+    }
+    UString  pattern() const
+    {
+        return _pat;
+    }
 
     static bool tryGrowingMaxStackSize;
     static bool didIncreaseMaxStackSize;
@@ -91,7 +113,7 @@ namespace KJS {
 #else
     static int availableStackSize;
 #endif
-  private:
+private:
 #if HAVE_PCREPOSIX
     pcre *_regex;
 #else
@@ -101,19 +123,19 @@ namespace KJS {
     char _flags;
     bool _valid;
     unsigned _numSubPatterns;
-    
+
     RegExp(const RegExp &);
     RegExp &operator=(const RegExp &);
 
-  public:
+public:
     enum UTF8SupportState {
-      Unknown,
-      Supported,
-      Unsupported
+        Unknown,
+        Supported,
+        Unsupported
     };
 
     static UTF8SupportState utf8Support;
-  };
+};
 
 } // namespace
 

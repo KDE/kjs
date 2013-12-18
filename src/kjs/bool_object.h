@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -26,56 +25,64 @@
 #include "function_object.h"
 #include "JSWrapperObject.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class BooleanInstance : public JSWrapperObject {
-  public:
+class BooleanInstance : public JSWrapperObject
+{
+public:
     BooleanInstance(JSObject *proto);
 
-    virtual JSObject* valueClone(Interpreter* targetCtx) const;
+    virtual JSObject *valueClone(Interpreter *targetCtx) const;
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of Boolean.prototype (and thus all objects created
-   * with the Boolean constructor
-   */
-  class BooleanPrototype : public BooleanInstance {
-  public:
+/**
+ * @internal
+ *
+ * The initial value of Boolean.prototype (and thus all objects created
+ * with the Boolean constructor
+ */
+class BooleanPrototype : public BooleanInstance
+{
+public:
     BooleanPrototype(ExecState *exec,
-                        ObjectPrototype *objectProto,
-                        FunctionPrototype *funcProto);
-  };
+                     ObjectPrototype *objectProto,
+                     FunctionPrototype *funcProto);
+};
 
-  /**
-   * @internal
-   *
-   * Class to implement all methods that are properties of the
-   * Boolean.prototype object
-   */
-  class BooleanProtoFunc : public InternalFunctionImp {
-  public:
-    BooleanProtoFunc(ExecState*, FunctionPrototype*, int i, int len, const Identifier&);
+/**
+ * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * Boolean.prototype object
+ */
+class BooleanProtoFunc : public InternalFunctionImp
+{
+public:
+    BooleanProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
     enum { ToString, ValueOf };
-  private:
+private:
     int id;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of the global variable's "Boolean" property
-   */
-  class BooleanObjectImp : public InternalFunctionImp {
+/**
+ * @internal
+ *
+ * The initial value of the global variable's "Boolean" property
+ */
+class BooleanObjectImp : public InternalFunctionImp
+{
     friend class BooleanProtoFunc;
-  public:
+public:
     BooleanObjectImp(ExecState *exec, FunctionPrototype *funcProto,
                      BooleanPrototype *booleanProto);
 
@@ -84,7 +91,7 @@ namespace KJS {
     virtual JSObject *construct(ExecState *exec, const List &args);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
-  };
+};
 
 } // namespace
 

@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -38,15 +37,13 @@ using WTF::HashSet;
 using WTF::HashMap;
 using WTF::Vector;
 
-
-namespace KJS {
+namespace KJS
+{
 
 class RegDescriptor;
 class FunctionBodyNode;
 
-
-enum CompileType
-{
+enum CompileType {
     NotCompiled,
     Release,
     Debug
@@ -55,37 +52,40 @@ enum CompileType
 class CompileState
 {
 public:
-    CompileState(CodeType ctype, CompileType compType, FunctionBodyNode* fbody, Register initialMaxTemp):
+    CompileState(CodeType ctype, CompileType compType, FunctionBodyNode *fbody, Register initialMaxTemp):
         localScopeVal(0), thisVal(0), globalScopeVal(0), evalResRegister(0),
         ctype(ctype), compType(compType), locals(initialMaxTemp, 0), initialMaxTemp(initialMaxTemp),
         maxTemp(initialMaxTemp), fbody(fbody), scopeDepth(0), finallyDepth(0), neededClosures(false)
     { }
 
-    FunctionBodyNode* functionBody() {
+    FunctionBodyNode *functionBody()
+    {
         return fbody;
     }
 
-    CodeType codeType() const {
+    CodeType codeType() const
+    {
         return ctype;
     }
 
-    CodeBlock& codeBlock();
+    CodeBlock &codeBlock();
 
-    CompileType compileType() const {
+    CompileType compileType() const
+    {
         return compType;
     }
-
 
     ~CompileState();
 
     // Returns true if the register is a formal temporary.
-    bool isTemporaryReg(Register regNum) {
+    bool isTemporaryReg(Register regNum)
+    {
         return regNum >= initialMaxTemp;
     }
 
     // We distinguish two kinds of temporaries --- markable and not. They'll get
     // corresponding bits set in localStore when that's initialized.
-    void requestTemporary(OpType type, OpValue* value, OpValue* reference);
+    void requestTemporary(OpType type, OpValue *value, OpValue *reference);
 
     // This method is used to acquire a read value of a local...
     OpValue localReadVal(Register regNum);
@@ -93,36 +93,42 @@ public:
     // And this one returns a reference, acquiring it for (immediate) write.
     // If there are any active read copies, we will backup the old value to
     // a temporary, and petchup their register descriptor to point to the backup.
-    OpValue localWriteRef(CodeBlock& block, Register regNum);
+    OpValue localWriteRef(CodeBlock &block, Register regNum);
 
     // This forces all live locals to temporaries.
-    void localFlushAll(CodeBlock& block);
+    void localFlushAll(CodeBlock &block);
 
     // This sets the registers containing the local scope and
     // 'this' values... It should be the rvalue, not the regnums
-    void setPreloadRegs(OpValue* localReg, OpValue* globalReg, OpValue* thisReg) {
+    void setPreloadRegs(OpValue *localReg, OpValue *globalReg, OpValue *thisReg)
+    {
         localScopeVal  = localReg;
         globalScopeVal = globalReg;
         thisVal        = thisReg;
     }
 
-    OpValue* localScope() {
+    OpValue *localScope()
+    {
         return localScopeVal;
     }
 
-    OpValue* thisValue() {
+    OpValue *thisValue()
+    {
         return thisVal;
     }
 
-    OpValue* globalScope() {
+    OpValue *globalScope()
+    {
         return globalScopeVal;
     }
 
-    void setEvalResultRegister(OpValue* val) {
+    void setEvalResultRegister(OpValue *val)
+    {
         evalResRegister = val;
     }
 
-    OpValue* evalResultReg() {
+    OpValue *evalResultReg()
+    {
         return evalResRegister;
     }
 
@@ -141,65 +147,72 @@ public:
         ContBreakTarget
     };
 
-    void pushNest(NestType type, Node* node = 0);
-    void popNest ();
+    void pushNest(NestType type, Node *node = 0);
+    void popNest();
 
     struct NestInfo {
         NestType type;
-        Node*    node;
+        Node    *node;
     };
 
-    bool inNestedScope() {
+    bool inNestedScope()
+    {
         return scopeDepth > 0;
     }
 
-    bool inTryFinally() {
+    bool inTryFinally()
+    {
         return finallyDepth > 0;
     }
 
-    const WTF::Vector<NestInfo>&  nestStack() {
+    const WTF::Vector<NestInfo>  &nestStack()
+    {
         return nests;
     }
 
     // Some constructs can be detected at compile time to involve
     // taking of closures. We keep track of that and avoid stack-allocation
     // if those are present.
-    bool needsClosures() {
+    bool needsClosures()
+    {
         return neededClosures;
     }
 
-    void setNeedsClosures() {
+    void setNeedsClosures()
+    {
         neededClosures = true;
     }
 
     // Label stuff....
-    
+
     // Registers a pending label. Returns true if the label is OK, false if it's a duplicate.
     // If it fails, the label stack isn't touched!
-    bool pushLabel(const Identifier& label);
+    bool pushLabel(const Identifier &label);
     void popLabel();
 
     // Binds all the labels to the given node
-    void bindLabels(Node* node);
+    void bindLabels(Node *node);
 
     // Returns destination for the label (node will be 0 if not found)
-    Node* resolveContinueLabel(Identifier label);
-    Node* resolveBreakLabel   (Identifier label);
+    Node *resolveContinueLabel(Identifier label);
+    Node *resolveBreakLabel(Identifier label);
 
     // Sets the targets for break/continues w/o label name
-    void pushDefaultBreak   (Node* node);
-    void pushDefaultContinue(Node* node);
-    void popDefaultBreak   ();
+    void pushDefaultBreak(Node *node);
+    void pushDefaultContinue(Node *node);
+    void popDefaultBreak();
     void popDefaultContinue();
 
     // Helpers for these and resolvePendingBreak
-    void enterLoop(Node* node) {
+    void enterLoop(Node *node)
+    {
         pushNest(ContBreakTarget, node);
         pushDefaultBreak(node);
         pushDefaultContinue(node);
     }
 
-    void exitLoop(Node* node) {
+    void exitLoop(Node *node)
+    {
         popNest();
         popDefaultBreak();
         popDefaultContinue();
@@ -207,40 +220,42 @@ public:
     }
 
     // Adds break/continue as needing relevant target for given node
-    void addPendingBreak   (Node* node, Addr addr);
-    void addPendingContinue(Node* node, Addr addr);
+    void addPendingBreak(Node *node, Addr addr);
+    void addPendingContinue(Node *node, Addr addr);
 
     // Patches up all pending break/continue statements to given destination.
     // LabelNode takes care of the breaks itself, the loops need to deal
     // with continue, though.
-    void resolvePendingBreaks   (Node* node, Addr dest);
-    void resolvePendingContinues(Node* node, Addr dest);
+    void resolvePendingBreaks(Node *node, Addr dest);
+    void resolvePendingContinues(Node *node, Addr dest);
 private:
-    OpValue* localScopeVal;
-    OpValue* thisVal;
-    OpValue* globalScopeVal;
-    OpValue* evalResRegister;
+    OpValue *localScopeVal;
+    OpValue *thisVal;
+    OpValue *globalScopeVal;
+    OpValue *evalResRegister;
 
     CodeType ctype;
     CompileType compType;
 
-    // Makes sure that any values of a local are 
-    void flushLocal(CodeBlock& block, Register reg);
+    // Makes sure that any values of a local are
+    void flushLocal(CodeBlock &block, Register reg);
 
     friend class RegDescriptor;
-    WTF::Vector<RegDescriptor*> locals;
-    WTF::Vector<RegDescriptor*> freeMarkTemps;
-    WTF::Vector<RegDescriptor*> freeNonMarkTemps;
+    WTF::Vector<RegDescriptor *> locals;
+    WTF::Vector<RegDescriptor *> freeMarkTemps;
+    WTF::Vector<RegDescriptor *> freeNonMarkTemps;
     Register initialMaxTemp;
     Register maxTemp;
 
-    FunctionBodyNode* fbody;
+    FunctionBodyNode *fbody;
 
-    void reuse(RegDescriptor* desc, bool markable) {
-        if (markable)
+    void reuse(RegDescriptor *desc, bool markable)
+    {
+        if (markable) {
             freeMarkTemps.append(desc);
-        else
+        } else {
             freeNonMarkTemps.append(desc);
+        }
     }
 
     // Cached version of #of Scopes's from below.
@@ -248,7 +263,7 @@ private:
 
     // Cached version of #of Finally's from below...
     int finallyDepth;
-    
+
     WTF::Vector<NestInfo> nests;
 
     // This is true if we see code constructs that require taking a closure
@@ -259,17 +274,17 @@ private:
     WTF::HashSet<Identifier> seenLabels;    // all labels we're inside
     WTF::Vector <Identifier> seenLabelsStack;
     WTF::Vector <Identifier> pendingLabels; // labels tha that haven't been bound to
-                                            // a statement yet.
+    // a statement yet.
 
     // Targets for continue/break w/o destination.
-    WTF::Vector<Node*> defaultBreakTargets;
-    WTF::Vector<Node*> defaultContinueTargets;
+    WTF::Vector<Node *> defaultBreakTargets;
+    WTF::Vector<Node *> defaultContinueTargets;
 
     // Named label targets
-    WTF::HashMap<Identifier, Node*> labelTargets;
+    WTF::HashMap<Identifier, Node *> labelTargets;
 
-    WTF::HashMap<Node*, WTF::Vector<Addr>* > pendingBreaks;
-    WTF::HashMap<Node*, WTF::Vector<Addr>* > pendingContinues;
+    WTF::HashMap<Node *, WTF::Vector<Addr>* > pendingBreaks;
+    WTF::HashMap<Node *, WTF::Vector<Addr>* > pendingContinues;
 };
 
 // We used register descriptors for two reasons:
@@ -278,33 +293,39 @@ private:
 class RegDescriptor
 {
 public:
-    RegDescriptor(CompileState* owner, Register reg, bool markable, bool temp = true):
+    RegDescriptor(CompileState *owner, Register reg, bool markable, bool temp = true):
         owner(owner), regNo(reg), temp(temp), markable(markable), killed(false), refCount(0)
     {}
 
-    Register reg() const {
+    Register reg() const
+    {
         return regNo;
     }
 
-    void ref() {
+    void ref()
+    {
         ++refCount;
     }
 
-    void deref() {
+    void deref()
+    {
         --refCount;
         if (refCount == 0) {
-            if (killed)
+            if (killed) {
                 delete this;
-            else if (temp)
+            } else if (temp) {
                 owner->reuse(this, markable);
+            }
         }
     }
 
-    bool live() {
+    bool live()
+    {
         return refCount > 0;
     }
 
-    void adopt(RegDescriptor* other) {
+    void adopt(RegDescriptor *other)
+    {
         // Make this point to the same as an another descriptor, which is about to die..
         temp     = other->temp;
         markable = other->markable;
@@ -314,7 +335,7 @@ public:
         other->killed = true;
     }
 private:
-    CompileState* owner;
+    CompileState *owner;
     Register      regNo;
     bool temp;
     bool markable;
@@ -322,21 +343,24 @@ private:
     int  refCount;
 };
 
-inline OpValue OpValue::immInt32(int32_t in) {
+inline OpValue OpValue::immInt32(int32_t in)
+{
     OpValue res;
     initImm(&res, OpType_int32);
     res.value.narrow.int32Val = in;
     return res;
 }
 
-inline OpValue OpValue::immNumber(double in) {
+inline OpValue OpValue::immNumber(double in)
+{
     OpValue res;
     initImm(&res, OpType_number);
     res.value.wide.numberVal = in;
     return res;
 }
 
-inline OpValue OpValue::immValue(JSValue* in) {
+inline OpValue OpValue::immValue(JSValue *in)
+{
     assert(in);
     OpValue res;
     initImm(&res, OpType_value);
@@ -344,42 +368,48 @@ inline OpValue OpValue::immValue(JSValue* in) {
     return res;
 }
 
-inline OpValue OpValue::immBool(bool in) {
+inline OpValue OpValue::immBool(bool in)
+{
     OpValue res;
     initImm(&res, OpType_bool);
     res.value.narrow.boolVal = in;
     return res;
 }
 
-inline OpValue OpValue::immString(UString* in) {
+inline OpValue OpValue::immString(UString *in)
+{
     OpValue res;
     initImm(&res, OpType_string);
     res.value.wide.stringVal = in;
     return res;
 }
 
-inline OpValue OpValue::immIdent(Identifier* in) {
+inline OpValue OpValue::immIdent(Identifier *in)
+{
     OpValue res;
     initImm(&res, OpType_ident);
     res.value.wide.identVal = in;
     return res;
 }
 
-inline OpValue OpValue::immNode(KJS::Node* in) {
+inline OpValue OpValue::immNode(KJS::Node *in)
+{
     OpValue res;
     initImm(&res, OpType_node);
     res.value.wide.nodeVal = in;
     return res;
 }
 
-inline OpValue OpValue::immCStr(const char* in) {
+inline OpValue OpValue::immCStr(const char *in)
+{
     OpValue res;
     initImm(&res, OpType_cstr);
     res.value.wide.cstrVal = in;
     return res;
 }
 
-inline OpValue OpValue::immAddr(Addr in) {
+inline OpValue OpValue::immAddr(Addr in)
+{
     OpValue res;
     initImm(&res, OpType_addr);
     res.value.narrow.addrVal = in;
@@ -391,4 +421,3 @@ inline OpValue::OpValue(): type(OpType_void) {} // since should never occur as a
 }
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

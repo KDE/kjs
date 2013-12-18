@@ -30,7 +30,8 @@
 #include <string.h>
 #include <wtf/MathExtras.h>
 
-namespace KJS {
+namespace KJS
+{
 
 static const double D16 = 65536.0;
 static const double D32 = 4294967296.0;
@@ -40,17 +41,17 @@ void *JSCell::operator new(size_t size)
     return Collector::allocate(size);
 }
 
-bool JSCell::getUInt32(uint32_t&) const
+bool JSCell::getUInt32(uint32_t &) const
 {
     return false;
 }
 
-bool JSCell::getTruncatedInt32(int32_t&) const
+bool JSCell::getTruncatedInt32(int32_t &) const
 {
     return false;
 }
 
-bool JSCell::getTruncatedUInt32(uint32_t&) const
+bool JSCell::getTruncatedUInt32(uint32_t &) const
 {
     return false;
 }
@@ -59,8 +60,9 @@ bool JSCell::getTruncatedUInt32(uint32_t&) const
 double JSValue::toInteger(ExecState *exec) const
 {
     int32_t i;
-    if (getTruncatedInt32(i))
+    if (getTruncatedInt32(i)) {
         return i;
+    }
     double d = toNumber(exec);
     return isNaN(d) ? 0.0 : trunc(d);
 }
@@ -68,17 +70,19 @@ double JSValue::toInteger(ExecState *exec) const
 double JSValue::toIntegerPreserveNaN(ExecState *exec) const
 {
     int32_t i;
-    if (getTruncatedInt32(i))
+    if (getTruncatedInt32(i)) {
         return i;
+    }
     return trunc(toNumber(exec));
 }
 
-int32_t JSValue::toInt32SlowCase(double d, bool& ok)
+int32_t JSValue::toInt32SlowCase(double d, bool &ok)
 {
     ok = true;
 
-    if (d >= -D32 / 2 && d < D32 / 2)
+    if (d >= -D32 / 2 && d < D32 / 2) {
         return static_cast<int32_t>(d);
+    }
 
     if (isNaN(d) || isInf(d)) {
         ok = false;
@@ -86,24 +90,26 @@ int32_t JSValue::toInt32SlowCase(double d, bool& ok)
     }
 
     double d32 = fmod(trunc(d), D32);
-    if (d32 >= D32 / 2)
+    if (d32 >= D32 / 2) {
         d32 -= D32;
-    else if (d32 < -D32 / 2)
+    } else if (d32 < -D32 / 2) {
         d32 += D32;
+    }
     return static_cast<int32_t>(d32);
 }
 
-int32_t JSValue::toInt32SlowCase(ExecState* exec, bool& ok) const
+int32_t JSValue::toInt32SlowCase(ExecState *exec, bool &ok) const
 {
     return JSValue::toInt32SlowCase(toNumber(exec), ok);
 }
 
-uint32_t JSValue::toUInt32SlowCase(double d, bool& ok)
+uint32_t JSValue::toUInt32SlowCase(double d, bool &ok)
 {
     ok = true;
 
-    if (d >= 0.0 && d < D32)
+    if (d >= 0.0 && d < D32) {
         return static_cast<uint32_t>(d);
+    }
 
     if (isNaN(d) || isInf(d)) {
         ok = false;
@@ -111,12 +117,13 @@ uint32_t JSValue::toUInt32SlowCase(double d, bool& ok)
     }
 
     double d32 = fmod(trunc(d), D32);
-    if (d32 < 0)
+    if (d32 < 0) {
         d32 += D32;
+    }
     return static_cast<uint32_t>(d32);
 }
 
-uint32_t JSValue::toUInt32SlowCase(ExecState* exec, bool& ok) const
+uint32_t JSValue::toUInt32SlowCase(ExecState *exec, bool &ok) const
 {
     return JSValue::toUInt32SlowCase(toNumber(exec), ok);
 }
@@ -124,21 +131,23 @@ uint32_t JSValue::toUInt32SlowCase(ExecState* exec, bool& ok) const
 uint16_t JSValue::toUInt16(ExecState *exec) const
 {
     uint32_t i;
-    if (getUInt32(i))
+    if (getUInt32(i)) {
         return static_cast<uint16_t>(i);
+    }
 
-    return KJS::toUInt16(const_cast<JSValue*>(this)->toNumber(exec));
+    return KJS::toUInt16(const_cast<JSValue *>(this)->toNumber(exec));
 }
 
-float JSValue::toFloat(ExecState* exec) const
+float JSValue::toFloat(ExecState *exec) const
 {
     return static_cast<float>(toNumber(exec));
 }
 
 bool JSCell::getNumber(double &numericValue) const
 {
-    if (!isNumber())
+    if (!isNumber()) {
         return false;
+    }
     numericValue = static_cast<const NumberImp *>(this)->value();
     return true;
 }
@@ -150,8 +159,9 @@ double JSCell::getNumber() const
 
 bool JSCell::getString(UString &stringValue) const
 {
-    if (!isString())
+    if (!isString()) {
         return false;
+    }
     stringValue = static_cast<const StringImp *>(this)->value();
     return true;
 }
@@ -173,38 +183,39 @@ const JSObject *JSCell::getObject() const
 
 bool JSCell::implementsCall() const
 {
-  return false;
+    return false;
 }
 
-JSCell* jsString()
+JSCell *jsString()
 {
     return new StringImp();
 }
 
-JSCell* jsString(const char* s)
+JSCell *jsString(const char *s)
 {
     return new StringImp(s, s ? strlen(s) : 0);
 }
 
-JSCell* jsString(const char* s, int len)
+JSCell *jsString(const char *s, int len)
 {
     return new StringImp(s, len);
 }
 
-JSCell* jsString(const UString& s)
+JSCell *jsString(const UString &s)
 {
     return s.isNull() ? new StringImp() : new StringImp(s);
 }
 
-JSCell* jsOwnedString(const UString& s)
+JSCell *jsOwnedString(const UString &s)
 {
     return s.isNull() ? new StringImp(UString::empty, StringImp::HasOtherOwner) : new StringImp(s, StringImp::HasOtherOwner);
 }
 
-JSCell* jsString(ExecState* exec, const JSValue* value)
+JSCell *jsString(ExecState *exec, const JSValue *value)
 {
-    if (value->isString())
-        return jsString(static_cast<const StringImp*>(value)->value());
+    if (value->isString()) {
+        return jsString(static_cast<const StringImp *>(value)->value());
+    }
     return jsString(value->toString(exec));
 }
 
@@ -215,21 +226,22 @@ JSValue *jsNumberCell(double d)
     return new NumberImp(d);
 }
 
-JSValue* JSValue::getByIndex(ExecState* exec, unsigned propertyName) const
+JSValue *JSValue::getByIndex(ExecState *exec, unsigned propertyName) const
 {
     switch (type()) {
     case StringType: {
-        UString s = static_cast<const StringImp*>(asCell())->value();
+        UString s = static_cast<const StringImp *>(asCell())->value();
         if (propertyName < static_cast<unsigned>(s.size())) {
             return jsString(s.substr(propertyName, 1));
         }
         // fall through
     }
     default: {
-        JSObject* obj = toObject(exec);
+        JSObject *obj = toObject(exec);
         PropertySlot slot;
-        if (obj->getPropertySlot(exec, propertyName, slot))
+        if (obj->getPropertySlot(exec, propertyName, slot)) {
             return slot.getValue(exec, obj, propertyName);
+        }
 
         return jsUndefined();
     }

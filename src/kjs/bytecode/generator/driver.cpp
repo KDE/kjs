@@ -24,7 +24,7 @@
 #include "tablebuilder.h"
 #include "filetemplate.h"
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc != 2) {
         std::cerr << "Usage: icemaker <path>\n";
@@ -39,12 +39,13 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    FileTemplate opcodesH  (path + "opcodes.h.in",   "opcodes.h");
+    FileTemplate opcodesH(path + "opcodes.h.in",   "opcodes.h");
     FileTemplate opcodesCpp(path + "opcodes.cpp.in", "opcodes.cpp");
     FileTemplate machineCpp(path + "machine.cpp.in", "machine.cpp");
 
-    if (!opcodesH.ok() || !opcodesCpp.ok() || !machineCpp.ok())
+    if (!opcodesH.ok() || !opcodesCpp.ok() || !machineCpp.ok()) {
         return -1;
+    }
 
     std::cout << "icemaker -41.9 for KJS/FrostByte\n";
     std::cout << "Generating bytecode instruction selection tables and VM dispatcher...\n";
@@ -54,4 +55,3 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

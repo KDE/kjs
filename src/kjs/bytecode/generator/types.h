@@ -47,39 +47,42 @@ enum ConvFlags {
     Conv_MayThrow = 8
 };
 
-struct Type
-{
+struct Type {
     string name;
     string nativeName;
 
     unsigned flags;
 
     // may not be the same as Type_Align8 in the feature..
-    bool alignTo8() const {
+    bool alignTo8() const
+    {
         return (flags & Type_Align8) == Type_Align8;
     }
 
-    bool hasReg() const {
+    bool hasReg() const
+    {
         return (flags & Type_HaveReg) == Type_HaveReg;
     }
 
-    bool hasImm() const {
+    bool hasImm() const
+    {
         return (flags & Type_HaveImm) == Type_HaveImm;
     }
 
     // field in store cells to access for this type
-    string field() const {
+    string field() const
+    {
         return ((flags & Type_Align8) ? "wide" : "narrow") +
-                std::string(".") + name + "Val";
+               std::string(".") + name + "Val";
     }
 
-    bool operator==(const Type& other) const {
+    bool operator==(const Type &other) const
+    {
         return name == other.name;
     }
 };
 
-struct ConversionInfo
-{
+struct ConversionInfo {
     string name;
     string impl;
     int  cost;   // for w/in tile for immediate, for external for reg
@@ -95,30 +98,30 @@ struct ConversionInfo
 class TableBuilder;
 
 // This class is responsible for managing types & conversions, and generating
-// conversion-selection routines. 
+// conversion-selection routines.
 class TypeTable
 {
 public:
-    TypeTable(TableBuilder* instrBuilder, CodePrinter& out);
+    TypeTable(TableBuilder *instrBuilder, CodePrinter &out);
 
     void generateCode();
-    
-    void handleType(const string& type, const string& nativeName, unsigned flags);
-    void handleConversion(const string& runtimeRoutine, int codeLine,
-                          unsigned flags, const string& from, const string& to,
+
+    void handleType(const string &type, const string &nativeName, unsigned flags);
+    void handleConversion(const string &runtimeRoutine, int codeLine,
+                          unsigned flags, const string &from, const string &to,
                           int tileCost, int registerCost);
 
     // issues error if there is a problem..
-    vector<Type> resolveSignature(const StringList& in);
-    Type         resolveType(const string& type);
+    vector<Type> resolveSignature(const StringList &in);
+    Type         resolveType(const string &type);
 
-    ConversionInfo immConv(const Type& from, const Type& to);
+    ConversionInfo immConv(const Type &from, const Type &to);
 private:
-    TableBuilder* instrBuilder;
-    CodePrinter&  out;
-    void printConversionInfo(Array& array, map<string, map<string, ConversionInfo> >& table, bool reg);
+    TableBuilder *instrBuilder;
+    CodePrinter  &out;
+    void printConversionInfo(Array &array, map<string, map<string, ConversionInfo> > &table, bool reg);
 
-    void printConversionRoutine(const ConversionInfo& conversion);
+    void printConversionRoutine(const ConversionInfo &conversion);
 
     map<string, Type> types;
     StringList        typeNames;
@@ -132,4 +135,3 @@ private:
 };
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

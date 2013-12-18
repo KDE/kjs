@@ -34,32 +34,37 @@
 #include "wtf/Vector.h"
 #include "PropertyNameArray.h"
 
-namespace KJS {
-    class ActivationImp;
-    class Interpreter;
-    class FunctionImp;
-    class FunctionBodyNode;
-    class ProgramNode;
-    class JSGlobalObject;
+namespace KJS
+{
+class ActivationImp;
+class Interpreter;
+class FunctionImp;
+class FunctionBodyNode;
+class ProgramNode;
+class JSGlobalObject;
 
-    enum CodeType { GlobalCode, EvalCode, FunctionCode };
+enum CodeType { GlobalCode, EvalCode, FunctionCode };
 
-  /**
-   * Represents the current state of script execution. This object allows you
-   * obtain a handle the interpreter that is currently executing the script,
-   * and also the current execution context.
-   */
-  class KJS_EXPORT ExecState : Noncopyable {
+/**
+ * Represents the current state of script execution. This object allows you
+ * obtain a handle the interpreter that is currently executing the script,
+ * and also the current execution context.
+ */
+class KJS_EXPORT ExecState : Noncopyable
+{
     friend class Interpreter;
     friend class FunctionImp;
     friend class GlobalFuncImp;
-  public:
+public:
     /**
      * Returns the interpreter associated with this execution state
      *
      * @return The interpreter executing the script
      */
-    Interpreter* dynamicInterpreter() const { return m_interpreter; }
+    Interpreter *dynamicInterpreter() const
+    {
+        return m_interpreter;
+    }
 
     /**
      * Returns the interpreter associated with the current scope's
@@ -67,7 +72,7 @@ namespace KJS {
      *
      * @return The interpreter currently in scope
      */
-    Interpreter* lexicalInterpreter() const;
+    Interpreter *lexicalInterpreter() const;
 
     /**
      * This describes how an exception should be handled
@@ -86,7 +91,8 @@ namespace KJS {
     // Cleanup depth entries from the stack, w/o running jumps
     void quietUnwind(int depth);
 
-    void setMachineRegisters(const unsigned char* pcBase, const unsigned char** pcLoc, LocalStorageEntry** machineLocalStoreLoc) {
+    void setMachineRegisters(const unsigned char *pcBase, const unsigned char **pcLoc, LocalStorageEntry **machineLocalStoreLoc)
+    {
         m_pcBase            = pcBase;
         m_pc                = pcLoc;
         m_machineLocalStore = machineLocalStoreLoc;
@@ -102,7 +108,8 @@ namespace KJS {
      entry is added to unwind m_deferredCompletions if that happens.
     */
 
-    void deferCompletion() {
+    void deferCompletion()
+    {
         pushExceptionHandler(RemoveDeferred);
         m_deferredCompletions.append(abruptCompletion());
         clearException();
@@ -114,14 +121,14 @@ namespace KJS {
      This will handle all the cases itself except for one: return,
      for which it will return the value to return (otherwise returning 0)
     */
-    JSValue* reactivateCompletion(bool insideTryFinally);
+    JSValue *reactivateCompletion(bool insideTryFinally);
 
     /**
      * Set the exception associated with this execution state,
      * updating the program counter appropriately, and executing any relevant EH cleanups.
      * @param e The JSValue of the exception being set
      */
-    void setException(JSValue* e);
+    void setException(JSValue *e);
 
     /**
      * Records an abrupt completion of code, and jumps to the closest catch or finally.
@@ -133,13 +140,19 @@ namespace KJS {
     /**
      * Clears the exception or other abnormal completion set on this execution state.
      */
-    void clearException() { m_completion = Completion(); }
+    void clearException()
+    {
+        m_completion = Completion();
+    }
 
     /**
      * Returns the exception associated with this execution state.
      * @return The current execution state exception
      */
-    JSValue* exception() const { return m_completion.complType() == Throw ? m_completion.value() : 0; }
+    JSValue *exception() const
+    {
+        return m_completion.complType() == Throw ? m_completion.value() : 0;
+    }
 
     /**
      * Use this to check if an exception was thrown in the current
@@ -147,9 +160,15 @@ namespace KJS {
      *
      * @return Whether an exception was thrown
      */
-    bool hadException() const { return m_completion.complType() == Throw; }
+    bool hadException() const
+    {
+        return m_completion.complType() == Throw;
+    }
 
-    Completion abruptCompletion() const { return m_completion; }
+    Completion abruptCompletion() const
+    {
+        return m_completion;
+    }
 
     /**
      * Returns the scope chain for this execution context. This is used for
@@ -158,7 +177,10 @@ namespace KJS {
      *
      * @return The execution context's scope chain
      */
-    const ScopeChain& scopeChain() const { return scope; }
+    const ScopeChain &scopeChain() const
+    {
+        return scope;
+    }
 
     /**
      * Returns the variable object for the execution context. This contains a
@@ -166,8 +188,14 @@ namespace KJS {
      *
      * @return The execution context's variable object
      */
-    JSObject* variableObject() const { return m_variable; }
-    void setVariableObject(JSObject* v) { m_variable = v; }
+    JSObject *variableObject() const
+    {
+        return m_variable;
+    }
+    void setVariableObject(JSObject *v)
+    {
+        m_variable = v;
+    }
 
     /**
      * Returns the "this" value for the execution context. This is the value
@@ -184,7 +212,10 @@ namespace KJS {
      *
      * @return The execution context's "this" value
      */
-    JSObject* thisValue() const { return m_thisVal; }
+    JSObject *thisValue() const
+    {
+        return m_thisVal;
+    }
 
     /**
      * Returns the context from which the current context was invoked. For
@@ -194,112 +225,155 @@ namespace KJS {
      *
      * @return The calling execution context
      */
-    ExecState* callingExecState() { return m_callingExec; }
+    ExecState *callingExecState()
+    {
+        return m_callingExec;
+    }
 
     /**
      * Returns the execState of a previous nested evaluation session, if any.
      */
-    ExecState* savedExecState() { return m_savedExec; }
+    ExecState *savedExecState()
+    {
+        return m_savedExec;
+    }
 
-    JSObject* activationObject() {
+    JSObject *activationObject()
+    {
         assert(m_codeType == FunctionCode);
         return m_variable;
     }
 
-    CodeType codeType() { return m_codeType; }
-    FunctionBodyNode* currentBody() { return m_currentBody; }
-    FunctionImp* function() const { return m_function; }
+    CodeType codeType()
+    {
+        return m_codeType;
+    }
+    FunctionBodyNode *currentBody()
+    {
+        return m_currentBody;
+    }
+    FunctionImp *function() const
+    {
+        return m_function;
+    }
 
-    void pushVariableObjectScope(JSVariableObject* s) { scope.pushVariableObject(s); }
-    void pushScope(JSObject* s) { scope.push(s); }
-    void popScope() { scope.pop(); }
+    void pushVariableObjectScope(JSVariableObject *s)
+    {
+        scope.pushVariableObject(s);
+    }
+    void pushScope(JSObject *s)
+    {
+        scope.push(s);
+    }
+    void popScope()
+    {
+        scope.pop();
+    }
 
     void mark();
 
-    void initLocalStorage(LocalStorageEntry* store, size_t size) {
+    void initLocalStorage(LocalStorageEntry *store, size_t size)
+    {
         m_localStore = store;
         m_localStoreSize = size;
     }
 
-    void updateLocalStorage(LocalStorageEntry* newStore) {
+    void updateLocalStorage(LocalStorageEntry *newStore)
+    {
         m_localStore         = newStore;
         *m_machineLocalStore = newStore;
     }
 
-    LocalStorageEntry* localStorage() { return m_localStore; }
+    LocalStorageEntry *localStorage()
+    {
+        return m_localStore;
+    }
 
     // This is a workaround to avoid accessing the global variables for these identifiers in
     // important property lookup functions, to avoid taking PIC branches in Mach-O binaries
-    const CommonIdentifiers& propertyNames() const { return *m_propertyNames; }
+    const CommonIdentifiers &propertyNames() const
+    {
+        return *m_propertyNames;
+    }
 
     // Compatibility stuff:
-    ExecState* context() { return this; }
-    ExecState* callingContext() { return callingExecState(); }
-  protected:
-    ExecState(Interpreter* intp, ExecState* save);
+    ExecState *context()
+    {
+        return this;
+    }
+    ExecState *callingContext()
+    {
+        return callingExecState();
+    }
+protected:
+    ExecState(Interpreter *intp, ExecState *save);
     ~ExecState();
     void markSelf();
 
-    Interpreter* m_interpreter;
+    Interpreter *m_interpreter;
     Completion   m_completion;
-    CommonIdentifiers* m_propertyNames;
-    ExecState* m_callingExec;
-    ExecState* m_savedExec; // in case of recursion of evaluation. Needed to mark things properly;
-                            // note that this is disjoint from the above, since that's only used for
-                            // eval/function, while this is for global.
+    CommonIdentifiers *m_propertyNames;
+    ExecState *m_callingExec;
+    ExecState *m_savedExec; // in case of recursion of evaluation. Needed to mark things properly;
+    // note that this is disjoint from the above, since that's only used for
+    // eval/function, while this is for global.
 
-    FunctionBodyNode* m_currentBody;
-    FunctionImp* m_function;
+    FunctionBodyNode *m_currentBody;
+    FunctionImp *m_function;
 
     ScopeChain scope;
-    JSObject* m_variable;
-    JSObject* m_thisVal;
+    JSObject *m_variable;
+    JSObject *m_thisVal;
 
-    LocalStorageEntry*      m_localStore;
+    LocalStorageEntry      *m_localStore;
     size_t                  m_localStoreSize;
 
     struct ExceptionHandler {
         ExceptionHandler() {}
         ExceptionHandler(HandlerType type, Addr dest):
-          type(type), dest(dest) {}
+            type(type), dest(dest) {}
 
         HandlerType type;
         Addr        dest;
     };
 
-    const unsigned char*  m_pcBase;  // The address of pc = 0
-    const unsigned char** m_pc;      // Where the current fetch address is stored
-    LocalStorageEntry** m_machineLocalStore; // Machine's copy of m_localStore
+    const unsigned char  *m_pcBase;  // The address of pc = 0
+    const unsigned char **m_pc;      // Where the current fetch address is stored
+    LocalStorageEntry **m_machineLocalStore; // Machine's copy of m_localStore
     WTF::Vector<ExceptionHandler, 4> m_exceptionHandlers;
     WTF::Vector<Completion, 4>       m_deferredCompletions;
 
     CodeType m_codeType;
-  };
+};
 
-  typedef ExecState Context; // Compatibility only
+typedef ExecState Context; // Compatibility only
 
-    class GlobalExecState : public ExecState {
-    public:
-        GlobalExecState(Interpreter* intp, JSGlobalObject* global);
-    };
+class GlobalExecState : public ExecState
+{
+public:
+    GlobalExecState(Interpreter *intp, JSGlobalObject *global);
+};
 
-    class InterpreterExecState : public ExecState {
-    public:
-        InterpreterExecState(Interpreter* intp, JSGlobalObject* global, JSObject* thisObject, ProgramNode*);
-    };
+class InterpreterExecState : public ExecState
+{
+public:
+    InterpreterExecState(Interpreter *intp, JSGlobalObject *global, JSObject *thisObject, ProgramNode *);
+};
 
-    class EvalExecState : public ExecState {
-    public:
-        EvalExecState(Interpreter* intp, JSGlobalObject* global, ProgramNode* body, ExecState* callingExecState);
-    };
+class EvalExecState : public ExecState
+{
+public:
+    EvalExecState(Interpreter *intp, JSGlobalObject *global, ProgramNode *body, ExecState *callingExecState);
+};
 
-    // Note: this does not push the activation on the scope chain,
-    // as the activation is not initialized at this point.
-    class FunctionExecState : public ExecState {
-    public:
-        FunctionExecState(Interpreter* intp, JSObject* thisObject,
-                          FunctionBodyNode*, ExecState* callingExecState, FunctionImp*);
-    };
+// Note: this does not push the activation on the scope chain,
+// as the activation is not initialized at this point.
+class FunctionExecState : public ExecState
+{
+public:
+    FunctionExecState(Interpreter *intp, JSObject *thisObject,
+                      FunctionBodyNode *, ExecState *callingExecState, FunctionImp *);
+};
 
 } // namespace KJS
 

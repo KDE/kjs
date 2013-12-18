@@ -48,36 +48,38 @@
 
 #include "bytecode/machine.h"
 
-namespace KJS {
+namespace KJS
+{
 
 // ------------------------------ Node -----------------------------------------
-
 
 #ifndef NDEBUG
 struct NodeCounter {
     static unsigned count;
     ~NodeCounter()
     {
-        if (count)
+        if (count) {
             fprintf(stderr, "LEAK: %d KJS::Node\n", count);
+        }
     }
 };
 unsigned NodeCounter::count = 0;
 static NodeCounter nodeCounter;
 #endif
 
-static HashSet<Node*>* newNodes;
-static HashCountedSet<Node*>* nodeExtraRefCounts;
+static HashSet<Node *> *newNodes;
+static HashCountedSet<Node *> *nodeExtraRefCounts;
 
 Node::Node()
 {
 #ifndef NDEBUG
     ++NodeCounter::count;
 #endif
-  m_line = lexer().lineNo();
-  if (!newNodes)
-      newNodes = new HashSet<Node*>;
-  newNodes->add(this);
+    m_line = lexer().lineNo();
+    if (!newNodes) {
+        newNodes = new HashSet<Node *>;
+    }
+    newNodes->add(this);
 }
 
 Node::~Node()
@@ -91,7 +93,7 @@ void Node::ref()
 {
     // bumping from 0 to 1 is just removing from the new nodes set
     if (newNodes) {
-        HashSet<Node*>::iterator it = newNodes->find(this);
+        HashSet<Node *>::iterator it = newNodes->find(this);
         if (it != newNodes->end()) {
             newNodes->remove(it);
             ASSERT(!nodeExtraRefCounts || !nodeExtraRefCounts->contains(this));
@@ -101,8 +103,9 @@ void Node::ref()
 
     ASSERT(!newNodes || !newNodes->contains(this));
 
-    if (!nodeExtraRefCounts)
-        nodeExtraRefCounts = new HashCountedSet<Node*>;
+    if (!nodeExtraRefCounts) {
+        nodeExtraRefCounts = new HashCountedSet<Node *>;
+    }
     nodeExtraRefCounts->add(this);
 }
 
@@ -115,11 +118,12 @@ void Node::deref()
         return;
     }
 
-    HashCountedSet<Node*>::iterator it = nodeExtraRefCounts->find(this);
-    if (it == nodeExtraRefCounts->end())
+    HashCountedSet<Node *>::iterator it = nodeExtraRefCounts->find(this);
+    if (it == nodeExtraRefCounts->end()) {
         delete this;
-    else
+    } else {
         nodeExtraRefCounts->remove(it);
+    }
 }
 
 unsigned Node::refcount()
@@ -131,21 +135,24 @@ unsigned Node::refcount()
 
     ASSERT(!newNodes || !newNodes->contains(this));
 
-    if (!nodeExtraRefCounts)
+    if (!nodeExtraRefCounts) {
         return 1;
+    }
 
     return 1 + nodeExtraRefCounts->count(this);
 }
 
 void Node::clearNewNodes()
 {
-    if (!newNodes)
+    if (!newNodes) {
         return;
+    }
 
 #ifndef NDEBUG
-    HashSet<Node*>::iterator end = newNodes->end();
-    for (HashSet<Node*>::iterator it = newNodes->begin(); it != end; ++it)
+    HashSet<Node *>::iterator end = newNodes->end();
+    for (HashSet<Node *>::iterator it = newNodes->begin(); it != end; ++it) {
         ASSERT(!nodeExtraRefCounts || !nodeExtraRefCounts->contains(*it));
+    }
 #endif
     deleteAllValues(*newNodes);
     delete newNodes;
@@ -162,29 +169,29 @@ static void substitute(UString &string, const UString &substring)
     string = newString;
 }
 
-static inline int currentSourceId(ExecState* exec)
+static inline int currentSourceId(ExecState *exec)
 {
     return exec->currentBody()->sourceId();
 }
 
-static inline const UString& currentSourceURL(ExecState* exec)
+static inline const UString &currentSourceURL(ExecState *exec)
 {
     return exec->currentBody()->sourceURL();
 }
 
-JSValue* Node::throwError(ExecState* exec, ErrorType e, const UString& msg)
+JSValue *Node::throwError(ExecState *exec, ErrorType e, const UString &msg)
 {
     return KJS::throwError(exec, e, msg, lineNo(), currentSourceId(exec), currentSourceURL(exec));
 }
 
-JSValue* Node::throwError(ExecState* exec, ErrorType e, const UString& msg, const Identifier& label)
+JSValue *Node::throwError(ExecState *exec, ErrorType e, const UString &msg, const Identifier &label)
 {
     UString message = msg;
     substitute(message, label.ustring());
     return KJS::throwError(exec, e, message, lineNo(), currentSourceId(exec), currentSourceURL(exec));
 }
 
-JSValue* Node::throwUndefinedVariableError(ExecState* exec, const Identifier& ident)
+JSValue *Node::throwUndefinedVariableError(ExecState *exec, const Identifier &ident)
 {
     return throwError(exec, ReferenceError, "Cannot find variable: %s", ident);
 }
@@ -194,60 +201,68 @@ Node *Node::nodeInsideAllParens()
     return this;
 }
 
-class VarDeclVisitor: public NodeVisitor {
-  private:
-    ExecState* m_exec;
-  public:
-    VarDeclVisitor(ExecState* exec) : m_exec(exec)
+class VarDeclVisitor: public NodeVisitor
+{
+private:
+    ExecState *m_exec;
+public:
+    VarDeclVisitor(ExecState *exec) : m_exec(exec)
     {}
 
-    virtual Node* visit(Node* node) {
-      node->processVarDecl(m_exec);
+    virtual Node *visit(Node *node)
+    {
+        node->processVarDecl(m_exec);
 
-      //Do not recurse inside function bodies, or things that 
-      // syntactically can't contain declarations
-      if (!node->scanForDeclarations())
-        return 0;
+        //Do not recurse inside function bodies, or things that
+        // syntactically can't contain declarations
+        if (!node->scanForDeclarations()) {
+            return 0;
+        }
 
-      return NodeVisitor::visit(node);
+        return NodeVisitor::visit(node);
     }
 };
 
-class FuncDeclVisitor: public NodeVisitor {
-  private:
-    ExecState* m_exec;
-  public:
-    FuncDeclVisitor(ExecState* exec) : m_exec(exec)
+class FuncDeclVisitor: public NodeVisitor
+{
+private:
+    ExecState *m_exec;
+public:
+    FuncDeclVisitor(ExecState *exec) : m_exec(exec)
     {}
 
-    virtual Node* visit(Node* node) {
-      node->processFuncDecl(m_exec);
+    virtual Node *visit(Node *node)
+    {
+        node->processFuncDecl(m_exec);
 
-      if (!node->scanForDeclarations())
-        return 0;
+        if (!node->scanForDeclarations()) {
+            return 0;
+        }
 
-      return NodeVisitor::visit(node);
+        return NodeVisitor::visit(node);
     }
 };
 
-void Node::processDecls(ExecState *exec) {
-  VarDeclVisitor vVisit(exec);
-  vVisit.visit(this);
+void Node::processDecls(ExecState *exec)
+{
+    VarDeclVisitor vVisit(exec);
+    vVisit.visit(this);
 
-  FuncDeclVisitor fVisit(exec);
-  fVisit.visit(this);
+    FuncDeclVisitor fVisit(exec);
+    fVisit.visit(this);
 }
 
-void Node::processVarDecl (ExecState*)
+void Node::processVarDecl(ExecState *)
 {}
 
-void Node::processFuncDecl(ExecState*)
+void Node::processFuncDecl(ExecState *)
 {}
 
 // ------------------------------ NodeVisitor ----------------------------------
-Node* NodeVisitor::visit(Node *node) {
-  node->recurseVisit(this);
-  return 0;
+Node *NodeVisitor::visit(Node *node)
+{
+    node->recurseVisit(this);
+    return 0;
 }
 
 // ------------------------------ StatementNode --------------------------------
@@ -264,10 +279,10 @@ void StatementNode::setLoc(int firstLine, int lastLine) const
     m_lastLine = lastLine;
 }
 
-void StatementNode::hitStatement(ExecState* exec)
+void StatementNode::hitStatement(ExecState *exec)
 {
-  // The debugger is always non-zero here, since otherwise this won't be involved
-  exec->dynamicInterpreter()->debugger()->reportAtStatement(exec, currentSourceId(exec), firstLine(), lastLine());
+    // The debugger is always non-zero here, since otherwise this won't be involved
+    exec->dynamicInterpreter()->debugger()->reportAtStatement(exec, currentSourceId(exec), firstLine(), lastLine());
 }
 
 // ------------------------------ GroupNode ------------------------------------
@@ -275,9 +290,9 @@ void StatementNode::hitStatement(ExecState* exec)
 Node *GroupNode::nodeInsideAllParens()
 {
     Node *n = this;
-    do
+    do {
         n = static_cast<GroupNode *>(n)->group.get();
-    while (n->isGroupNode());
+    } while (n->isGroupNode());
     return n;
 }
 
@@ -285,7 +300,6 @@ void GroupNode::recurseVisit(NodeVisitor *visitor)
 {
     recurseVisitLink(visitor, group);
 }
-
 
 // ------------------------------ ElementNode ----------------------------------
 
@@ -299,7 +313,6 @@ void ElementNode::recurseVisit(NodeVisitor *visitor)
     recurseVisitLink(visitor, next);
     recurseVisitLink(visitor, node);
 }
-
 
 // ------------------------------ ArrayNode ------------------------------------
 
@@ -339,8 +352,8 @@ void PropertyNode::recurseVisit(NodeVisitor *visitor)
 
 void BracketAccessorNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr1);
-  recurseVisitLink(visitor, expr2);
+    recurseVisitLink(visitor, expr1);
+    recurseVisitLink(visitor, expr2);
 }
 
 // ------------------------------ DotAccessorNode --------------------------------
@@ -398,125 +411,125 @@ void FunctionCallReferenceNode::recurseVisit(NodeVisitor *visitor)
 
 void PostfixNode::recurseVisit(NodeVisitor *visitor)
 {
-   Node::recurseVisitLink(visitor, m_loc);
+    Node::recurseVisitLink(visitor, m_loc);
 }
 
 // ------------------------------ DeleteReferenceNode -------------------------------
 
 void DeleteReferenceNode::recurseVisit(NodeVisitor *visitor)
 {
-   Node::recurseVisitLink(visitor, loc);
+    Node::recurseVisitLink(visitor, loc);
 }
 
 // ------------------------------ DeleteValueNode -----------------------------------
 
 void DeleteValueNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, m_expr);
+    recurseVisitLink(visitor, m_expr);
 }
 
 // ------------------------------ VoidNode -------------------------------------
 
 void VoidNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ TypeOfVarNode -----------------------------------
 
 void TypeOfVarNode::recurseVisit(NodeVisitor *visitor)
 {
-   Node::recurseVisitLink(visitor, loc);
+    Node::recurseVisitLink(visitor, loc);
 }
 
 // ------------------------------ TypeOfValueNode -----------------------------------
 
 void TypeOfValueNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, m_expr);
+    recurseVisitLink(visitor, m_expr);
 }
 
 // ------------------------------ PrefixNode ----------------------------------------
 
 void PrefixNode::recurseVisit(NodeVisitor *visitor)
 {
-   Node::recurseVisitLink(visitor, m_loc);
+    Node::recurseVisitLink(visitor, m_loc);
 }
 
 // ------------------------------ UnaryPlusNode --------------------------------
 
 void UnaryPlusNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ NegateNode -----------------------------------
 
 void NegateNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ BitwiseNotNode -------------------------------
 
 void BitwiseNotNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ LogicalNotNode -------------------------------
 
 void LogicalNotNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------ BinaryOperatorNode -------------------------------
 
 void BinaryOperatorNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr1);
-  recurseVisitLink(visitor, expr2);
+    recurseVisitLink(visitor, expr1);
+    recurseVisitLink(visitor, expr2);
 }
 
 // ------------------------------ BinaryLogicalNode ----------------------------
 
 void BinaryLogicalNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr1);
-  recurseVisitLink(visitor, expr2);
+    recurseVisitLink(visitor, expr1);
+    recurseVisitLink(visitor, expr2);
 }
 
 // ------------------------------ ConditionalNode ------------------------------
 
 void ConditionalNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, logical);
-  recurseVisitLink(visitor, expr1);
-  recurseVisitLink(visitor, expr2);
+    recurseVisitLink(visitor, logical);
+    recurseVisitLink(visitor, expr1);
+    recurseVisitLink(visitor, expr2);
 }
 
 // ------------------------------ AssignNode -----------------------------------
 
 void AssignNode::recurseVisit(NodeVisitor *visitor)
 {
-   Node::recurseVisitLink(visitor, m_loc);
-   Node::recurseVisitLink(visitor, m_right);
+    Node::recurseVisitLink(visitor, m_loc);
+    Node::recurseVisitLink(visitor, m_right);
 }
 
 // ------------------------------ CommaNode ------------------------------------
 
 void CommaNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr1);
-  recurseVisitLink(visitor, expr2);
+    recurseVisitLink(visitor, expr1);
+    recurseVisitLink(visitor, expr2);
 }
 
 // ------------------------------ AssignExprNode -------------------------------
 
 void AssignExprNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ VarDeclNode ----------------------------------
@@ -530,82 +543,87 @@ VarDeclNode::VarDeclNode(const Identifier &id, AssignExprNode *in, Type t)
 // ECMA 12.2
 JSValue *VarDeclNode::evaluate(ExecState *exec)
 {
-  JSObject* variable = exec->variableObject();
+    JSObject *variable = exec->variableObject();
 
-  JSValue* val;
-  if (init) {
-      val = init->evaluate(exec);
-      KJS_CHECKEXCEPTIONVALUE
-  } else {
-      // already declared? - check with getDirect so you can override
-      // built-in properties of the global object with var declarations.
-      // Also check for 'arguments' property. The 'arguments' cannot be found with
-      // getDirect, because it's created lazily by
-      // ActivationImp::getOwnPropertySlot.
-      // Since variable declarations are always in function scope, 'variable'
-      // will always contain instance of ActivationImp and ActivationImp will
-      // always have 'arguments' property
-      if (variable->getDirect(ident) || ident == exec->propertyNames().arguments)
-          return 0;
-      val = jsUndefined();
-  }
+    JSValue *val;
+    if (init) {
+        val = init->evaluate(exec);
+        KJS_CHECKEXCEPTIONVALUE
+    } else {
+        // already declared? - check with getDirect so you can override
+        // built-in properties of the global object with var declarations.
+        // Also check for 'arguments' property. The 'arguments' cannot be found with
+        // getDirect, because it's created lazily by
+        // ActivationImp::getOwnPropertySlot.
+        // Since variable declarations are always in function scope, 'variable'
+        // will always contain instance of ActivationImp and ActivationImp will
+        // always have 'arguments' property
+        if (variable->getDirect(ident) || ident == exec->propertyNames().arguments) {
+            return 0;
+        }
+        val = jsUndefined();
+    }
 
 #ifdef KJS_VERBOSE
-  printInfo(exec,(UString("new variable ")+ident.ustring()).cstring().c_str(),val);
+    printInfo(exec, (UString("new variable ") + ident.ustring()).cstring().c_str(), val);
 #endif
-  // We use Internal to bypass all checks in derived objects, e.g. so that
-  // "var location" creates a dynamic property instead of activating window.location.
-  int flags = Internal;
-  if (exec->codeType() != EvalCode)
-    flags |= DontDelete;
-  if (varType == VarDeclNode::Constant)
-    flags |= ReadOnly;
-  variable->put(exec, ident, val, flags);
+    // We use Internal to bypass all checks in derived objects, e.g. so that
+    // "var location" creates a dynamic property instead of activating window.location.
+    int flags = Internal;
+    if (exec->codeType() != EvalCode) {
+        flags |= DontDelete;
+    }
+    if (varType == VarDeclNode::Constant) {
+        flags |= ReadOnly;
+    }
+    variable->put(exec, ident, val, flags);
 
-  return 0; //No useful value, not a true expr
+    return 0; //No useful value, not a true expr
 }
 #endif
 
 void VarDeclNode::processVarDecl(ExecState *exec)
 {
-  JSObject* variable = exec->variableObject();
+    JSObject *variable = exec->variableObject();
 
-  // First, determine which flags we want to use..
-  int flags = DontDelete;
-  if (varType == VarDeclNode::Constant)
-    flags |= ReadOnly;
+    // First, determine which flags we want to use..
+    int flags = DontDelete;
+    if (varType == VarDeclNode::Constant) {
+        flags |= ReadOnly;
+    }
 
-  // Are we inside a function? If so, we fill in the symbol table
-  switch (exec->codeType()) {
+    // Are we inside a function? If so, we fill in the symbol table
+    switch (exec->codeType()) {
     case FunctionCode:
-      // Inside a function, we're just computing static information.
-      // so, just fill in the symbol table.
-      exec->currentBody()->addVarDecl(ident, flags, exec);
-      return;
+        // Inside a function, we're just computing static information.
+        // so, just fill in the symbol table.
+        exec->currentBody()->addVarDecl(ident, flags, exec);
+        return;
     case EvalCode:
-      // eval-injected variables can be deleted..
-      flags &= ~DontDelete;
+        // eval-injected variables can be deleted..
+        flags &= ~DontDelete;
 
-      // If a variable by this name already exists, don't clobber it -
-      // eval may be trying to inject a variable that already exists..
-      if (!variable->hasProperty(exec, ident)) {
-        variable->put(exec, ident, jsUndefined(), flags);
-        // eval injected a new local into scope! Better mark that down,
-        // so that NonLocalResolver stops skipping the local scope
-        variable->setLocalInjected();
-      }
-      break;
+        // If a variable by this name already exists, don't clobber it -
+        // eval may be trying to inject a variable that already exists..
+        if (!variable->hasProperty(exec, ident)) {
+            variable->put(exec, ident, jsUndefined(), flags);
+            // eval injected a new local into scope! Better mark that down,
+            // so that NonLocalResolver stops skipping the local scope
+            variable->setLocalInjected();
+        }
+        break;
     case GlobalCode:
-      // If a variable by this name already exists, don't clobber it -
-      // ### I am not sue this is needed for GlobalCode
-      if (!variable->hasProperty(exec, ident))
-        variable->put(exec, ident, jsUndefined(), flags);
-  };
+        // If a variable by this name already exists, don't clobber it -
+        // ### I am not sue this is needed for GlobalCode
+        if (!variable->hasProperty(exec, ident)) {
+            variable->put(exec, ident, jsUndefined(), flags);
+        }
+    };
 }
 
 void VarDeclNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, init);
+    recurseVisitLink(visitor, init);
 }
 
 // ------------------------------ VarDeclListNode ------------------------------
@@ -617,28 +635,28 @@ void VarDeclListNode::breakCycle()
 
 void VarDeclListNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, var);
-  recurseVisitLink(visitor, next);
+    recurseVisitLink(visitor, var);
+    recurseVisitLink(visitor, next);
 }
 
 // ------------------------------ VarStatementNode -----------------------------
 
 void VarStatementNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, next);
+    recurseVisitLink(visitor, next);
 }
 
 // ------------------------------ BlockNode ------------------------------------
 
 BlockNode::BlockNode(SourceElementsNode *s)
 {
-  if (s) {
-    source = s->next.release();
-    Parser::removeNodeCycle(source.get());
-    setLoc(s->firstLine(), s->lastLine());
-  } else {
-    source = 0;
-  }
+    if (s) {
+        source = s->next.release();
+        Parser::removeNodeCycle(source.get());
+        setLoc(s->firstLine(), s->lastLine());
+    } else {
+        source = 0;
+    }
 }
 
 void BlockNode::recurseVisit(NodeVisitor *visitor)
@@ -650,89 +668,89 @@ void BlockNode::recurseVisit(NodeVisitor *visitor)
 
 void ExprStatementNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ IfNode ---------------------------------------
 
 void IfNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, statement1);
-  recurseVisitLink(visitor, statement2);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, statement1);
+    recurseVisitLink(visitor, statement2);
 }
 
 // ------------------------------ DoWhileNode ----------------------------------
 
 void DoWhileNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, statement);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, statement);
 }
 
 // ------------------------------ WhileNode ------------------------------------
 
 void WhileNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, statement);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, statement);
 }
 
 // ------------------------------ ForNode --------------------------------------
 
 void ForNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr1);
-  recurseVisitLink(visitor, expr2);
-  recurseVisitLink(visitor, expr3);
-  recurseVisitLink(visitor, statement);
+    recurseVisitLink(visitor, expr1);
+    recurseVisitLink(visitor, expr2);
+    recurseVisitLink(visitor, expr3);
+    recurseVisitLink(visitor, statement);
 }
 
 // ------------------------------ ForInNode ------------------------------------
 
 ForInNode::ForInNode(Node *l, Node *e, StatementNode *s)
-  : init(0L), lexpr(l), expr(e), varDecl(0L), statement(s)
+    : init(0L), lexpr(l), expr(e), varDecl(0L), statement(s)
 {
 }
 
 ForInNode::ForInNode(const Identifier &i, AssignExprNode *in, Node *e, StatementNode *s)
-  : ident(i), init(in), expr(e), statement(s)
+    : ident(i), init(in), expr(e), statement(s)
 {
-  // for( var foo = bar in baz )
-  varDecl = new VarDeclNode(ident, init.get(), VarDeclNode::Variable);
-  lexpr   = new VarAccessNode(ident);
+    // for( var foo = bar in baz )
+    varDecl = new VarDeclNode(ident, init.get(), VarDeclNode::Variable);
+    lexpr   = new VarAccessNode(ident);
 }
 
 void ForInNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, init);
-  recurseVisitLink(visitor, lexpr);
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, varDecl);
-  recurseVisitLink(visitor, statement);
+    recurseVisitLink(visitor, init);
+    recurseVisitLink(visitor, lexpr);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, varDecl);
+    recurseVisitLink(visitor, statement);
 }
 
 // ------------------------------ ReturnNode -----------------------------------
 
 void ReturnNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, value);
+    recurseVisitLink(visitor, value);
 }
 
 // ------------------------------ WithNode -------------------------------------
 
 void WithNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, statement);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, statement);
 }
 
 // ------------------------------ CaseClauseNode -------------------------------
 
 void CaseClauseNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, source);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, source);
 }
 
 // ------------------------------ ClauseListNode -------------------------------
@@ -744,8 +762,8 @@ void ClauseListNode::breakCycle()
 
 void ClauseListNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, clause);
-  recurseVisitLink(visitor, next);
+    recurseVisitLink(visitor, clause);
+    recurseVisitLink(visitor, next);
 }
 
 // ------------------------------ CaseBlockNode --------------------------------
@@ -753,50 +771,50 @@ void ClauseListNode::recurseVisit(NodeVisitor *visitor)
 CaseBlockNode::CaseBlockNode(ClauseListNode *l1, CaseClauseNode *d,
                              ClauseListNode *l2)
 {
-  if (l1) {
-    list1 = l1->next.release();
-    Parser::removeNodeCycle(list1.get());
-  } else {
-    list1 = 0;
-  }
+    if (l1) {
+        list1 = l1->next.release();
+        Parser::removeNodeCycle(list1.get());
+    } else {
+        list1 = 0;
+    }
 
-  def = d;
+    def = d;
 
-  if (l2) {
-    list2 = l2->next.release();
-    Parser::removeNodeCycle(list2.get());
-  } else {
-    list2 = 0;
-  }
+    if (l2) {
+        list2 = l2->next.release();
+        Parser::removeNodeCycle(list2.get());
+    } else {
+        list2 = 0;
+    }
 }
 
 void CaseBlockNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, list1);
-  recurseVisitLink(visitor, def);
-  recurseVisitLink(visitor, list2);
+    recurseVisitLink(visitor, list1);
+    recurseVisitLink(visitor, def);
+    recurseVisitLink(visitor, list2);
 }
 
 // ------------------------------ SwitchNode -----------------------------------
 
 void SwitchNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
-  recurseVisitLink(visitor, block);
+    recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, block);
 }
 
 // ------------------------------ LabelNode ------------------------------------
 
 void LabelNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, statement);
+    recurseVisitLink(visitor, statement);
 }
 
 // ------------------------------ ThrowNode ------------------------------------
 
 void ThrowNode::recurseVisit(NodeVisitor *visitor)
 {
-  recurseVisitLink(visitor, expr);
+    recurseVisitLink(visitor, expr);
 }
 
 // ------------------------------ TryNode --------------------------------------
@@ -829,180 +847,183 @@ FunctionBodyNode::FunctionBodyNode(SourceElementsNode *s)
     , m_compType(NotCompiled)
     , m_flags(parser().popFunctionContext())
 {
-  setLoc(-1, -1);
+    setLoc(-1, -1);
 }
 
-
-void FunctionBodyNode::addVarDecl(const Identifier& ident, int attr, ExecState* exec)
+void FunctionBodyNode::addVarDecl(const Identifier &ident, int attr, ExecState *exec)
 {
-  // There is one nasty special case: ignore a 'var' declaration of 'arguments';
-  // it effectively doesn't do anything since the magic 'arguments' is already
-  // in scope anyway, and if we allocated a local, we would have to worry about
-  // keeping track of whether it was initialized or not on what is supposed to be the
-  // fast path. So we just make this go through the property map instead.
-  // Note that this does not matter for parameters or function declarations,
-  // since those overwrite the magic 'arguments' anyway.
-  if (ident == exec->propertyNames().arguments)
-    return;
+    // There is one nasty special case: ignore a 'var' declaration of 'arguments';
+    // it effectively doesn't do anything since the magic 'arguments' is already
+    // in scope anyway, and if we allocated a local, we would have to worry about
+    // keeping track of whether it was initialized or not on what is supposed to be the
+    // fast path. So we just make this go through the property map instead.
+    // Note that this does not matter for parameters or function declarations,
+    // since those overwrite the magic 'arguments' anyway.
+    if (ident == exec->propertyNames().arguments) {
+        return;
+    }
 
-  (void)addSymbol(ident, attr);
+    (void)addSymbol(ident, attr);
 }
 
-void FunctionBodyNode::addFunDecl(const Identifier& ident, int attr, FuncDeclNode* funcDecl)
+void FunctionBodyNode::addFunDecl(const Identifier &ident, int attr, FuncDeclNode *funcDecl)
 {
-  m_functionLocals.append(addSymbol(ident, attr, funcDecl));
+    m_functionLocals.append(addSymbol(ident, attr, funcDecl));
 }
 
 void FunctionBodyNode::reserveSlot(size_t id, bool shouldMark)
 {
-  ASSERT(id == m_symbolList.size());
-  m_symbolList.append(SymbolInfo(shouldMark ? 0 : DontMark, 0));
+    ASSERT(id == m_symbolList.size());
+    m_symbolList.append(SymbolInfo(shouldMark ? 0 : DontMark, 0));
 }
 
-size_t FunctionBodyNode::addSymbol(const Identifier& ident, int flags, FuncDeclNode* funcDecl)
+size_t FunctionBodyNode::addSymbol(const Identifier &ident, int flags, FuncDeclNode *funcDecl)
 {
-  // We get symbols in the order specified in 10.1.3, but sometimes
-  // the later ones are supposed to lose. This -mostly- does not
-  // matter for us --- we primarily concern ourselves with name/ID
-  // mapping, but there is an issue of attributes and funcDecl's.
-  // However, the only flag that matters here is ReadOnly --
-  // everything else just has DontDelete set; and it's from const,
-  // so we can just ignore it on repetitions, since var/const should lose
-  // and are at the end.
-  //
-  // And for funcDecl, since functions win over everything, we always set it if non-zero
-  size_t oldId = m_symbolTable.get(ident.ustring().rep());
-  if (oldId != missingSymbolMarker()) {
-    if (funcDecl)
-      m_symbolList[oldId].funcDecl = funcDecl;
-    return oldId;
-  }
+    // We get symbols in the order specified in 10.1.3, but sometimes
+    // the later ones are supposed to lose. This -mostly- does not
+    // matter for us --- we primarily concern ourselves with name/ID
+    // mapping, but there is an issue of attributes and funcDecl's.
+    // However, the only flag that matters here is ReadOnly --
+    // everything else just has DontDelete set; and it's from const,
+    // so we can just ignore it on repetitions, since var/const should lose
+    // and are at the end.
+    //
+    // And for funcDecl, since functions win over everything, we always set it if non-zero
+    size_t oldId = m_symbolTable.get(ident.ustring().rep());
+    if (oldId != missingSymbolMarker()) {
+        if (funcDecl) {
+            m_symbolList[oldId].funcDecl = funcDecl;
+        }
+        return oldId;
+    }
 
-  size_t id = m_symbolList.size();         //First entry gets 0, etc.
-  m_symbolTable.set(ident.ustring().rep(), id);
-  m_symbolList.append(SymbolInfo(flags, funcDecl));
-  return id;
+    size_t id = m_symbolList.size();         //First entry gets 0, etc.
+    m_symbolTable.set(ident.ustring().rep(), id);
+    m_symbolList.append(SymbolInfo(flags, funcDecl));
+    return id;
 }
 
-void FunctionBodyNode::addSymbolOverwriteID(size_t id, const Identifier& ident, int flags)
+void FunctionBodyNode::addSymbolOverwriteID(size_t id, const Identifier &ident, int flags)
 {
-  ASSERT(id == m_symbolList.size());
+    ASSERT(id == m_symbolList.size());
 
-  // Remove previous one, if any
-  size_t oldId = m_symbolTable.get(ident.ustring().rep());
-  if (oldId != missingSymbolMarker())
-      m_symbolList[oldId].attr = DontMark;
+    // Remove previous one, if any
+    size_t oldId = m_symbolTable.get(ident.ustring().rep());
+    if (oldId != missingSymbolMarker()) {
+        m_symbolList[oldId].attr = DontMark;
+    }
 
-  // Add a new one
-  m_symbolTable.set(ident.ustring().rep(), id);
-  m_symbolList.append(SymbolInfo(flags, 0));
+    // Add a new one
+    m_symbolTable.set(ident.ustring().rep(), id);
+    m_symbolList.append(SymbolInfo(flags, 0));
 }
 
-void FunctionBodyNode::addParam(const Identifier& ident)
+void FunctionBodyNode::addParam(const Identifier &ident)
 {
-  m_paramList.append(ident);
+    m_paramList.append(ident);
 }
 
 Completion FunctionBodyNode::execute(ExecState *exec)
 {
-  CodeType    ctype   = exec->codeType();
-  CompileType cmpType = exec->dynamicInterpreter()->debugger() ? Debug : Release;
-  compileIfNeeded(ctype, cmpType);
-  ASSERT(ctype != FunctionCode);
+    CodeType    ctype   = exec->codeType();
+    CompileType cmpType = exec->dynamicInterpreter()->debugger() ? Debug : Release;
+    compileIfNeeded(ctype, cmpType);
+    ASSERT(ctype != FunctionCode);
 
-  LocalStorage*      store = new LocalStorage();
-  LocalStorageEntry* regs;
+    LocalStorage      *store = new LocalStorage();
+    LocalStorageEntry *regs;
 
-  // Allocate enough space, and make sure to initialize things so we don't mark garbage
-  store->resize(m_symbolList.size());
-  regs = store->data();
-  for (size_t c = 0; c < m_symbolList.size(); ++c) {
-    regs[c].val.valueVal = jsUndefined();
-    regs[c].attributes   = m_symbolList[c].attr;
-  }
-  
-  exec->initLocalStorage(regs, m_symbolList.size());
+    // Allocate enough space, and make sure to initialize things so we don't mark garbage
+    store->resize(m_symbolList.size());
+    regs = store->data();
+    for (size_t c = 0; c < m_symbolList.size(); ++c) {
+        regs[c].val.valueVal = jsUndefined();
+        regs[c].attributes   = m_symbolList[c].attr;
+    }
 
-  JSValue* val = Machine::runBlock(exec, m_compiledCode);
+    exec->initLocalStorage(regs, m_symbolList.size());
 
-  Completion result;
-  if (exec->hadException())
-    result = Completion(Throw, exec->exception());
-  else
-    result = Completion(Normal, val);
+    JSValue *val = Machine::runBlock(exec, m_compiledCode);
 
-  exec->initLocalStorage(0, 0);
-  delete store;
-  exec->clearException();
+    Completion result;
+    if (exec->hadException()) {
+        result = Completion(Throw, exec->exception());
+    } else {
+        result = Completion(Normal, val);
+    }
 
-  return result;
+    exec->initLocalStorage(0, 0);
+    delete store;
+    exec->clearException();
+
+    return result;
 }
 
 void FunctionBodyNode::compile(CodeType ctype, CompileType compType)
 {
-  m_compType = compType;
+    m_compType = compType;
 
-  CompileState comp(ctype, compType, this, m_symbolList.size());
-  generateExecCode(&comp);
-  m_tearOffAtEnd = comp.needsClosures();
+    CompileState comp(ctype, compType, this, m_symbolList.size());
+    generateExecCode(&comp);
+    m_tearOffAtEnd = comp.needsClosures();
 
 #if 0
-  fprintf(stderr, "\n\n");
-  fprintf(stderr, "\n---------------------------------\n\n");
-  fprintf(stderr, "%s", toString().ascii());
-  fprintf(stderr, "\n---------------------------------\n\n");
-  CodeGen::disassembleBlock(m_compiledCode);
-  fprintf(stderr, "\n---------------------------------\n\n");
+    fprintf(stderr, "\n\n");
+    fprintf(stderr, "\n---------------------------------\n\n");
+    fprintf(stderr, "%s", toString().ascii());
+    fprintf(stderr, "\n---------------------------------\n\n");
+    CodeGen::disassembleBlock(m_compiledCode);
+    fprintf(stderr, "\n---------------------------------\n\n");
 #endif
 }
-
 
 // ------------------------------ FuncDeclNode ---------------------------------
 
 // ECMA 13
 void FuncDeclNode::processFuncDecl(ExecState *exec)
 {
-  // See whether we just need to fill in the symbol table,
-  // or actually fiddle with objects.
-  int flags = Internal | DontDelete;
-  switch (exec->codeType()) {
+    // See whether we just need to fill in the symbol table,
+    // or actually fiddle with objects.
+    int flags = Internal | DontDelete;
+    switch (exec->codeType()) {
     case FunctionCode:
-      // Inside a function, just need symbol info
-      exec->currentBody()->addFunDecl(ident, flags, this);
-      return;
+        // Inside a function, just need symbol info
+        exec->currentBody()->addFunDecl(ident, flags, this);
+        return;
     case EvalCode:
-      // eval-injected symbols can be deleted...
-      flags &= ~DontDelete;
+        // eval-injected symbols can be deleted...
+        flags &= ~DontDelete;
 
-      // eval injected a new local into scope! Better mark that down,
-      // so that NonLocalResolver stops skipping the local scope
-      exec->variableObject()->setLocalInjected();
+        // eval injected a new local into scope! Better mark that down,
+        // so that NonLocalResolver stops skipping the local scope
+        exec->variableObject()->setLocalInjected();
 
-      // fallthrough intentional
+    // fallthrough intentional
     case GlobalCode:
-      exec->variableObject()->put(exec, ident, makeFunctionObject(exec), flags);
-  };
+        exec->variableObject()->put(exec, ident, makeFunctionObject(exec), flags);
+    };
 }
 
 void FuncDeclNode::addParams()
 {
-  for (ParameterNode *p = param.get(); p != 0L; p = p->nextParam())
-    body->addParam(p->ident());
+    for (ParameterNode *p = param.get(); p != 0L; p = p->nextParam()) {
+        body->addParam(p->ident());
+    }
 }
 
-FunctionImp* FuncDeclNode::makeFunctionObject(ExecState *exec)
+FunctionImp *FuncDeclNode::makeFunctionObject(ExecState *exec)
 {
-  // TODO: let this be an object with [[Class]] property "Function"
-  FunctionImp *func = new FunctionImp(exec, ident, body.get(), exec->scopeChain());
+    // TODO: let this be an object with [[Class]] property "Function"
+    FunctionImp *func = new FunctionImp(exec, ident, body.get(), exec->scopeChain());
 
-  JSObject *proto = exec->lexicalInterpreter()->builtinObject()->construct(exec, List::empty());
-  proto->put(exec, exec->propertyNames().constructor, func, DontEnum);
-  // ECMA Edition 5.1r6 - 15.3.5.2 - [[Writable]]: true, [[Enumerable]]: false, [[Configurable]]: false
-  func->put(exec, exec->propertyNames().prototype, proto, Internal|DontDelete|DontEnum);
+    JSObject *proto = exec->lexicalInterpreter()->builtinObject()->construct(exec, List::empty());
+    proto->put(exec, exec->propertyNames().constructor, func, DontEnum);
+    // ECMA Edition 5.1r6 - 15.3.5.2 - [[Writable]]: true, [[Enumerable]]: false, [[Configurable]]: false
+    func->put(exec, exec->propertyNames().prototype, proto, Internal | DontDelete | DontEnum);
 
-  func->put(exec, exec->propertyNames().length, jsNumber(body->numParams()), ReadOnly|DontDelete|DontEnum);
+    func->put(exec, exec->propertyNames().length, jsNumber(body->numParams()), ReadOnly | DontDelete | DontEnum);
 
-  return func;
+    return func;
 }
 
 void FuncDeclNode::recurseVisit(NodeVisitor *visitor)
@@ -1015,8 +1036,9 @@ void FuncDeclNode::recurseVisit(NodeVisitor *visitor)
 
 void FuncExprNode::addParams()
 {
-  for(ParameterNode *p = param.get(); p != 0L; p = p->nextParam())
-    body->addParam(p->ident());
+    for (ParameterNode *p = param.get(); p != 0L; p = p->nextParam()) {
+        body->addParam(p->ident());
+    }
 }
 
 void FuncExprNode::recurseVisit(NodeVisitor *visitor)
@@ -1028,17 +1050,17 @@ void FuncExprNode::recurseVisit(NodeVisitor *visitor)
 // ------------------------------ SourceElementsNode ---------------------------
 
 SourceElementsNode::SourceElementsNode(StatementNode *s1)
-  : node(s1), next(this)
+    : node(s1), next(this)
 {
     Parser::noteNodeCycle(this);
     setLoc(s1->firstLine(), s1->lastLine());
 }
 
 SourceElementsNode::SourceElementsNode(SourceElementsNode *s1, StatementNode *s2)
-  : node(s2), next(s1->next)
+    : node(s2), next(s1->next)
 {
-  s1->next = this;
-  setLoc(s1->firstLine(), s2->lastLine());
+    s1->next = this;
+    setLoc(s1->firstLine(), s2->lastLine());
 }
 
 void SourceElementsNode::breakCycle()
@@ -1064,106 +1086,109 @@ void PackageNameNode::recurseVisit(NodeVisitor *visitor)
     recurseVisitLink(visitor, names);
 }
 
-Completion PackageNameNode::loadSymbol(ExecState* exec, bool wildcard)
+Completion PackageNameNode::loadSymbol(ExecState *exec, bool wildcard)
 {
-    Package* basePackage;
-    JSObject* baseObject;
+    Package *basePackage;
+    JSObject *baseObject;
     if (names) {
-	PackageObject *pobj = names->resolvePackage(exec);
-	if (pobj == 0)
-	    return Completion(Normal);
-	basePackage = pobj->package();
-	baseObject = pobj;
+        PackageObject *pobj = names->resolvePackage(exec);
+        if (pobj == 0) {
+            return Completion(Normal);
+        }
+        basePackage = pobj->package();
+        baseObject = pobj;
     } else {
-	Interpreter* ip = exec->lexicalInterpreter();
-	basePackage = ip->globalPackage();
-	baseObject = ip->globalObject();
+        Interpreter *ip = exec->lexicalInterpreter();
+        basePackage = ip->globalPackage();
+        baseObject = ip->globalObject();
     }
 
     if (wildcard) {
-	// if a .* is specified the last identifier should
-	// denote another package name
-	PackageObject* pobj = resolvePackage(exec, baseObject, basePackage);
-	if (!pobj)
-	    return Completion(Normal);
-	basePackage = pobj->package();
-	baseObject = pobj;
-	basePackage->loadAllSymbols(exec, baseObject);
+        // if a .* is specified the last identifier should
+        // denote another package name
+        PackageObject *pobj = resolvePackage(exec, baseObject, basePackage);
+        if (!pobj) {
+            return Completion(Normal);
+        }
+        basePackage = pobj->package();
+        baseObject = pobj;
+        basePackage->loadAllSymbols(exec, baseObject);
     } else {
-	basePackage->loadSymbol(exec, baseObject, id);
+        basePackage->loadSymbol(exec, baseObject, id);
     }
 
     return Completion(Normal);
 }
 
-PackageObject* PackageNameNode::resolvePackage(ExecState* exec)
+PackageObject *PackageNameNode::resolvePackage(ExecState *exec)
 {
-    JSObject* baseObject;
-    Package* basePackage;
+    JSObject *baseObject;
+    Package *basePackage;
     if (names) {
-	PackageObject* basePackageObject = names->resolvePackage(exec);
-	if (basePackageObject == 0)
-	    return 0;
-	baseObject = basePackageObject;
-	basePackage = basePackageObject->package();
+        PackageObject *basePackageObject = names->resolvePackage(exec);
+        if (basePackageObject == 0) {
+            return 0;
+        }
+        baseObject = basePackageObject;
+        basePackage = basePackageObject->package();
     } else {
-	// first identifier is looked up in global object
-	Interpreter* ip = exec->lexicalInterpreter();
-	baseObject = ip->globalObject();
-	basePackage = ip->globalPackage();
+        // first identifier is looked up in global object
+        Interpreter *ip = exec->lexicalInterpreter();
+        baseObject = ip->globalObject();
+        basePackage = ip->globalPackage();
     }
 
     return resolvePackage(exec, baseObject, basePackage);
 }
 
-PackageObject* PackageNameNode::resolvePackage(ExecState* exec,
-					       JSObject* baseObject,
-					       Package* basePackage)
+PackageObject *PackageNameNode::resolvePackage(ExecState *exec,
+        JSObject *baseObject,
+        Package *basePackage)
 {
-    PackageObject* res = 0;
+    PackageObject *res = 0;
 
     // Let's see whether the package was already resolved previously.
-    JSValue* v = baseObject->get(exec, id);
+    JSValue *v = baseObject->get(exec, id);
     if (v && !v->isUndefined()) {
-	if (!v->isObject()) {
-	    // Symbol conflict
-	    throwError(exec, GeneralError, "Invalid type of package %s", id);
-	    return 0;
-	}
-	res = static_cast<PackageObject*>(v);
+        if (!v->isObject()) {
+            // Symbol conflict
+            throwError(exec, GeneralError, "Invalid type of package %s", id);
+            return 0;
+        }
+        res = static_cast<PackageObject *>(v);
     } else {
-	UString err;
-	Package *newBase = basePackage->loadSubPackage(id, &err);
-	if (newBase == 0) {
-	    if (err.isEmpty()) {
-		throwError(exec, GeneralError, "Package not found");
-	    } else {
-		throwError(exec, GeneralError, err);
-	    }
-	    return 0;
-	}
-	res = new PackageObject(newBase);
-	baseObject->put(exec, id, res);
+        UString err;
+        Package *newBase = basePackage->loadSubPackage(id, &err);
+        if (newBase == 0) {
+            if (err.isEmpty()) {
+                throwError(exec, GeneralError, "Package not found");
+            } else {
+                throwError(exec, GeneralError, err);
+            }
+            return 0;
+        }
+        res = new PackageObject(newBase);
+        baseObject->put(exec, id, res);
     }
 
     return res;
 }
 
-void ImportStatement::processVarDecl(ExecState* exec)
+void ImportStatement::processVarDecl(ExecState *exec)
 {
     // error out if package support is not activated
-    Package* glob = exec->lexicalInterpreter()->globalPackage();
+    Package *glob = exec->lexicalInterpreter()->globalPackage();
     if (!glob) {
-	throwError(exec, GeneralError,
-		   "Package support disabled. Import failed.");
-	return;
+        throwError(exec, GeneralError,
+                   "Package support disabled. Import failed.");
+        return;
     }
 
     // also error out if not used on top-level
     if (exec->codeType() != GlobalCode) {
-      throwError(exec, GeneralError,
-                  "Package imports may only occur at top level.");
-      return;
+        throwError(exec, GeneralError,
+                   "Package imports may only occur at top level.");
+        return;
     }
 
     name->loadSymbol(exec, wld);

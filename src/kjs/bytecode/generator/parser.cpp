@@ -32,7 +32,7 @@
  The error recovert is even simpler: we just exit. That's it.
 */
 
-Parser::Parser(istream* stream): tokenLoaded(false), hadError(false), lexer(new Lexer(stream))
+Parser::Parser(istream *stream): tokenLoaded(false), hadError(false), lexer(new Lexer(stream))
 {}
 
 Parser::~Parser()
@@ -43,13 +43,14 @@ Parser::~Parser()
 string Parser::matchIdentifier()
 {
     Lexer::Token tok = getNext();
-    if (tok.type == Lexer::Ident)
+    if (tok.type == Lexer::Ident) {
         return tok.value;
+    }
     issueError("Expected identifier, got:" + tok.toString(lexer));
     return "";
 }
 
-void Parser::matchCode(std::string* strOut, int* lineOut)
+void Parser::matchCode(std::string *strOut, int *lineOut)
 {
     Lexer::Token tok = getNext();
     if (tok.type == Lexer::Code) {
@@ -63,8 +64,9 @@ void Parser::matchCode(std::string* strOut, int* lineOut)
 int Parser::matchNumber()
 {
     Lexer::Token tok = getNext();
-    if (tok.type == Lexer::Number)
+    if (tok.type == Lexer::Number) {
         return std::atol(tok.value.c_str());
+    }
     issueError("Expected number, got:" + tok.toString(lexer));
     return 0;
 }
@@ -72,8 +74,9 @@ int Parser::matchNumber()
 void Parser::match(Lexer::TokenType t)
 {
     Lexer::Token tok = getNext();
-    if (tok.type != t)
+    if (tok.type != t) {
         issueError("Expected " + Lexer::Token(t).toString(lexer) + " got:" + tok.toString(lexer));
+    }
 }
 
 bool Parser::check(Lexer::TokenType t)
@@ -86,7 +89,7 @@ bool Parser::check(Lexer::TokenType t)
     }
 }
 
-unsigned Parser::matchFlags(const Flag* permittedFlags)
+unsigned Parser::matchFlags(const Flag *permittedFlags)
 {
     unsigned flagsVal = 0;
     if (check(Lexer::LBracket)) {
@@ -94,10 +97,11 @@ unsigned Parser::matchFlags(const Flag* permittedFlags)
             std::string flag;
 
             // We permit keywords to double as flags.
-            if (peekNext().isKeyword())
+            if (peekNext().isKeyword()) {
                 flag = getNext().toString(lexer);
-            else
+            } else {
                 flag = matchIdentifier();
+            }
 
             // Lookup the name.
             bool found = false;
@@ -108,20 +112,22 @@ unsigned Parser::matchFlags(const Flag* permittedFlags)
                 }
             }
 
-            if (!found)
+            if (!found) {
                 issueError("invalid flag:" + flag);
+            }
 
             // Done or more?
-            if (check(Lexer::RBracket))
+            if (check(Lexer::RBracket)) {
                 return flagsVal;
-            else
+            } else {
                 match(Lexer::Comma);
+            }
         }
     }
     return 0;
 }
 
-void Parser::issueError(const string& msg)
+void Parser::issueError(const string &msg)
 {
     std::cerr << "Parse error:" << msg << " at about line:" << lexer->lineNumber() << "\n";
     std::exit(-1);
@@ -159,10 +165,11 @@ void Parser::parse()
 
     // Now we may have conversions or operations
     while (tok.type == Lexer::Conversion || tok.type == Lexer::Operation) {
-        if (tok.type == Lexer::Conversion)
+        if (tok.type == Lexer::Conversion) {
             parseConversion();
-        else
+        } else {
             parseOperation();
+        }
         tok = peekNext();
     }
 
@@ -178,14 +185,17 @@ void Parser::parseType()
     match(Lexer::Colon);
     string nativeName = matchIdentifier();
 
-    if (nativeName == "const")
-        nativeName += " " + matchIdentifier(); // krazy:exclude=doublequote_chars
+    if (nativeName == "const") {
+        nativeName += " " + matchIdentifier();    // krazy:exclude=doublequote_chars
+    }
 
-    while (check(Lexer::Scope))
+    while (check(Lexer::Scope)) {
         nativeName += "::" + matchIdentifier();
+    }
 
-    if (check(Lexer::Star))
-        nativeName += "*"; // krazy:exclude=doublequote_chars
+    if (check(Lexer::Star)) {
+        nativeName += "*";    // krazy:exclude=doublequote_chars
+    }
 
     const Flag typeFlags[] = {
         {"immediate", Type_HaveImm},
@@ -217,7 +227,6 @@ void Parser::parseConversion()
         {"mayThrow", Conv_MayThrow},
         {0, 0}
     };
-                                                                                                                                               
 
     unsigned flags = 0;
     string code;
@@ -264,19 +273,20 @@ void Parser::parseOperation()
         {"hint",   Op_Hint},
         {0, 0}
     };
-    
+
     std::string name = matchIdentifier();
-    unsigned flags   = matchFlags(opFlags);    
+    unsigned flags   = matchFlags(opFlags);
 
     handleOperation(name, flags);
 
     match(Lexer::LBrace);
     Lexer::Token tok = peekNext();
     while (tok.type == Lexer::Tile || tok.type == Lexer::Impl) {
-        if (tok.type == Lexer::Tile)
+        if (tok.type == Lexer::Tile) {
             parseTile();
-        else
+        } else {
             parseImpl();
+        }
         tok = peekNext();
     }
     match(Lexer::RBrace);
@@ -292,8 +302,9 @@ void Parser::parseImpl()
     string ret = matchIdentifier();
 
     string fn;
-    if (peekNext().type == Lexer::Ident)
+    if (peekNext().type == Lexer::Ident) {
         fn = matchIdentifier();
+    }
     match(Lexer::LParen);
 
     const Flag paramFlags[] = {
@@ -313,12 +324,14 @@ void Parser::parseImpl()
 
         params.push_back(param);
 
-        if (!check(Lexer::Comma))
+        if (!check(Lexer::Comma)) {
             break;
-            
+        }
+
         // Make sure we have an ident next, and not an rparen..
-        if (peekNext().type != Lexer::Ident)
+        if (peekNext().type != Lexer::Ident) {
             issueError("Parameter signature in impl doesn't start with an identifier!");
+        }
     }
     match(Lexer::RParen);
 
@@ -344,12 +357,14 @@ void Parser::parseTile()
     match(Lexer::LParen);
     while (peekNext().type != Lexer::RParen) {
         paramSigs.push_back(matchIdentifier());
-        if (peekNext().type != Lexer::Comma)
+        if (peekNext().type != Lexer::Comma) {
             break;
+        }
         getNext(); // Eat the comma..
         // Make sure we have an ident next, and not an rparen..
-        if (peekNext().type != Lexer::Ident)
+        if (peekNext().type != Lexer::Ident) {
             issueError("Parameter signature in tile doesn't start with an identifier!");
+        }
     }
 
     match(Lexer::RParen);
@@ -360,4 +375,3 @@ void Parser::parseTile()
     match(Lexer::SemiColon);
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

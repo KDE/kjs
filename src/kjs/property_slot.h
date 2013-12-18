@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 4 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 2005 Apple Computer, Inc.
@@ -27,7 +26,8 @@
 #include "identifier.h"
 #include "value.h"
 
-namespace KJS {
+namespace KJS
+{
 
 struct HashEntry;
 class ExecState;
@@ -36,10 +36,10 @@ class JSObject;
 class KJS_EXPORT PropertySlot
 {
 public:
-    typedef JSValue *(*GetValueFunc)(ExecState *, JSObject *originalObject, const Identifier&, const PropertySlot&);
-    typedef JSValue *(*GetValueNumberFunc)(ExecState *, JSObject *originalObject, unsigned, const PropertySlot&);
+    typedef JSValue *(*GetValueFunc)(ExecState *, JSObject *originalObject, const Identifier &, const PropertySlot &);
+    typedef JSValue *(*GetValueNumberFunc)(ExecState *, JSObject *originalObject, unsigned, const PropertySlot &);
 
-    JSValue *getValue(ExecState *exec, JSObject *originalObject, const Identifier& propertyName) const
+    JSValue *getValue(ExecState *exec, JSObject *originalObject, const Identifier &propertyName) const
     {
         switch (m_getType) {
         case ValueType:
@@ -116,7 +116,7 @@ public:
         m_getType = NumberFunction;
     }
 
-    void setCustomValue(JSObject *slotBase, void* value, GetValueFunc getValue)
+    void setCustomValue(JSObject *slotBase, void *value, GetValueFunc getValue)
     {
         assert(getValue);
         m_slotBase = slotBase;
@@ -140,15 +140,27 @@ public:
         m_getType = StringFunction;
     }
 
-    JSObject *slotBase() const { return m_slotBase; }
+    JSObject *slotBase() const
+    {
+        return m_slotBase;
+    }
 
-    const HashEntry *staticEntry() const { return m_data.staticEntry; }
-    unsigned index() const { return m_data.index; }
-    void*    customValue() const { return m_data.value; }
+    const HashEntry *staticEntry() const
+    {
+        return m_data.staticEntry;
+    }
+    unsigned index() const
+    {
+        return m_data.index;
+    }
+    void    *customValue() const
+    {
+        return m_data.value;
+    }
 
 private:
-    static JSValue *undefinedGetter(ExecState *, JSObject *, const Identifier&, const PropertySlot&);
-    static JSValue *functionGetter(ExecState *, JSObject *, const Identifier&, const PropertySlot&);
+    static JSValue *undefinedGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
+    static JSValue *functionGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
 
     union {
         GetValueFunc m_getValue;
@@ -161,8 +173,8 @@ private:
         JSValue **valueSlot;
         const HashEntry *staticEntry;
         unsigned index;
-        void*    value;
-        JSValue* jsValue;
+        void    *value;
+        JSValue *jsValue;
     } m_data;
 
     enum GetType {

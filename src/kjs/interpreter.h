@@ -30,31 +30,34 @@
 #include "types.h"
 #include <wtf/HashMap.h>
 
-namespace KJS {
-  class Debugger;
-  class SavedBuiltins;
-  class TimeoutChecker;
-  class Package;
-  class ActivationImp;
-  class JSGlobalObject;
-  class StringImp;
+namespace KJS
+{
+class Debugger;
+class SavedBuiltins;
+class TimeoutChecker;
+class Package;
+class ActivationImp;
+class JSGlobalObject;
+class StringImp;
 
 #if USE(BINDINGS)
-  namespace Bindings {
-    class RootObject;
-  }
+namespace Bindings
+{
+class RootObject;
+}
 #endif
 
-  /**
-   * Interpreter objects can be used to evaluate ECMAScript code. Each
-   * interpreter has a global object which is used for the purposes of code
-   * evaluation, and also provides access to built-in properties such as
-   * " Object" and "Number".
-   */
-  class KJS_EXPORT Interpreter {
-      friend class Collector;
-      friend class TimeoutChecker;
-  public:
+/**
+ * Interpreter objects can be used to evaluate ECMAScript code. Each
+ * interpreter has a global object which is used for the purposes of code
+ * evaluation, and also provides access to built-in properties such as
+ * " Object" and "Number".
+ */
+class KJS_EXPORT Interpreter
+{
+    friend class Collector;
+    friend class TimeoutChecker;
+public:
     /**
      * Creates a new interpreter. The supplied object will be used as the global
      * object for all scripts executed with this interpreter. During
@@ -71,7 +74,7 @@ namespace KJS {
      *
      * @param globalObject The object to use as the global object for this interpreter
      */
-    Interpreter(JSGlobalObject* globalObject);
+    Interpreter(JSGlobalObject *globalObject);
     /**
      * Creates a new interpreter. A global object will be created and
      * initialized with the standard global properties.
@@ -82,7 +85,7 @@ namespace KJS {
      * Returns the object that is used as the global object during all script
      * execution performed by this interpreter
      */
-    JSGlobalObject* globalObject() const;
+    JSGlobalObject *globalObject() const;
     void initGlobalObject();
 
     /**
@@ -107,7 +110,7 @@ namespace KJS {
      * Web browser where package imports should be disabled for
      * security reasons.
      */
-    void setGlobalPackage(Package* p);
+    void setGlobalPackage(Package *p);
 
     /**
      * Returns the package that was installed to handle top level
@@ -116,7 +119,7 @@ namespace KJS {
      *
      * @return The global package
      */
-    Package* globalPackage();
+    Package *globalPackage();
 
     /**
      * Parses the supplied ECMAScript code and checks for syntax errors.
@@ -124,11 +127,11 @@ namespace KJS {
      * @param code The code to check
      * @param sourceURL A URL denoting the origin of the code
      * @param startingLineNumber The line offset within an embedding context
-     * @return A normal completion if there were no syntax errors in the code, 
+     * @return A normal completion if there were no syntax errors in the code,
      * otherwise a throw completion with the syntax error as its value.
      */
-    Completion checkSyntax(const UString& sourceURL, int startingLineNumber, const UString& code);
-    Completion checkSyntax(const UString& sourceURL, int startingLineNumber, const UChar* code, int codeLength);
+    Completion checkSyntax(const UString &sourceURL, int startingLineNumber, const UString &code);
+    Completion checkSyntax(const UString &sourceURL, int startingLineNumber, const UChar *code, int codeLength);
 
     /**
      * Evaluates the supplied ECMAScript code.
@@ -148,8 +151,8 @@ namespace KJS {
      * execution. This should either be jsNull() or an Object.
      * @return A completion object representing the result of the execution.
      */
-    Completion evaluate(const UString& sourceURL, int startingLineNumber, const UChar* code, int codeLength, JSValue* thisV = 0);
-    Completion evaluate(const UString& sourceURL, int startingLineNumber, const UString& code, JSValue* thisV = 0);
+    Completion evaluate(const UString &sourceURL, int startingLineNumber, const UChar *code, int codeLength, JSValue *thisV = 0);
+    Completion evaluate(const UString &sourceURL, int startingLineNumber, const UString &code, JSValue *thisV = 0);
 
     /**
      * Pretty-prints the supplied ECMAScript code after checking it
@@ -160,11 +163,11 @@ namespace KJS {
      * @param codeIn The code to check
      * @param codeIn Pointer to string that will contain reformatted code
      *        upon successful parsing.
-     * @return A normal completion if there were no syntax errors in the code, 
+     * @return A normal completion if there were no syntax errors in the code,
      * otherwise a throw completion with the syntax error as its value.
      */
-    static bool normalizeCode(const UString& codeIn, UString* codeOut,
-                              int* errLine = 0, UString* errMsg = 0);
+    static bool normalizeCode(const UString &codeIn, UString *codeOut,
+                              int *errLine = 0, UString *errMsg = 0);
 
     /**
      * Returns the builtin "Object" object. This is the object that was set
@@ -285,8 +288,14 @@ namespace KJS {
      * Currently, in KJS, this only changes the behavior of Date::getYear()
      * which returns the full year under IE.
      */
-    void setCompatMode(CompatMode mode) { m_compatMode = mode; }
-    CompatMode compatMode() const { return m_compatMode; }
+    void setCompatMode(CompatMode mode)
+    {
+        m_compatMode = mode;
+    }
+    CompatMode compatMode() const
+    {
+        return m_compatMode;
+    }
 
     /**
      * Run the garbage collection. Returns true when at least one object
@@ -299,7 +308,7 @@ namespace KJS {
      * implementing custom mark methods must make sure to chain to this one.
      */
     virtual void mark(bool currentThreadIsMainThread);
-    
+
     /**
      * This marks all GC heap resources stored as optimizations;
      * and which have their lifetime managed by the appropriate AST.
@@ -313,13 +322,16 @@ namespace KJS {
      * interpreters are created in the same process.
      * The base class returns 0, the ECMA-bindings interpreter returns 1.
      */
-    virtual int rtti() { return 0; }
+    virtual int rtti()
+    {
+        return 0;
+    }
 
     static bool shouldPrintExceptions();
     static void setShouldPrintExceptions(bool);
 
-    void saveBuiltins (SavedBuiltins&) const;
-    void restoreBuiltins (const SavedBuiltins&);
+    void saveBuiltins(SavedBuiltins &) const;
+    void restoreBuiltins(const SavedBuiltins &);
 
     /**
      * Determine if the it is 'safe' to execute code in the target interpreter from an
@@ -327,26 +339,53 @@ namespace KJS {
      * cross frame security rules.  In particular, attempts to access 'bound' objects are
      * not allowed unless isSafeScript returns true.
      */
-    virtual bool isSafeScript(const Interpreter*) { return true; }
+    virtual bool isSafeScript(const Interpreter *)
+    {
+        return true;
+    }
 
 #if USE(BINDINGS)
-    virtual void *createLanguageInstanceForValue(ExecState*, int language, JSObject* value, const Bindings::RootObject* origin, const Bindings::RootObject* current);
+    virtual void *createLanguageInstanceForValue(ExecState *, int language, JSObject *value, const Bindings::RootObject *origin, const Bindings::RootObject *current);
 #endif
 
     // Chained list of interpreters (ring)
-    static Interpreter* firstInterpreter() { return s_hook; }
-    Interpreter* nextInterpreter() const { return next; }
-    Interpreter* prevInterpreter() const { return prev; }
+    static Interpreter *firstInterpreter()
+    {
+        return s_hook;
+    }
+    Interpreter *nextInterpreter() const
+    {
+        return next;
+    }
+    Interpreter *prevInterpreter() const
+    {
+        return prev;
+    }
 
-    Debugger* debugger() const { return m_debugger; }
-    void setDebugger(Debugger* d) { m_debugger = d; }
+    Debugger *debugger() const
+    {
+        return m_debugger;
+    }
+    void setDebugger(Debugger *d)
+    {
+        m_debugger = d;
+    }
 
-    void setExecState(ExecState* e) { m_execState = e; }
+    void setExecState(ExecState *e)
+    {
+        m_execState = e;
+    }
 
     // Note: may be 0, if in globalExec
-    ExecState* execState() { return m_execState ? m_execState : &m_globalExec; }
+    ExecState *execState()
+    {
+        return m_execState ? m_execState : &m_globalExec;
+    }
 
-    void setTimeoutTime(unsigned timeoutTime) { m_timeoutTime = timeoutTime; }
+    void setTimeoutTime(unsigned timeoutTime)
+    {
+        m_timeoutTime = timeoutTime;
+    }
 
     void startTimeoutCheck();
     void stopTimeoutCheck();
@@ -359,24 +398,40 @@ namespace KJS {
 
     bool checkTimeout();
 
-    void ref() { ++m_refCount; }
-    void deref() { if (--m_refCount <= 0) delete this; }
-    int refCount() const { return m_refCount; }
+    void ref()
+    {
+        ++m_refCount;
+    }
+    void deref()
+    {
+        if (--m_refCount <= 0) {
+            delete this;
+        }
+    }
+    int refCount() const
+    {
+        return m_refCount;
+    }
 
-    unsigned char* stackAlloc(size_t size) {
-        unsigned char* nextPtr = stackPtr + size;
+    unsigned char *stackAlloc(size_t size)
+    {
+        unsigned char *nextPtr = stackPtr + size;
         if (nextPtr <= stackEnd) {
-            unsigned char* toRet = stackPtr;
+            unsigned char *toRet = stackPtr;
             stackPtr = nextPtr;
             return toRet;
         }
         return extendStack(size);
     }
 
-    void stackFree(size_t size) { stackPtr-= size; } // ### shrink it?
+    void stackFree(size_t size)
+    {
+        stackPtr -= size;    // ### shrink it?
+    }
 
-    ActivationImp* getRecycledActivation() {
-        ActivationImp* out = 0;
+    ActivationImp *getRecycledActivation()
+    {
+        ActivationImp *out = 0;
         if (m_numCachedActivations) {
             m_numCachedActivations--;
             out = m_cachedActivations[m_numCachedActivations];
@@ -384,84 +439,87 @@ namespace KJS {
         return out;
     }
 
-    void recycleActivation(ActivationImp* act);
-    
+    void recycleActivation(ActivationImp *act);
+
     // Global string table management. This is used from StringNode
     // to cache StringImp's for string literals. We keep refcounts
     // to permit multiple ones to use the same value.
-    static StringImp* internString(const UString& literal);
-    static void releaseInternedString(const UString& literal);
+    static StringImp *internString(const UString &literal);
+    static void releaseInternedString(const UString &literal);
 
-    typedef WTF::HashMap<UString::Rep*, std::pair<KJS::StringImp*, int> > InternedStringsTable;
-private:    
+    typedef WTF::HashMap<UString::Rep *, std::pair<KJS::StringImp *, int> > InternedStringsTable;
+private:
     static void markInternedStringsTable();
-    
+
     // This creates a table if needed
     static void initInternedStringsTable();
-    
-    static InternedStringsTable* s_internedStrings;
+
+    static InternedStringsTable *s_internedStrings;
 
 protected:
     virtual ~Interpreter(); // only deref should delete us
-    virtual bool shouldInterruptScript() const { return true; }
+    virtual bool shouldInterruptScript() const
+    {
+        return true;
+    }
 
     long m_timeoutTime;
 
 private:
     bool handleTimeout();
     void init();
-    void printException(const Completion& c, const UString& sourceURL);
+    void printException(const Completion &c, const UString &sourceURL);
 
     /**
      * This constructor is not implemented, in order to prevent
      * copy-construction of Interpreter objects. You should always pass around
      * pointers to an interpreter instance instead.
      */
-    Interpreter(const Interpreter&);
+    Interpreter(const Interpreter &);
 
     /**
      * This operator is not implemented, in order to prevent assignment of
      * Interpreter objects. You should always pass around pointers to an
      * interpreter instance instead.
      */
-    Interpreter operator=(const Interpreter&);
+    Interpreter operator=(const Interpreter &);
 
     int m_refCount;
 
-    JSGlobalObject* m_globalObject;
+    JSGlobalObject *m_globalObject;
     GlobalExecState m_globalExec;
     Package *globPkg;
 
     // Execution stack stuff for this interpreter.
-    unsigned char* stackBase; // lowest address in the array
-    unsigned char* stackPtr;  // current top/next to allocate
-    unsigned char* stackEnd;  // last address in the stack
-    unsigned char* extendStack(size_t needed);
+    unsigned char *stackBase; // lowest address in the array
+    unsigned char *stackPtr;  // current top/next to allocate
+    unsigned char *stackEnd;  // last address in the stack
+    unsigned char *extendStack(size_t needed);
 
     // A list of cached activations
     enum {MaxCachedActivations = 32};
 
-    ActivationImp* m_cachedActivations[MaxCachedActivations];
+    ActivationImp *m_cachedActivations[MaxCachedActivations];
     int            m_numCachedActivations;
 
     // Chained list of interpreters (ring) - for collector
-    static Interpreter* s_hook;
+    static Interpreter *s_hook;
     Interpreter *next, *prev;
 
     int m_recursion;
 
-    Debugger* m_debugger;
-    ExecState* m_execState;
+    Debugger *m_debugger;
+    ExecState *m_execState;
     CompatMode m_compatMode;
 
-    TimeoutChecker* m_timeoutChecker;
+    TimeoutChecker *m_timeoutChecker;
     bool m_timedOut;
 
     unsigned m_startTimeoutCheckCount;
     unsigned m_pauseTimeoutCheckCount;
-    
+
     // Helper for setting constructors, making sure their function names are OK
-    void putNamedConstructor(const char* name, JSObject* value);
+    void putNamedConstructor(const char *name, JSObject *value);
 
     ProtectedPtr<JSObject> m_Object;
     ProtectedPtr<JSObject> m_Function;
@@ -496,68 +554,69 @@ private:
     ProtectedPtr<JSObject> m_SyntaxErrorPrototype;
     ProtectedPtr<JSObject> m_TypeErrorPrototype;
     ProtectedPtr<JSObject> m_UriErrorPrototype;
-  };
+};
 
-  inline bool Interpreter::checkTimeout()
-  {
-    if (!m_timedOut)
-      return false;
+inline bool Interpreter::checkTimeout()
+{
+    if (!m_timedOut) {
+        return false;
+    }
 
     return handleTimeout();
-  }
+}
 
-  /**
-   * Interface to set enhanced Unicode support functions. By default
-   * the interpreter will use the standard C library functions.
-   *
-   * @internal
-   */
-  class KJS_EXPORT UnicodeSupport
-  {
-  public:
+/**
+ * Interface to set enhanced Unicode support functions. By default
+ * the interpreter will use the standard C library functions.
+ *
+ * @internal
+ */
+class KJS_EXPORT UnicodeSupport
+{
+public:
     UnicodeSupport();
 
     typedef bool (*CharCategoryFunction)(int c);
     static void setIdentStartChecker(CharCategoryFunction f);
     static void setIdentPartChecker(CharCategoryFunction f);
 
-    typedef int (*StringConversionFunction)(uint16_t* str, int strLength,
-					    uint16_t*& destIfNeeded);
+    typedef int (*StringConversionFunction)(uint16_t *str, int strLength,
+                                            uint16_t *&destIfNeeded);
     static void setToLowerFunction(StringConversionFunction f);
     static void setToUpperFunction(StringConversionFunction f);
-  };
+};
 
-  /**
-   * Define a Qt-based version of the Unicode support functions.
-   *
-   * @internal
-   */
+/**
+ * Define a Qt-based version of the Unicode support functions.
+ *
+ * @internal
+ */
 #define KJS_QT_UNICODE_IMPL \
-namespace KJS { \
-  static bool qtIdentStart(int c) { if (c & 0xffff0000) return false; QChar::Category cat = QChar((unsigned short)c).category(); return cat == QChar::Letter_Uppercase || cat == QChar::Letter_Lowercase || cat == QChar::Letter_Titlecase || cat == QChar::Letter_Modifier || cat == QChar::Letter_Other || c == '$' || c == '_'; } \
-  static bool qtIdentPart(int c) { if (c & 0xffff0000) return false; QChar::Category cat = QChar((unsigned short)c).category(); return cat == QChar::Letter_Uppercase || cat == QChar::Letter_Lowercase || cat == QChar::Letter_Titlecase || cat == QChar::Letter_Modifier || cat == QChar::Letter_Other || cat == QChar::Mark_NonSpacing || cat == QChar::Mark_SpacingCombining || cat == QChar::Number_DecimalDigit || cat == QChar::Punctuation_Connector || c == '$' || c == '_'; } \
-  static int qtToLower(uint16_t* str, int strLength, uint16_t*& destIfNeeded) { \
-      destIfNeeded = 0; \
-      for (int i = 0; i < strLength; ++i) \
-        str[i] = QChar(str[i]).toLower().unicode(); \
-      return strLength; } \
-  static int qtToUpper(uint16_t* str, int strLength, uint16_t*& destIfNeeded) { \
-      destIfNeeded = 0; \
-      for (int i = 0; i < strLength; ++i) \
-        str[i] = QChar(str[i]).toUpper().unicode(); \
-      return strLength; } \
-}
+    namespace KJS { \
+    static bool qtIdentStart(int c) { if (c & 0xffff0000) return false; QChar::Category cat = QChar((unsigned short)c).category(); return cat == QChar::Letter_Uppercase || cat == QChar::Letter_Lowercase || cat == QChar::Letter_Titlecase || cat == QChar::Letter_Modifier || cat == QChar::Letter_Other || c == '$' || c == '_'; } \
+    static bool qtIdentPart(int c) { if (c & 0xffff0000) return false; QChar::Category cat = QChar((unsigned short)c).category(); return cat == QChar::Letter_Uppercase || cat == QChar::Letter_Lowercase || cat == QChar::Letter_Titlecase || cat == QChar::Letter_Modifier || cat == QChar::Letter_Other || cat == QChar::Mark_NonSpacing || cat == QChar::Mark_SpacingCombining || cat == QChar::Number_DecimalDigit || cat == QChar::Punctuation_Connector || c == '$' || c == '_'; } \
+    static int qtToLower(uint16_t* str, int strLength, uint16_t*& destIfNeeded) { \
+        destIfNeeded = 0; \
+        for (int i = 0; i < strLength; ++i) \
+            str[i] = QChar(str[i]).toLower().unicode(); \
+        return strLength; } \
+    static int qtToUpper(uint16_t* str, int strLength, uint16_t*& destIfNeeded) { \
+        destIfNeeded = 0; \
+        for (int i = 0; i < strLength; ++i) \
+            str[i] = QChar(str[i]).toUpper().unicode(); \
+        return strLength; } \
+    }
 
-  /**
-   * Set the Qt-based version of the Unicode support functions.
-   *
-   * @internal
-   */
+/**
+ * Set the Qt-based version of the Unicode support functions.
+ *
+ * @internal
+ */
 #define KJS_QT_UNICODE_SET \
-  { KJS::UnicodeSupport::setIdentStartChecker(KJS::qtIdentStart); \
-    KJS::UnicodeSupport::setIdentPartChecker(KJS::qtIdentPart); \
-    KJS::UnicodeSupport::setToLowerFunction(KJS::qtToLower); \
-    KJS::UnicodeSupport::setToUpperFunction(KJS::qtToUpper); }
+    { KJS::UnicodeSupport::setIdentStartChecker(KJS::qtIdentStart); \
+        KJS::UnicodeSupport::setIdentPartChecker(KJS::qtIdentPart); \
+        KJS::UnicodeSupport::setToLowerFunction(KJS::qtToLower); \
+        KJS::UnicodeSupport::setToUpperFunction(KJS::qtToUpper); }
 
 } // namespace
 

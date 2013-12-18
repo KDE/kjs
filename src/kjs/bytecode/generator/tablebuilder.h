@@ -30,8 +30,7 @@
 #include "parser.h"
 
 // Actually, a specialization, but who cares?
-struct Operation
-{
+struct Operation {
     string name;
     string retType;
     int          cost;
@@ -44,8 +43,7 @@ struct Operation
     vector<Parameter> implParams;   // the params the [[ code ]]  block takes
 };
 
-struct OperationVariant
-{
+struct OperationVariant {
     string   sig;
     Operation op;
     vector<bool> paramIsIm;
@@ -57,8 +55,8 @@ struct OperationVariant
 class TableBuilder: public Parser
 {
 public:
-    TableBuilder(istream* inStream, ostream* hStream, ostream* cppStream,
-                 FileTemplate* fTemplate, ostream* mStream);
+    TableBuilder(istream *inStream, ostream *hStream, ostream *cppStream,
+                 FileTemplate *fTemplate, ostream *mStream);
 
     virtual ~TableBuilder() {}
     void generateCode();
@@ -66,29 +64,30 @@ private:
     // Interface to the parser; also (ab)used by the type system to emit
     // conversion ops.
     friend class TypeTable;
-    
-    virtual void handleType(const string& type, const string& nativeName, unsigned flags);
-    virtual void handleConversion(const string& runtimeRoutine, int codeLine,
-                                  unsigned flags, const string& from, const string& to,
+
+    virtual void handleType(const string &type, const string &nativeName, unsigned flags);
+    virtual void handleConversion(const string &runtimeRoutine, int codeLine,
+                                  unsigned flags, const string &from, const string &to,
                                   int tileCost, int registerCost);
 
-    virtual void handleOperation(const string& name, unsigned flags);
-    virtual void handleImpl(const string& fnName, const string& code, int codeLine, int cost,
-                            const string& retType, vector<Parameter> sig);
-    virtual void handleTile(const string& fnName, StringList sig);
+    virtual void handleOperation(const string &name, unsigned flags);
+    virtual void handleImpl(const string &fnName, const string &code, int codeLine, int cost,
+                            const string &retType, vector<Parameter> sig);
+    virtual void handleTile(const string &fnName, StringList sig);
 
     // Enumerates all r/i/pad variants; plus computes the shuffle table.
-    void expandOperationVariants(const Operation& op, vector<bool>& paramIsIm);
+    void expandOperationVariants(const Operation &op, vector<bool> &paramIsIm);
 
-    void dumpOpStructForVariant(const OperationVariant& variant, bool doPad,
+    void dumpOpStructForVariant(const OperationVariant &variant, bool doPad,
                                 bool hasPadVariant, bool needsComma);
 
-    void generateVariantImpl(const OperationVariant& variant);
+    void generateVariantImpl(const OperationVariant &variant);
 
     CodePrinter  out;
     TypeTable    types;
 
-    ostream& mInd(int ind) {
+    ostream &mInd(int ind)
+    {
         return out.mInd(ind);
     }
 
@@ -102,8 +101,7 @@ private:
     vector<OperationVariant> variants;
     map<string, StringList>  variantNamesForOp;
 
-    FileTemplate* fTemplate;
+    FileTemplate *fTemplate;
 };
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

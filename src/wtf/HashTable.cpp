@@ -19,7 +19,8 @@
 
 #include <wtf/HashTable.h>
 
-namespace WTF {
+namespace WTF
+{
 
 #if DUMP_HASHTABLE_STATS
 
@@ -40,7 +41,7 @@ HashTableStats::~HashTableStats()
     printf("%d total collisions, average %.2f probes per access\n", numCollisions, 1.0 * (numAccesses + numCollisions) / numAccesses);
     printf("longest collision chain: %d\n", maxCollisions);
     for (int i = 1; i <= maxCollisions; i++) {
-        printf("  %d lookups with exactly %d collisions (%.2f%% , %.2f%% with this many or more)\n", collisionGraph[i], i, 100.0 * (collisionGraph[i] - collisionGraph[i+1]) / numAccesses, 100.0 * collisionGraph[i] / numAccesses);
+        printf("  %d lookups with exactly %d collisions (%.2f%% , %.2f%% with this many or more)\n", collisionGraph[i], i, 100.0 * (collisionGraph[i] - collisionGraph[i + 1]) / numAccesses, 100.0 * collisionGraph[i] / numAccesses);
     }
     printf("%d rehashes\n", numRehashes);
     printf("%d reinserts\n", numReinserts);
@@ -48,8 +49,9 @@ HashTableStats::~HashTableStats()
 
 void HashTableStats::recordCollisionAtCount(int count)
 {
-    if (count > maxCollisions)
+    if (count > maxCollisions) {
         maxCollisions = count;
+    }
     numCollisions++;
     collisionGraph[count]++;
 }

@@ -58,44 +58,59 @@
     macro(set) \
     macro(toISOString)
 
-namespace KJS {
+namespace KJS
+{
 
-    class KJS_EXPORT CommonIdentifiers : Noncopyable {
+class KJS_EXPORT CommonIdentifiers : Noncopyable
+{
 
-    private:
-        CommonIdentifiers();
+private:
+    CommonIdentifiers();
 
-    public:
-        static CommonIdentifiers* shared();
+public:
+    static CommonIdentifiers *shared();
 
-        const Identifier nullIdentifier;
-        const Identifier underscoreProto;
+    const Identifier nullIdentifier;
+    const Identifier underscoreProto;
 
 #define KJS_IDENTIFIER_DECLARE_PROPERTY_NAME_GLOBAL(name) const Identifier name;
-        KJS_COMMON_IDENTIFIERS_EACH_PROPERTY_NAME(KJS_IDENTIFIER_DECLARE_PROPERTY_NAME_GLOBAL)
+    KJS_COMMON_IDENTIFIERS_EACH_PROPERTY_NAME(KJS_IDENTIFIER_DECLARE_PROPERTY_NAME_GLOBAL)
 #undef KJS_IDENTIFIER_DECLARE_PROPERTY_NAME_GLOBAL
-    };
+};
 } // namespace KJS
 
 // ### better place in identifier.h. only here because of the shared null
-namespace WTF {
-    // Provide hashing of Identifiers --- using the rep ptr
-    struct IdentHash {
-        static unsigned hash(const KJS::Identifier& key) {
-            return PtrHash<KJS::UString::Rep*>::hash(key.ustring().rep());
-        }
-        static bool equal(const KJS::Identifier& a, const KJS::Identifier& b) { return a == b; }
-        static const bool safeToCompareToEmptyOrDeleted = false;
-    };
+namespace WTF
+{
+// Provide hashing of Identifiers --- using the rep ptr
+struct IdentHash {
+    static unsigned hash(const KJS::Identifier &key)
+    {
+        return PtrHash<KJS::UString::Rep *>::hash(key.ustring().rep());
+    }
+    static bool equal(const KJS::Identifier &a, const KJS::Identifier &b)
+    {
+        return a == b;
+    }
+    static const bool safeToCompareToEmptyOrDeleted = false;
+};
 
-    template<> struct DefaultHash<KJS::Identifier> { typedef IdentHash Hash; };
+template<> struct DefaultHash<KJS::Identifier> {
+    typedef IdentHash Hash;
+};
 
-    template<> struct HashTraits<KJS::Identifier> : GenericHashTraits<KJS::Identifier> {
-        static const bool emptyValueIsZero = false;
-        static const bool needsDestruction = true;
-        static void constructDeletedValue(KJS::Identifier* slot) { new (slot) KJS::Identifier(); }
-        static bool isDeletedValue(const KJS::Identifier& value) { return value.isNull(); }
-    };
+template<> struct HashTraits<KJS::Identifier> : GenericHashTraits<KJS::Identifier> {
+    static const bool emptyValueIsZero = false;
+    static const bool needsDestruction = true;
+    static void constructDeletedValue(KJS::Identifier *slot)
+    {
+        new(slot) KJS::Identifier();
+    }
+    static bool isDeletedValue(const KJS::Identifier &value)
+    {
+        return value.isNull();
+    }
+};
 
 } // namespace WTF
 

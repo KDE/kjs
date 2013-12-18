@@ -26,15 +26,17 @@
 #include <string.h> // for strlen
 #include <new> // for placement new
 
-namespace KJS {
+namespace KJS
+{
 
 typedef HashSet<UString::Rep *> IdentifierTable;
 static IdentifierTable *table;
 
-static inline IdentifierTable& identifierTable()
+static inline IdentifierTable &identifierTable()
 {
-    if (!table)
+    if (!table) {
         table = new IdentifierTable;
+    }
     return *table;
 }
 
@@ -43,24 +45,26 @@ bool Identifier::equal(const UString::Rep *r, const char *s)
     int length = r->len;
     const UChar *d = r->data();
     for (int i = 0; i != length; ++i)
-        if (d[i].uc != (unsigned char)s[i])
+        if (d[i].uc != (unsigned char)s[i]) {
             return false;
+        }
     return s[length] == 0;
 }
 
 bool Identifier::equal(const UString::Rep *r, const UChar *s, int length)
 {
-    if (r->len != length)
+    if (r->len != length) {
         return false;
+    }
     const UChar *d = r->data();
     for (int i = 0; i != length; ++i)
-        if (d[i].uc != s[i].uc)
+        if (d[i].uc != s[i].uc) {
             return false;
+        }
     return true;
 }
 
-struct CStringTranslator
-{
+struct CStringTranslator {
     static unsigned hash(const char *c)
     {
         return UString::Rep::computeHash(c);
@@ -71,12 +75,13 @@ struct CStringTranslator
         return Identifier::equal(r, s);
     }
 
-    static void translate(UString::Rep*& location, const char *c, unsigned hash)
+    static void translate(UString::Rep *&location, const char *c, unsigned hash)
     {
         size_t length = strlen(c);
         UChar *d = static_cast<UChar *>(fastMalloc(sizeof(UChar) * length));
-        for (size_t i = 0; i != length; i++)
+        for (size_t i = 0; i != length; i++) {
             d[i] = c[i];
+        }
 
         UString::Rep *r = UString::Rep::create(d, static_cast<int>(length)).releaseRef();
         r->isIdentifier = 1;
@@ -89,9 +94,9 @@ struct CStringTranslator
 
 PassRefPtr<UString::Rep> Identifier::add(const char *c)
 {
-   if (!c) {
-       UString::Rep::null.hash();
-       return &UString::Rep::null;
+    if (!c) {
+        UString::Rep::null.hash();
+        return &UString::Rep::null;
     }
 
     if (!c[0]) {
@@ -107,23 +112,23 @@ struct UCharBuffer {
     unsigned int length;
 };
 
-struct UCharBufferTranslator
-{
-    static unsigned hash(const UCharBuffer& buf)
+struct UCharBufferTranslator {
+    static unsigned hash(const UCharBuffer &buf)
     {
         return UString::Rep::computeHash(buf.s, buf.length);
     }
 
-    static bool equal(UString::Rep *str, const UCharBuffer& buf)
+    static bool equal(UString::Rep *str, const UCharBuffer &buf)
     {
         return Identifier::equal(str, buf.s, buf.length);
     }
 
-    static void translate(UString::Rep *& location, const UCharBuffer& buf, unsigned hash)
+    static void translate(UString::Rep  *&location, const UCharBuffer &buf, unsigned hash)
     {
         UChar *d = static_cast<UChar *>(fastMalloc(sizeof(UChar) * buf.length));
-        for (unsigned i = 0; i != buf.length; i++)
+        for (unsigned i = 0; i != buf.length; i++) {
             d[i] = buf.s[i];
+        }
 
         UString::Rep *r = UString::Rep::create(d, buf.length).releaseRef();
         r->isIdentifier = 1;
@@ -138,7 +143,7 @@ PassRefPtr<UString::Rep> Identifier::add(const UChar *s, int length)
 {
     if (!length) {
         UString::Rep::empty.hash();
-         return &UString::Rep::empty;
+        return &UString::Rep::empty;
     }
 
     UCharBuffer buf = {s, static_cast<unsigned int>(length)};
@@ -151,12 +156,13 @@ PassRefPtr<UString::Rep> Identifier::addSlowCase(UString::Rep *r)
 
     if (r->len == 0) {
         UString::Rep::empty.hash();
-         return &UString::Rep::empty;
+        return &UString::Rep::empty;
     }
 
-     UString::Rep *result = *identifierTable().add(r).first;
-     if (result == r)
+    UString::Rep *result = *identifierTable().add(r).first;
+    if (result == r) {
         r->isIdentifier = true;
+    }
     return result;
 }
 

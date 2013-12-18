@@ -44,7 +44,7 @@ private Q_SLOTS:
 void KJSApiTest::objectConstruction()
 {
     KJSInterpreter ip;
-    KJSContext* ctx = ip.globalContext();
+    KJSContext *ctx = ip.globalContext();
 
     // Object
     QVERIFY2(KJSObject().isObject(), "Broken default object");
@@ -92,7 +92,7 @@ void KJSApiTest::objectConstruction()
 void KJSApiTest::interpreterEvaluate()
 {
     KJSInterpreter ip;
-    KJSContext* ctx = ip.globalContext();
+    KJSContext *ctx = ip.globalContext();
     KJSResult res;
 
     // syntax error
@@ -131,47 +131,47 @@ void KJSApiTest::interpreterNormalizeCode()
 
 void KJSApiTest::objectProperties()
 {
-   KJSInterpreter ip;
-   KJSContext* ctx = ip.globalContext();
+    KJSInterpreter ip;
+    KJSContext *ctx = ip.globalContext();
 
-   KJSObject global = ip.globalObject();
-   KJSObject v;
+    KJSObject global = ip.globalObject();
+    KJSObject v;
 
-   // bool
-   global.setProperty(ctx, "myprop", true);
-   v = global.property(ctx, "myprop");
-   QVERIFY(v.isBoolean());
-   QCOMPARE(v.toBoolean(ctx), true);
+    // bool
+    global.setProperty(ctx, "myprop", true);
+    v = global.property(ctx, "myprop");
+    QVERIFY(v.isBoolean());
+    QCOMPARE(v.toBoolean(ctx), true);
 
-   // double
-   global.setProperty(ctx, "myprop", 21.0);
-   v = global.property(ctx, "myprop");
-   QVERIFY(v.isNumber());
-   QCOMPARE(v.toNumber(ctx), 21.0);
+    // double
+    global.setProperty(ctx, "myprop", 21.0);
+    v = global.property(ctx, "myprop");
+    QVERIFY(v.isNumber());
+    QCOMPARE(v.toNumber(ctx), 21.0);
 
-   // int
-   global.setProperty(ctx, "myprop", 22);
-   v = global.property(ctx, "myprop");
-   QVERIFY(v.isNumber());
-   QCOMPARE(v.toNumber(ctx), 22.0);
+    // int
+    global.setProperty(ctx, "myprop", 22);
+    v = global.property(ctx, "myprop");
+    QVERIFY(v.isNumber());
+    QCOMPARE(v.toNumber(ctx), 22.0);
 
-   // string (8-bit)
-   global.setProperty(ctx, "myprop", "myvalue8");
-   v = global.property(ctx, "myprop");
-   QVERIFY(v.isString());
-   QCOMPARE(v.toString(ctx), QLatin1String("myvalue8"));
+    // string (8-bit)
+    global.setProperty(ctx, "myprop", "myvalue8");
+    v = global.property(ctx, "myprop");
+    QVERIFY(v.isString());
+    QCOMPARE(v.toString(ctx), QLatin1String("myvalue8"));
 
-   // string (Unicode)
-   global.setProperty(ctx, "myprop", QLatin1String("myvalue16"));
-   v = global.property(ctx, "myprop");
-   QVERIFY(v.isString());
-   QCOMPARE(v.toString(ctx), QLatin1String("myvalue16"));
+    // string (Unicode)
+    global.setProperty(ctx, "myprop", QLatin1String("myvalue16"));
+    v = global.property(ctx, "myprop");
+    QVERIFY(v.isString());
+    QCOMPARE(v.toString(ctx), QLatin1String("myvalue16"));
 }
 
 void KJSApiTest::prototypeConstants()
 {
     KJSInterpreter ip;
-    KJSContext* ctx = ip.globalContext();
+    KJSContext *ctx = ip.globalContext();
 
     KJSPrototype proto;
 
@@ -184,18 +184,20 @@ void KJSApiTest::prototypeConstants()
     QCOMPARE(obj.property(ctx, "s0").toString(ctx), QLatin1String("XYZ"));
 }
 
-static struct O { int x; } o0 = { 42 };
+static struct O {
+    int x;
+} o0 = { 42 };
 
-static KJSObject getX(KJSContext* /*context*/, void* object)
+static KJSObject getX(KJSContext * /*context*/, void *object)
 {
-    O* o = reinterpret_cast<O*>(object);
+    O *o = reinterpret_cast<O *>(object);
     int x = o->x;
     return KJSNumber(x);
 }
 
-static void setX(KJSContext* context, void* object, KJSObject value)
+static void setX(KJSContext *context, void *object, KJSObject value)
 {
-    O* o = reinterpret_cast<O*>(object);
+    O *o = reinterpret_cast<O *>(object);
     double n = value.toNumber(context);
     o->x = n;
 }
@@ -203,7 +205,7 @@ static void setX(KJSContext* context, void* object, KJSObject value)
 void KJSApiTest::prototypeProperties()
 {
     KJSInterpreter ip;
-    KJSContext* ctx = ip.globalContext();
+    KJSContext *ctx = ip.globalContext();
 
     KJSPrototype proto;
 
@@ -223,18 +225,20 @@ void KJSApiTest::prototypeProperties()
     QCOMPARE(obj.property(ctx, "readOnlyX").toNumber(ctx), 43.0);
 }
 
-static KJSObject multiply(KJSContext* context, void* object,
-                          const KJSArguments& arguments)
+static KJSObject multiply(KJSContext *context, void *object,
+                          const KJSArguments &arguments)
 {
-    double factor = *reinterpret_cast<double*>(object);
+    double factor = *reinterpret_cast<double *>(object);
 
     // test number of arguments
-    if (arguments.count() != 1)
+    if (arguments.count() != 1) {
         return context->throwException("Missing argument");
+    }
 
     KJSObject a0 = arguments.at(0);
-    if (!a0.isNumber())
+    if (!a0.isNumber()) {
         return KJSNumber(-2);
+    }
 
     double v0 = a0.toNumber(context);
 
@@ -244,7 +248,7 @@ static KJSObject multiply(KJSContext* context, void* object,
 void KJSApiTest::prototypeFunctions()
 {
     KJSInterpreter ip;
-    KJSContext* ctx = ip.globalContext();
+    KJSContext *ctx = ip.globalContext();
 
     KJSPrototype proto;
 

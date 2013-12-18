@@ -21,17 +21,18 @@
  *  Boston, MA 02110-1301, USA.
  *
  */
- #include "nodes2bytecode.h"
- #include "CompileState.h"
- #include <wtf/Assertions.h>
+#include "nodes2bytecode.h"
+#include "CompileState.h"
+#include <wtf/Assertions.h>
 
- #include <typeinfo>
- #include <iostream>
+#include <typeinfo>
+#include <iostream>
 
-namespace KJS {
+namespace KJS
+{
 
 // A few helpers..
-static void emitError(CompileState* comp, Node* node, ErrorType type, const char* msgStr)
+static void emitError(CompileState *comp, Node *node, ErrorType type, const char *msgStr)
 {
     OpValue me = OpValue::immNode(node);
     OpValue se = OpValue::immInt32(type);
@@ -39,18 +40,17 @@ static void emitError(CompileState* comp, Node* node, ErrorType type, const char
     CodeGen::emitOp(comp, Op_RaiseError, 0, &me, &se, &msg);
 }
 
-static void emitSyntaxError(CompileState* comp, Node* node, const char* msgStr)
+static void emitSyntaxError(CompileState *comp, Node *node, const char *msgStr)
 {
     emitError(comp, node, SyntaxError, msgStr);
 }
 
-static void emitReferenceError(CompileState* comp, Node* node, const char* msgStr)
+static void emitReferenceError(CompileState *comp, Node *node, const char *msgStr)
 {
     emitError(comp, node, ReferenceError, msgStr);
 }
 
-
-OpValue Node::generateEvalCode(CompileState*)
+OpValue Node::generateEvalCode(CompileState *)
 {
     std::cerr << "WARNING: no generateEvalCode for:" << typeid(*this).name() << "\n";
     ASSERT(0);
@@ -58,49 +58,51 @@ OpValue Node::generateEvalCode(CompileState*)
     return OpValue::immInt32(42);
 }
 
-void StatementNode::generateExecCode(CompileState*)
+void StatementNode::generateExecCode(CompileState *)
 {
     std::cerr << "WARNING: no generateExecCode for:" << typeid(*this).name() << "\n";
     ASSERT(0);
 }
 
-void StatementNode::generateDebugInfo(CompileState* comp)
+void StatementNode::generateDebugInfo(CompileState *comp)
 {
     OpValue me = OpValue::immNode(this);
     CodeGen::emitOp(comp, Op_AtStatement, 0, &me);
 }
 
-static inline bool exitContextNeeded(CompileState* comp) {
+static inline bool exitContextNeeded(CompileState *comp)
+{
     return comp->compileType() == Debug &&
            comp->codeType()    == FunctionCode;
 }
 
-static void generateExitContextIfNeeded(CompileState* comp) {
+static void generateExitContextIfNeeded(CompileState *comp)
+{
     if (exitContextNeeded(comp)) {
         OpValue ourNode = OpValue::immNode(comp->functionBody());
-        CodeGen::emitOp(comp, Op_ExitDebugContext, 0, &ourNode);        
+        CodeGen::emitOp(comp, Op_ExitDebugContext, 0, &ourNode);
     }
 }
 
 // ------------------------------ Basic literals -----------------------------------------
 
-OpValue NullNode::generateEvalCode(CompileState*)
+OpValue NullNode::generateEvalCode(CompileState *)
 {
     return OpValue::immValue(jsNull());
 }
 
-OpValue BooleanNode::generateEvalCode(CompileState*)
+OpValue BooleanNode::generateEvalCode(CompileState *)
 {
     return OpValue::immBool(value());
 }
 
-OpValue NumberNode::generateEvalCode(CompileState*)
+OpValue NumberNode::generateEvalCode(CompileState *)
 {
     using namespace std;
 #if 0
     if (typeHint == OpType_Value) {
         // Try to fit into a JSValue if at all possible..
-        JSValue* im = JSImmediate::from(value());
+        JSValue *im = JSImmediate::from(value());
         if (im) {
             OpValue res = mkImmediateVal(OpType_value);
             return res;
@@ -111,23 +113,24 @@ OpValue NumberNode::generateEvalCode(CompileState*)
     // Numeric-like..
     double d = value();
     int32_t i32 = JSValue::toInt32(d);
-    if (double(i32) == d && !(i32 == 0 && signbit(d))) // be careful with -0.0 here
+    if (double(i32) == d && !(i32 == 0 && signbit(d))) { // be careful with -0.0 here
         return OpValue::immInt32(i32);
-    else
+    } else {
         return OpValue::immNumber(d);
+    }
 }
 
-
-OpValue StringNode::generateEvalCode(CompileState* comp)
+OpValue StringNode::generateEvalCode(CompileState *comp)
 {
     // For now, just generate a JSValue
     // We may want to permit string pointers as well, to help overload resolution,
     // but it's not clear whether that's useful, since we can't MM them. Perhaps
     // a special StringInstance type may be of use eventually.
-    
-    if (interned) // we're re-compiling.. just reuse it
+
+    if (interned) { // we're re-compiling.. just reuse it
         return OpValue::immValue(interned);
-        
+    }
+
     // Intern shorter strings
     if (val.size() < 16) {
         interned = Interpreter::internString(val);
@@ -143,11 +146,12 @@ OpValue StringNode::generateEvalCode(CompileState* comp)
 
 StringNode::~StringNode()
 {
-    if (interned)
+    if (interned) {
         Interpreter::releaseInternedString(val);
+    }
 }
 
-OpValue RegExpNode::generateEvalCode(CompileState* comp)
+OpValue RegExpNode::generateEvalCode(CompileState *comp)
 {
     // ### TODO: cache the engine object?
     OpValue out;
@@ -157,14 +161,14 @@ OpValue RegExpNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue ThisNode::generateEvalCode(CompileState* comp)
+OpValue ThisNode::generateEvalCode(CompileState *comp)
 {
     return *comp->thisValue();
 }
 
 // ------------------------------ VarAccessNode ----------------------------------------
 
-size_t VarAccessNode::classifyVariable(CompileState* comp, Classification& classify)
+size_t VarAccessNode::classifyVariable(CompileState *comp, Classification &classify)
 {
     // Are we inside a with or catch? In that case, it's all dynamic. Boo.
     // Ditto for eval.
@@ -192,15 +196,16 @@ size_t VarAccessNode::classifyVariable(CompileState* comp, Classification& class
 
     // Do we know this?
     size_t index = comp->functionBody()->lookupSymbolID(ident);
-    if (index == missingSymbolMarker())
+    if (index == missingSymbolMarker()) {
         classify = NonLocal;
-    else
+    } else {
         classify = Local;
+    }
 
     return index;
 }
 
-OpValue VarAccessNode::generateEvalCode(CompileState* comp)
+OpValue VarAccessNode::generateEvalCode(CompileState *comp)
 {
     Classification classify;
     size_t index = classifyVariable(comp, classify);
@@ -227,7 +232,7 @@ OpValue VarAccessNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue VarAccessNode::valueForTypeOf(CompileState* comp)
+OpValue VarAccessNode::valueForTypeOf(CompileState *comp)
 {
     // ### some code dupe here.
     Classification classify;
@@ -257,25 +262,26 @@ OpValue VarAccessNode::valueForTypeOf(CompileState* comp)
     return out;
 }
 
-CompileReference* VarAccessNode::generateRefBind(CompileState* comp)
+CompileReference *VarAccessNode::generateRefBind(CompileState *comp)
 {
     Classification classify;
     classifyVariable(comp, classify);
 
-    if (classify == Local || classify == Global)
-        return 0; // nothing to do, we know where it is
+    if (classify == Local || classify == Global) {
+        return 0;    // nothing to do, we know where it is
+    }
 
     // Otherwise, we need to find the scope for writing
-    CompileReference* ref = new CompileReference;
+    CompileReference *ref = new CompileReference;
 
     OpValue quiet = OpValue::immNode(0);
     OpValue varName = OpValue::immIdent(&ident);
     CodeGen::emitOp(comp, classify == Dynamic ? Op_ScopeLookup : Op_NonLocalScopeLookup,
-                        &ref->baseObj, &varName, &quiet);
+                    &ref->baseObj, &varName, &quiet);
     return ref;
 }
 
-CompileReference* VarAccessNode::generateRefRead(CompileState* comp, OpValue* out)
+CompileReference *VarAccessNode::generateRefRead(CompileState *comp, OpValue *out)
 {
     Classification classify;
     classifyVariable(comp, classify);
@@ -289,24 +295,25 @@ CompileReference* VarAccessNode::generateRefRead(CompileState* comp, OpValue* ou
     }
 
     // For others, use the lookup-and-fetch ops
-    CompileReference* ref = new CompileReference;
+    CompileReference *ref = new CompileReference;
 
     OpValue readReg;
     OpValue varName = OpValue::immIdent(&ident);
     comp->requestTemporary(OpType_value, out, &readReg);
 
     OpName op;
-    if (classify == Dynamic)
+    if (classify == Dynamic) {
         op = Op_ScopeLookupAndGetChecked;
-    else
+    } else {
         op = Op_NonLocalScopeLookupAndGetChecked;
+    }
     CodeGen::emitOp(comp, op, &ref->baseObj, &readReg, &varName);
 
     return ref;
 }
 
-void VarAccessNode::generateRefWrite(CompileState* comp,
-                                           CompileReference* ref, OpValue& valToStore)
+void VarAccessNode::generateRefWrite(CompileState *comp,
+                                     CompileReference *ref, OpValue &valToStore)
 {
     Classification classify;
     size_t index = classifyVariable(comp, classify);
@@ -319,11 +326,11 @@ void VarAccessNode::generateRefWrite(CompileState* comp,
         // Symbolic write to the appropriate scope..
         OpValue varName = OpValue::immIdent(&ident);
         CodeGen::emitOp(comp, Op_SymPutKnownObject, 0,
-                       (classify == Global ? comp->globalScope() : &ref->baseObj), &varName, &valToStore);
+                        (classify == Global ? comp->globalScope() : &ref->baseObj), &varName, &valToStore);
     }
 }
 
-OpValue VarAccessNode::generateRefDelete(CompileState* comp)
+OpValue VarAccessNode::generateRefDelete(CompileState *comp)
 {
     Classification classify;
     classifyVariable(comp, classify);
@@ -351,7 +358,7 @@ OpValue VarAccessNode::generateRefDelete(CompileState* comp)
     return out;
 }
 
-void VarAccessNode::generateRefFunc(CompileState* comp, OpValue* funOut, OpValue* thisOut)
+void VarAccessNode::generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut)
 {
     Classification classify;
     classifyVariable(comp, classify);
@@ -379,14 +386,14 @@ void VarAccessNode::generateRefFunc(CompileState* comp, OpValue* funOut, OpValue
 
 // ------------------------------ GroupNode----------------------------------------
 
-OpValue GroupNode::generateEvalCode(CompileState* comp)
+OpValue GroupNode::generateEvalCode(CompileState *comp)
 {
     return group->generateEvalCode(comp);
 }
 
 // ------------------------------ Object + Array literals --------------------------
 
-OpValue ArrayNode::generateEvalCode(CompileState* comp)
+OpValue ArrayNode::generateEvalCode(CompileState *comp)
 {
     OpValue arr;
     CodeGen::emitOp(comp, Op_NewEmptyArray, &arr);
@@ -394,7 +401,7 @@ OpValue ArrayNode::generateEvalCode(CompileState* comp)
     OpValue und = OpValue::immValue(jsUndefined());
 
     int pos = 0;
-    for (ElementNode* el = element.get(); el; el = el->next.get()) {
+    for (ElementNode *el = element.get(); el; el = el->next.get()) {
         if (!el->node) {
             // Fill elision w/undefined, unless we can just skip over to a value
             for (int i = 0; i < el->elision; i++) {
@@ -423,13 +430,13 @@ OpValue ArrayNode::generateEvalCode(CompileState* comp)
     return arr;
 }
 
-OpValue ObjectLiteralNode::generateEvalCode(CompileState* comp)
+OpValue ObjectLiteralNode::generateEvalCode(CompileState *comp)
 {
     OpValue obj;
     CodeGen::emitOp(comp, Op_NewObject, &obj);
 
-    for (PropertyListNode* entry = list.get(); entry; entry = entry->next.get()) {
-        PropertyNode* prop = entry->node.get();
+    for (PropertyListNode *entry = list.get(); entry; entry = entry->next.get()) {
+        PropertyNode *prop = entry->node.get();
         OpValue name = OpValue::immIdent(&prop->name->str);
         OpValue val  = prop->assign->generateEvalCode(comp);
 
@@ -450,7 +457,7 @@ OpValue ObjectLiteralNode::generateEvalCode(CompileState* comp)
 }
 
 // ------------------------------ BracketAccessorNode --------------------------------
-OpValue BracketAccessorNode::generateEvalCode(CompileState* comp)
+OpValue BracketAccessorNode::generateEvalCode(CompileState *comp)
 {
     OpValue ret;
     OpValue base  = expr1->generateEvalCode(comp);
@@ -461,7 +468,7 @@ OpValue BracketAccessorNode::generateEvalCode(CompileState* comp)
     return ret;
 }
 
-CompileReference* BracketAccessorNode::generateRefBind(CompileState* comp)
+CompileReference *BracketAccessorNode::generateRefBind(CompileState *comp)
 {
     // Per 11.2.1, the following steps must happen when evaluating foo[bar]
     // 1) eval foo
@@ -470,16 +477,16 @@ CompileReference* BracketAccessorNode::generateRefBind(CompileState* comp)
     // 4) call toString on [[bar]]
     // ... all of which are part of reference evaluation. Fun.
     // ### FIXME FIXME FIXME: we don't do step 4 in right spot yet!
-    CompileReference* ref = new CompileReference;
+    CompileReference *ref = new CompileReference;
     OpValue baseV = expr1->generateEvalCode(comp);
     ref->indexVal = expr2->generateEvalCode(comp);
     CodeGen::emitOp(comp, Op_ToObject, &ref->baseObj, &baseV);
     return ref;
 }
 
-CompileReference* BracketAccessorNode::generateRefRead(CompileState* comp, OpValue* out)
+CompileReference *BracketAccessorNode::generateRefRead(CompileState *comp, OpValue *out)
 {
-    CompileReference* ref = new CompileReference;
+    CompileReference *ref = new CompileReference;
 
     // ### As above, this sequence should store the toString on reference, if there will be a follow up
     // write --- need a hint for that..
@@ -494,13 +501,13 @@ CompileReference* BracketAccessorNode::generateRefRead(CompileState* comp, OpVal
     return ref;
 }
 
-void BracketAccessorNode::generateRefWrite(CompileState* comp,
-                                             CompileReference* ref, OpValue& valToStore)
+void BracketAccessorNode::generateRefWrite(CompileState *comp,
+        CompileReference *ref, OpValue &valToStore)
 {
     CodeGen::emitOp(comp, Op_BracketPutKnownObject, 0, &ref->baseObj, &ref->indexVal, &valToStore);
 }
 
-OpValue BracketAccessorNode::generateRefDelete(CompileState* comp)
+OpValue BracketAccessorNode::generateRefDelete(CompileState *comp)
 {
     OpValue base  = expr1->generateEvalCode(comp);
     OpValue index = expr2->generateEvalCode(comp);
@@ -510,7 +517,7 @@ OpValue BracketAccessorNode::generateRefDelete(CompileState* comp)
     return out;
 }
 
-void BracketAccessorNode::generateRefFunc(CompileState* comp, OpValue* funOut, OpValue* thisOut)
+void BracketAccessorNode::generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut)
 {
     OpValue baseV  = expr1->generateEvalCode(comp);
     OpValue indexV = expr2->generateEvalCode(comp);
@@ -525,7 +532,7 @@ void BracketAccessorNode::generateRefFunc(CompileState* comp, OpValue* funOut, O
 // ------------------------------ DotAccessorNode --------------------------------
 
 // ECMA 11.2.1b
-OpValue DotAccessorNode::generateEvalCode(CompileState* comp)
+OpValue DotAccessorNode::generateEvalCode(CompileState *comp)
 {
     OpValue ret;
     OpValue base    = expr->generateEvalCode(comp);
@@ -534,17 +541,17 @@ OpValue DotAccessorNode::generateEvalCode(CompileState* comp)
     return ret;
 }
 
-CompileReference* DotAccessorNode::generateRefBind(CompileState* comp)
+CompileReference *DotAccessorNode::generateRefBind(CompileState *comp)
 {
-    CompileReference* ref = new CompileReference;
+    CompileReference *ref = new CompileReference;
     OpValue baseV = expr->generateEvalCode(comp);
     CodeGen::emitOp(comp, Op_ToObject, &ref->baseObj, &baseV);
     return ref;
 }
 
-CompileReference* DotAccessorNode::generateRefRead(CompileState* comp, OpValue* out)
+CompileReference *DotAccessorNode::generateRefRead(CompileState *comp, OpValue *out)
 {
-    CompileReference* ref = new CompileReference;
+    CompileReference *ref = new CompileReference;
     OpValue baseV = expr->generateEvalCode(comp);
     OpValue baseReg;
     OpValue varName = OpValue::immIdent(&ident);
@@ -553,14 +560,14 @@ CompileReference* DotAccessorNode::generateRefRead(CompileState* comp, OpValue* 
     return ref;
 }
 
-void DotAccessorNode::generateRefWrite(CompileState* comp,
-                                       CompileReference* ref, OpValue& valToStore)
+void DotAccessorNode::generateRefWrite(CompileState *comp,
+                                       CompileReference *ref, OpValue &valToStore)
 {
     OpValue varName = OpValue::immIdent(&ident);
     CodeGen::emitOp(comp, Op_SymPutKnownObject, 0, &ref->baseObj, &varName, &valToStore);
 }
 
-OpValue DotAccessorNode::generateRefDelete(CompileState* comp)
+OpValue DotAccessorNode::generateRefDelete(CompileState *comp)
 {
     OpValue base = expr->generateEvalCode(comp);
     OpValue varName = OpValue::immIdent(&ident);
@@ -569,7 +576,7 @@ OpValue DotAccessorNode::generateRefDelete(CompileState* comp)
     return out;
 }
 
-void DotAccessorNode::generateRefFunc(CompileState* comp, OpValue* funOut, OpValue* thisOut)
+void DotAccessorNode::generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut)
 {
     OpValue baseV = expr->generateEvalCode(comp);
     OpValue varName = OpValue::immIdent(&ident);
@@ -581,13 +588,13 @@ void DotAccessorNode::generateRefFunc(CompileState* comp, OpValue* funOut, OpVal
 
 // ------------------ ........
 
-void ArgumentsNode::generateEvalArguments(CompileState* comp)
+void ArgumentsNode::generateEvalArguments(CompileState *comp)
 {
     WTF::Vector<OpValue> args;
 
     // We need evaluate arguments and push them in separate steps as there may be
     // function/ctor calls inside.
-    for (ArgumentListNode* arg = list.get(); arg; arg = arg->next.get()) {
+    for (ArgumentListNode *arg = list.get(); arg; arg = arg->next.get()) {
         args.append(arg->expr->generateEvalCode(comp));
     }
 
@@ -596,10 +603,10 @@ void ArgumentsNode::generateEvalArguments(CompileState* comp)
     size_t c = 0;
     while (c < args.size()) {
         if (c + 3 <= args.size()) {
-            CodeGen::emitOp(comp, Op_Add3Arg, 0, &args[c], &args[c+1], &args[c+2]);
+            CodeGen::emitOp(comp, Op_Add3Arg, 0, &args[c], &args[c + 1], &args[c + 2]);
             c += 3;
         } else if (c + 2 <= args.size()) {
-            CodeGen::emitOp(comp, Op_Add2Arg, 0, &args[c], &args[c+1]);
+            CodeGen::emitOp(comp, Op_Add2Arg, 0, &args[c], &args[c + 1]);
             c += 2;
         } else {
             CodeGen::emitOp(comp, Op_AddArg, 0, &args[c]);
@@ -608,21 +615,22 @@ void ArgumentsNode::generateEvalArguments(CompileState* comp)
     }
 }
 
-OpValue NewExprNode::generateEvalCode(CompileState* comp)
+OpValue NewExprNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = expr->generateEvalCode(comp);
 
-    if (args)
+    if (args) {
         args->generateEvalArguments(comp);
-    else
+    } else {
         CodeGen::emitOp(comp, Op_ClearArgs, 0);
+    }
 
     OpValue out;
     CodeGen::emitOp(comp, Op_CtorCall, &out, &v);
     return out;
 }
 
-OpValue FunctionCallValueNode::generateEvalCode(CompileState* comp)
+OpValue FunctionCallValueNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = expr->generateEvalCode(comp);
     args->generateEvalArguments(comp);
@@ -632,11 +640,11 @@ OpValue FunctionCallValueNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue FunctionCallReferenceNode::generateEvalCode(CompileState* comp)
+OpValue FunctionCallReferenceNode::generateEvalCode(CompileState *comp)
 {
-    Node* cand = expr->nodeInsideAllParens();
+    Node *cand = expr->nodeInsideAllParens();
     ASSERT(cand->isLocation());
-    LocationNode* loc = static_cast<LocationNode*>(cand);
+    LocationNode *loc = static_cast<LocationNode *>(cand);
 
     OpValue funVal, thisVal;
     loc->generateRefFunc(comp, &funVal, &thisVal);
@@ -647,24 +655,24 @@ OpValue FunctionCallReferenceNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue PostfixNode::generateEvalCode(CompileState* comp)
+OpValue PostfixNode::generateEvalCode(CompileState *comp)
 {
-    Node* cand = m_loc->nodeInsideAllParens();
+    Node *cand = m_loc->nodeInsideAllParens();
     if (!cand->isLocation()) {
         emitReferenceError(comp, this,
-                m_oper == OpPlusPlus ?
-                    "Postfix ++ operator applied to value that is not a reference." :
-                    "Postfix -- operator applied to value that is not a reference.");
+                           m_oper == OpPlusPlus ?
+                           "Postfix ++ operator applied to value that is not a reference." :
+                           "Postfix -- operator applied to value that is not a reference.");
         return OpValue::immValue(jsUndefined());
     }
 
-    LocationNode* loc = static_cast<LocationNode*>(cand);
+    LocationNode *loc = static_cast<LocationNode *>(cand);
 
     // ### we want to fold this in if the kid is a local -- any elegant way?
 
     //read current value
     OpValue curV;
-    CompileReference* ref = loc->generateRefRead(comp, &curV);
+    CompileReference *ref = loc->generateRefRead(comp, &curV);
 
     // We need it to be a number..
     if (curV.type != OpType_number) {
@@ -683,23 +691,23 @@ OpValue PostfixNode::generateEvalCode(CompileState* comp)
     return curV;
 }
 
-OpValue DeleteReferenceNode::generateEvalCode(CompileState* comp)
+OpValue DeleteReferenceNode::generateEvalCode(CompileState *comp)
 {
     return loc->generateRefDelete(comp);
 }
 
-OpValue DeleteValueNode::generateEvalCode(CompileState*)
+OpValue DeleteValueNode::generateEvalCode(CompileState *)
 {
     return OpValue::immBool(true);
 }
 
-OpValue VoidNode::generateEvalCode(CompileState* comp)
+OpValue VoidNode::generateEvalCode(CompileState *comp)
 {
     (void)expr->generateEvalCode(comp);
     return OpValue::immValue(jsUndefined());
 }
 
-OpValue TypeOfVarNode::generateEvalCode(CompileState* comp)
+OpValue TypeOfVarNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = loc->valueForTypeOf(comp);
 
@@ -708,7 +716,7 @@ OpValue TypeOfVarNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue TypeOfValueNode::generateEvalCode(CompileState* comp)
+OpValue TypeOfValueNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = m_expr->generateEvalCode(comp);
     OpValue typeOfV;
@@ -716,24 +724,24 @@ OpValue TypeOfValueNode::generateEvalCode(CompileState* comp)
     return typeOfV;
 }
 
-OpValue PrefixNode::generateEvalCode(CompileState* comp)
+OpValue PrefixNode::generateEvalCode(CompileState *comp)
 {
-    Node* cand = m_loc->nodeInsideAllParens();
+    Node *cand = m_loc->nodeInsideAllParens();
     if (!cand->isLocation()) {
         emitReferenceError(comp, this,
-                m_oper == OpPlusPlus ?
-                    "Prefix ++ operator applied to value that is not a reference." :
-                    "Prefix -- operator applied to value that is not a reference.");
+                           m_oper == OpPlusPlus ?
+                           "Prefix ++ operator applied to value that is not a reference." :
+                           "Prefix -- operator applied to value that is not a reference.");
         return OpValue::immValue(jsUndefined());
     }
 
-    LocationNode* loc = static_cast<LocationNode*>(cand);
+    LocationNode *loc = static_cast<LocationNode *>(cand);
 
     // ### we want to fold this in if the kid is a local -- any elegant way?
 
     //read current value
     OpValue curV;
-    CompileReference* ref = loc->generateRefRead(comp, &curV);
+    CompileReference *ref = loc->generateRefRead(comp, &curV);
 
     OpValue newV;
     CodeGen::emitOp(comp, (m_oper == OpPlusPlus) ? Op_Add1 : Op_Sub1,
@@ -745,7 +753,7 @@ OpValue PrefixNode::generateEvalCode(CompileState* comp)
     return newV;
 }
 
-OpValue UnaryPlusNode::generateEvalCode(CompileState* comp)
+OpValue UnaryPlusNode::generateEvalCode(CompileState *comp)
 {
     // This is basically just a number cast
     OpValue curV = expr->generateEvalCode(comp);
@@ -759,7 +767,7 @@ OpValue UnaryPlusNode::generateEvalCode(CompileState* comp)
     return curV;
 }
 
-OpValue NegateNode::generateEvalCode(CompileState* comp)
+OpValue NegateNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = expr->generateEvalCode(comp);
     OpValue negV;
@@ -767,7 +775,7 @@ OpValue NegateNode::generateEvalCode(CompileState* comp)
     return negV;
 }
 
-OpValue BitwiseNotNode::generateEvalCode(CompileState* comp)
+OpValue BitwiseNotNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = expr->generateEvalCode(comp);
     OpValue out;
@@ -775,7 +783,7 @@ OpValue BitwiseNotNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue LogicalNotNode::generateEvalCode(CompileState* comp)
+OpValue LogicalNotNode::generateEvalCode(CompileState *comp)
 {
     OpValue v = expr->generateEvalCode(comp);
     OpValue out;
@@ -783,13 +791,13 @@ OpValue LogicalNotNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue BinaryOperatorNode::generateEvalCode(CompileState* comp)
+OpValue BinaryOperatorNode::generateEvalCode(CompileState *comp)
 {
     OpValue v1 = expr1->generateEvalCode(comp);
     OpValue v2 = expr2->generateEvalCode(comp);
 
     OpName codeOp; // ### could perhaps skip conversion entirely,
-                   // and set these in the parser?
+    // and set these in the parser?
     switch (oper) {
     case OpMult:
         // operator *
@@ -883,7 +891,7 @@ OpValue BinaryOperatorNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-OpValue BinaryLogicalNode::generateEvalCode(CompileState* comp)
+OpValue BinaryLogicalNode::generateEvalCode(CompileState *comp)
 {
     // This is somewhat ugly since we can't patchup labels in already generated
     // code, and don't know the types in advance. It could also benefit from
@@ -900,7 +908,7 @@ OpValue BinaryLogicalNode::generateEvalCode(CompileState* comp)
     // if op is && and a is false, we jump out, ditto
     // for || and true.
     Addr jumpToShortCircuit = CodeGen::emitOp(comp, oper == OpAnd ? Op_IfNotJump : Op_IfJump,
-                                              0, &a, OpValue::dummyAddr());
+                              0, &a, OpValue::dummyAddr());
 
     // Now, generate the code for b...
     OpValue b = expr2->generateEvalCode(comp);
@@ -908,10 +916,11 @@ OpValue BinaryLogicalNode::generateEvalCode(CompileState* comp)
     // Hopefully, either the types match, or the result slot is already a value,
     // so we can just promote b (which will happen automatically to produce param for Op_RegPutVal)
     if (a.type == b.type || a.type == OpType_value) {
-        if (a.type == OpType_value)
+        if (a.type == OpType_value) {
             CodeGen::emitOp(comp, Op_RegPutValue, 0, &aReg, &b);
-        else
+        } else {
             CodeGen::emitRegStore(comp, &aReg, &b);
+        }
         CodeGen::patchJumpToNext(comp, jumpToShortCircuit, 1);
         return aVal;
     } else {
@@ -937,7 +946,7 @@ OpValue BinaryLogicalNode::generateEvalCode(CompileState* comp)
     }
 }
 
-OpValue ConditionalNode::generateEvalCode(CompileState* comp)
+OpValue ConditionalNode::generateEvalCode(CompileState *comp)
 {
     // As above, we have some difficulty here, since we do not have a way of knowing
     // the types in advance, but since we can't reasonably speculate on them both being bool,
@@ -971,7 +980,7 @@ OpValue ConditionalNode::generateEvalCode(CompileState* comp)
     return resVal;
 }
 
-OpValue FuncExprNode::generateEvalCode(CompileState* comp)
+OpValue FuncExprNode::generateEvalCode(CompileState *comp)
 {
     comp->setNeedsClosures();
 
@@ -982,14 +991,14 @@ OpValue FuncExprNode::generateEvalCode(CompileState* comp)
     return out;
 }
 
-void FuncDeclNode::generateExecCode(CompileState* comp)
+void FuncDeclNode::generateExecCode(CompileState *comp)
 {
     comp->setNeedsClosures();
 
     // No executable content...
 }
 
-void SourceElementsNode::generateExecCode(CompileState* comp)
+void SourceElementsNode::generateExecCode(CompileState *comp)
 {
     node->generateExecCode(comp);
 
@@ -999,17 +1008,17 @@ void SourceElementsNode::generateExecCode(CompileState* comp)
     }
 }
 
-OpValue AssignNode::generateEvalCode(CompileState* comp)
+OpValue AssignNode::generateEvalCode(CompileState *comp)
 {
-    Node* cand = m_loc->nodeInsideAllParens();
+    Node *cand = m_loc->nodeInsideAllParens();
     if (!cand->isLocation()) {
         emitReferenceError(comp, this, "Left side of assignment is not a reference.");
         return OpValue::immValue(jsUndefined());
     }
 
-    LocationNode* loc = static_cast<LocationNode*>(cand);
+    LocationNode *loc = static_cast<LocationNode *>(cand);
 
-    CompileReference* ref;
+    CompileReference *ref;
 
     OpValue v;
     if (m_oper == OpEqual) {
@@ -1068,18 +1077,18 @@ OpValue AssignNode::generateEvalCode(CompileState* comp)
     return v;
 }
 
-OpValue CommaNode::generateEvalCode(CompileState* comp)
+OpValue CommaNode::generateEvalCode(CompileState *comp)
 {
     expr1->generateEvalCode(comp);
     return expr2->generateEvalCode(comp);
 }
 
-OpValue AssignExprNode::generateEvalCode(CompileState* comp)
+OpValue AssignExprNode::generateEvalCode(CompileState *comp)
 {
     return expr->generateEvalCode(comp);
 }
 
-void VarDeclNode::generateCode(CompileState* comp)
+void VarDeclNode::generateCode(CompileState *comp)
 {
     // We only care about things which have an initializer ---
     // everything else is a no-op at execution time,
@@ -1111,21 +1120,22 @@ void VarDeclNode::generateCode(CompileState* comp)
     } // if initializer..
 }
 
-OpValue VarDeclListNode::generateEvalCode(CompileState* comp)
+OpValue VarDeclListNode::generateEvalCode(CompileState *comp)
 {
-    for (VarDeclListNode *n = this; n; n = n->next.get())
+    for (VarDeclListNode *n = this; n; n = n->next.get()) {
         n->var->generateCode(comp);
+    }
 
     return OpValue::immInt32(0); // unused..
 }
 
-void VarStatementNode::generateExecCode(CompileState* comp)
+void VarStatementNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     next->generateEvalCode(comp);
 }
 
-void BlockNode::generateExecCode(CompileState* comp)
+void BlockNode::generateExecCode(CompileState *comp)
 {
     if (source) {
         generateDebugInfoIfNeeded(comp);
@@ -1133,23 +1143,24 @@ void BlockNode::generateExecCode(CompileState* comp)
     }
 }
 
-void EmptyStatementNode::generateExecCode(CompileState*)
+void EmptyStatementNode::generateExecCode(CompileState *)
 {}
 
-void ExprStatementNode::generateExecCode(CompileState* comp)
+void ExprStatementNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     OpValue val = expr->generateEvalCode(comp);
 
     // Update the result for eval or global code
-    if (comp->codeType() != FunctionCode)
+    if (comp->codeType() != FunctionCode) {
         CodeGen::emitOp(comp, Op_RegPutValue, 0, comp->evalResultReg(), &val);
+    }
 }
 
-void IfNode::generateExecCode(CompileState* comp)
+void IfNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
-    
+
     // eval the condition
     OpValue cond = expr->generateEvalCode(comp);
 
@@ -1161,8 +1172,9 @@ void IfNode::generateExecCode(CompileState* comp)
 
     // If we have an else, add in a jump to skip over it.
     Addr afterAllJmp = 0;
-    if (statement2)
+    if (statement2) {
         afterAllJmp = CodeGen::emitOp(comp, Op_Jump, 0, OpValue::dummyAddr());
+    }
 
     // This is where we go if true fails --- else, or afterwards.
     CodeGen::patchJumpToNext(comp, afterTrueJmp, 1);
@@ -1176,7 +1188,7 @@ void IfNode::generateExecCode(CompileState* comp)
     }
 }
 
-void DoWhileNode::generateExecCode(CompileState* comp)
+void DoWhileNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     comp->enterLoop(this);
@@ -1195,7 +1207,7 @@ void DoWhileNode::generateExecCode(CompileState* comp)
     comp->exitLoop(this);
 }
 
-void WhileNode::generateExecCode(CompileState* comp)
+void WhileNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     comp->enterLoop(this);
@@ -1220,14 +1232,15 @@ void WhileNode::generateExecCode(CompileState* comp)
     comp->exitLoop(this);
 }
 
-void ForNode::generateExecCode(CompileState* comp)
+void ForNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     comp->enterLoop(this);
 
     // Initializer, if any..
-    if (expr1)
+    if (expr1) {
         expr1->generateEvalCode(comp);
+    }
 
     // Insert a jump to the loop test (address not yet known)
     Addr jumpToTest = CodeGen::emitOp(comp, Op_Jump, 0, OpValue::dummyAddr());
@@ -1242,8 +1255,9 @@ void ForNode::generateExecCode(CompileState* comp)
     // ### there is a CheckTimeout hook here in nodes.cpp...
 
     // Generate increment...
-    if (expr3)
-      expr3->generateEvalCode(comp);
+    if (expr3) {
+        expr3->generateEvalCode(comp);
+    }
 
     // The test goes here, so patch up the previous jump..
     CodeGen::patchJumpToNext(comp, jumpToTest, 0);
@@ -1260,22 +1274,23 @@ void ForNode::generateExecCode(CompileState* comp)
     comp->exitLoop(this);
 }
 
-void ForInNode::generateExecCode(CompileState* comp)
+void ForInNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
-    if (varDecl)
+    if (varDecl) {
         varDecl->generateCode(comp);
+    }
 
     OpValue val = expr->generateEvalCode(comp);
     OpValue obj; // version of val after toObject, returned by BeginForIn.
-    
+
     OpValue stateVal, stateReg;
     comp->requestTemporary(OpType_value, &stateVal, &stateReg);
 
     // Fetch the property name array..
     CodeGen::emitOp(comp, Op_BeginForIn, &obj, &val, &stateReg);
 
-    comp->enterLoop(this); 
+    comp->enterLoop(this);
 
     // We put the test first here, since the test and the fetch are combined.
     OpValue sym;
@@ -1283,11 +1298,11 @@ void ForInNode::generateExecCode(CompileState* comp)
                                      &stateVal, OpValue::dummyAddr());
 
     // Write to the variable
-    assert (lexpr->isLocation());
-    LocationNode* loc = static_cast<LocationNode*>(lexpr.get());
+    assert(lexpr->isLocation());
+    LocationNode *loc = static_cast<LocationNode *>(lexpr.get());
 
-    CompileReference* ref = loc->generateRefBind(comp);
-    loc->generateRefWrite (comp, ref, sym);
+    CompileReference *ref = loc->generateRefBind(comp);
+    loc->generateRefWrite(comp, ref, sym);
     delete ref;
 
     // Run the body.
@@ -1308,13 +1323,13 @@ void ForInNode::generateExecCode(CompileState* comp)
 
 // Helper for continue/break -- emits stack cleanup call if needed,
 // and a jump either to the or an ??? exception.
-static void handleJumpOut(CompileState* comp, Node* dest, ComplType breakOrCont)
+static void handleJumpOut(CompileState *comp, Node *dest, ComplType breakOrCont)
 {
     // We scan up the nest stack until we get to the target or
     // a try-finally.
     int toUnwind = 0;
 
-    const WTF::Vector<CompileState::NestInfo>& nests = comp->nestStack();
+    const WTF::Vector<CompileState::NestInfo> &nests = comp->nestStack();
 
     for (int pos = nests.size() - 1; pos >= 0; --pos) {
         switch (nests[pos].type) {
@@ -1329,10 +1344,11 @@ static void handleJumpOut(CompileState* comp, Node* dest, ComplType breakOrCont)
             CodeGen::emitOp(comp, Op_ContBreakInTryFinally, 0, OpValue::dummyAddr());
 
             // Queue destination for resolution
-            if (breakOrCont == Continue)
+            if (breakOrCont == Continue) {
                 comp->addPendingContinue(dest, pc);
-            else
+            } else {
                 comp->addPendingBreak(dest, pc);
+            }
 
             return;
         }
@@ -1351,28 +1367,30 @@ static void handleJumpOut(CompileState* comp, Node* dest, ComplType breakOrCont)
                 CodeGen::emitOp(comp, Op_Jump, 0, OpValue::dummyAddr());
 
                 // Queue destination for resolution
-                if (breakOrCont == Continue)
+                if (breakOrCont == Continue) {
                     comp->addPendingContinue(dest, pc);
-                else
+                } else {
                     comp->addPendingBreak(dest, pc);
+                }
 
                 return;
             } // if matching destination..
         }
     }
 
-    assert (!"Huh? Unable to find continue/break target in the nest stack");
+    assert(!"Huh? Unable to find continue/break target in the nest stack");
 }
 
-void ContinueNode::generateExecCode(CompileState* comp)
+void ContinueNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
-    Node* dest = comp->resolveContinueLabel(ident);
+    Node *dest = comp->resolveContinueLabel(ident);
     if (!dest) {
-        if (ident.isEmpty())
+        if (ident.isEmpty()) {
             emitSyntaxError(comp, this, "Illegal continue without target outside a loop.");
-        else
+        } else {
             emitSyntaxError(comp, this, "Invalid label in continue.");
+        }
     } else {
         // Continue can only be used for a loop
         if (dest->isIterationStatement()) {
@@ -1383,21 +1401,22 @@ void ContinueNode::generateExecCode(CompileState* comp)
     }
 }
 
-void BreakNode::generateExecCode(CompileState* comp)
+void BreakNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
-    Node* dest = comp->resolveBreakLabel(ident);
+    Node *dest = comp->resolveBreakLabel(ident);
     if (!dest) {
-        if (ident.isEmpty())
+        if (ident.isEmpty()) {
             emitSyntaxError(comp, this, "Illegal break without target outside a loop or switch.");
-        else
+        } else {
             emitSyntaxError(comp, this, "Invalid label in break.");
+        }
     } else {
         handleJumpOut(comp, dest, Break);
     }
 }
 
-void ReturnNode::generateExecCode(CompileState* comp)
+void ReturnNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     OpValue arg;
@@ -1408,18 +1427,20 @@ void ReturnNode::generateExecCode(CompileState* comp)
         return;
     }
 
-    if (!value)
+    if (!value) {
         arg = OpValue::immValue(jsUndefined());
-    else
+    } else {
         arg = value->generateEvalCode(comp);
+    }
 
-    if (!comp->inTryFinally())
+    if (!comp->inTryFinally()) {
         generateExitContextIfNeeded(comp);
+    }
 
     CodeGen::emitOp(comp, comp->inTryFinally() ? Op_ReturnInTryFinally : Op_Return, 0, &arg);
 }
 
-void WithNode::generateExecCode(CompileState* comp)
+void WithNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     // ### this may be too conservative --- it only applies if there is
@@ -1437,7 +1458,7 @@ void WithNode::generateExecCode(CompileState* comp)
     comp->popNest();
 }
 
-void LabelNode::generateExecCode(CompileState* comp)
+void LabelNode::generateExecCode(CompileState *comp)
 {
     if (!comp->pushLabel(label)) {
         emitSyntaxError(comp, this, "Duplicated label found.");
@@ -1461,14 +1482,14 @@ void LabelNode::generateExecCode(CompileState* comp)
     comp->popLabel();
 }
 
-void ThrowNode::generateExecCode(CompileState* comp)
+void ThrowNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     OpValue projectile = expr->generateEvalCode(comp);
     CodeGen::emitOp(comp, Op_Throw, 0, &projectile);
 }
 
-void TryNode::generateExecCode(CompileState* comp)
+void TryNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
     // ### this may be too conservative --- it only applies if there is
@@ -1486,8 +1507,9 @@ void TryNode::generateExecCode(CompileState* comp)
 
     // Jump over the catch if try is OK
     Addr jumpOverCatch = 0;
-    if (catchBlock)
+    if (catchBlock) {
         jumpOverCatch = CodeGen::emitOp(comp, Op_Jump, 0, OpValue::dummyAddr());
+    }
 
     // Exceptions would go here --- either in a catch or a finally.
     CodeGen::patchJumpToNext(comp, setCatchHandler, 0);
@@ -1525,10 +1547,10 @@ void TryNode::generateExecCode(CompileState* comp)
         CodeGen::patchJumpToNext(comp, jumpOverCatch, 0);
     }
 
-
     if (finallyBlock) {
-        if (catchBlock) // if a catch was using us an EH, patch that instruction to here
+        if (catchBlock) { // if a catch was using us an EH, patch that instruction to here
             CodeGen::patchJumpToNext(comp, catchToFinallyEH, 0);
+        }
 
         CodeGen::emitOp(comp, Op_DeferCompletion);
         comp->pushNest(CompileState::OtherCleanup);
@@ -1547,7 +1569,7 @@ void TryNode::generateExecCode(CompileState* comp)
     }
 }
 
-void FunctionBodyNode::generateExecCode(CompileState* comp)
+void FunctionBodyNode::generateExecCode(CompileState *comp)
 {
     // Load scope, global and 'this' pointers.
     OpValue scopeVal,  scopeReg,
@@ -1595,10 +1617,10 @@ void FunctionBodyNode::generateExecCode(CompileState* comp)
     CodeGen::emitOp(comp, Op_PropagateException);
 }
 
-void SwitchNode::generateExecCode(CompileState* comp)
+void SwitchNode::generateExecCode(CompileState *comp)
 {
     generateDebugInfoIfNeeded(comp);
-    CaseBlockNode* caseBlock = this->block.get();
+    CaseBlockNode *caseBlock = this->block.get();
 
     // The code we produce has 2 stages: first, we emit all the conditionals, and pick
     // the label to jump to (with the jump to the default being last),
@@ -1615,7 +1637,7 @@ void SwitchNode::generateExecCode(CompileState* comp)
     Addr defJump;
 
     // Jumps for list 1..
-    for (ClauseListNode* iter = caseBlock->list1.get(); iter; iter = iter->next.get()) {
+    for (ClauseListNode *iter = caseBlock->list1.get(); iter; iter = iter->next.get()) {
         OpValue ref = iter->clause->expr->generateEvalCode(comp);
         OpValue match;
         CodeGen::emitOp(comp, Op_StrEq, &match, &switchOn, &ref);
@@ -1625,7 +1647,7 @@ void SwitchNode::generateExecCode(CompileState* comp)
     }
 
     // Jumps for list 2..
-    for (ClauseListNode* iter = caseBlock->list2.get(); iter; iter = iter->next.get()) {
+    for (ClauseListNode *iter = caseBlock->list2.get(); iter; iter = iter->next.get()) {
         OpValue ref = iter->clause->expr->generateEvalCode(comp);
         OpValue match;
         CodeGen::emitOp(comp, Op_StrEq, &match, &switchOn, &ref);
@@ -1639,30 +1661,34 @@ void SwitchNode::generateExecCode(CompileState* comp)
 
     // Now, we can actually emit the bodies, fixing the addresses as we go
     int p = 0;
-    for (ClauseListNode* iter = caseBlock->list1.get(); iter; iter = iter->next.get()) {
+    for (ClauseListNode *iter = caseBlock->list1.get(); iter; iter = iter->next.get()) {
         CodeGen::patchJumpToNext(comp, list1jumps[p], 1);
-        if (iter->clause->source)
+        if (iter->clause->source) {
             iter->clause->source->generateExecCode(comp);
+        }
         ++p;
     }
 
     if (caseBlock->def) {
         CodeGen::patchJumpToNext(comp, defJump, 0);
-        if (caseBlock->def->source)
+        if (caseBlock->def->source) {
             caseBlock->def->source->generateExecCode(comp);
+        }
     }
 
     p = 0;
-    for (ClauseListNode* iter = caseBlock->list2.get(); iter; iter = iter->next.get()) {
+    for (ClauseListNode *iter = caseBlock->list2.get(); iter; iter = iter->next.get()) {
         CodeGen::patchJumpToNext(comp, list2jumps[p], 1);
-        if (iter->clause->source)
+        if (iter->clause->source) {
             iter->clause->source->generateExecCode(comp);
+        }
         ++p;
     }
 
     // If we didn't have a default, that jump is to here..
-    if (!caseBlock->def)
+    if (!caseBlock->def) {
         CodeGen::patchJumpToNext(comp, defJump, 0);
+    }
 
     // Breaks should go after us..
     comp->popDefaultBreak();
@@ -1670,10 +1696,8 @@ void SwitchNode::generateExecCode(CompileState* comp)
     comp->resolvePendingBreaks(this, CodeGen::nextPC(comp));
 }
 
-void ImportStatement::generateExecCode(CompileState*)
+void ImportStatement::generateExecCode(CompileState *)
 {} // handled as a declaration..
-
 
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

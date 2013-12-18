@@ -21,7 +21,8 @@
 #include <math.h>
 #include "global.h"
 
-namespace KJS {
+namespace KJS
+{
 
 // This file exists because JavaScriptCore needs to define the NaN and Inf globals in a way
 // that does not use a static initializer so we don't have a framework initialization routine.
@@ -33,19 +34,19 @@ namespace KJS {
 // It would be good to figure out a 100% clean way that still avoids code that runs at init time.
 
 #if (defined(AVOID_STATIC_CONSTRUCTORS) && !AVOID_STATIC_CONSTRUCTORS)
-    KJS_EXPORT extern const double NaN = NAN;
-    KJS_EXPORT extern const double Inf = INFINITY;
+KJS_EXPORT extern const double NaN = NAN;
+KJS_EXPORT extern const double Inf = INFINITY;
 #elif PLATFORM(DARWIN)
 
 #if PLATFORM(BIG_ENDIAN)
-    KJS_EXPORT extern const unsigned char NaN[sizeof(double)] = { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 };
-    KJS_EXPORT extern const unsigned char Inf[sizeof(double)] = { 0x7f, 0xf0, 0, 0, 0, 0, 0, 0 };
+KJS_EXPORT extern const unsigned char NaN[sizeof(double)] = { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 };
+KJS_EXPORT extern const unsigned char Inf[sizeof(double)] = { 0x7f, 0xf0, 0, 0, 0, 0, 0, 0 };
 #elif PLATFORM(MIDDLE_ENDIAN)
-    KJS_EXPORT extern const unsigned char NaN[] = { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 };
-    KJS_EXPORT extern const unsigned char Inf[] = { 0, 0, 0xf0, 0x7f, 0, 0, 0, 0 };
+KJS_EXPORT extern const unsigned char NaN[] = { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 };
+KJS_EXPORT extern const unsigned char Inf[] = { 0, 0, 0xf0, 0x7f, 0, 0, 0, 0 };
 #else
-    KJS_EXPORT extern const unsigned char NaN[sizeof(double)] = { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f };
-    KJS_EXPORT extern const unsigned char Inf[sizeof(double)] = { 0, 0, 0, 0, 0, 0, 0xf0, 0x7f };
+KJS_EXPORT extern const unsigned char NaN[sizeof(double)] = { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f };
+KJS_EXPORT extern const unsigned char Inf[sizeof(double)] = { 0, 0, 0, 0, 0, 0, 0xf0, 0x7f };
 #endif // PLATFORM(MIDDLE_ENDIAN)
 
 #else // !PLATFORM(DARWIN)
@@ -67,21 +68,21 @@ static const union {
 
 } NaNInf = { {
 #if PLATFORM(BIG_ENDIAN)
-    { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 },
-    { 0x7f, 0xf0, 0, 0, 0, 0, 0, 0 }
+        { 0x7f, 0xf8, 0, 0, 0, 0, 0, 0 },
+        { 0x7f, 0xf0, 0, 0, 0, 0, 0, 0 }
 #elif PLATFORM(MIDDLE_ENDIAN)
-    { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 },
-    { 0, 0, 0xf0, 0x7f, 0, 0, 0, 0 }
+        { 0, 0, 0xf8, 0x7f, 0, 0, 0, 0 },
+        { 0, 0, 0xf0, 0x7f, 0, 0, 0, 0 }
 #else
-    { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f },
-    { 0, 0, 0, 0, 0, 0, 0xf0, 0x7f }
+        { 0, 0, 0, 0, 0, 0, 0xf8, 0x7f },
+        { 0, 0, 0, 0, 0, 0, 0xf0, 0x7f }
 #endif
-} } ;
+    }
+};
 
-    KJS_EXPORT extern const double NaN = NaNInf.doubles.NaN_Double;
-    KJS_EXPORT extern const double Inf = NaNInf.doubles.Inf_Double;
+KJS_EXPORT extern const double NaN = NaNInf.doubles.NaN_Double;
+KJS_EXPORT extern const double Inf = NaNInf.doubles.Inf_Double;
 
 #endif // !PLATFORM(DARWIN)
-
 
 } // namespace KJS

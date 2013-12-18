@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -24,51 +23,56 @@
 
 #include "function.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class FunctionPrototype;
+class FunctionPrototype;
 
-  /**
-   * @internal
-   *
-   * The initial value of Object.prototype (and thus all objects created
-   * with the Object constructor
-   */
-  class KJS_EXPORT ObjectPrototype : public JSObject {
-  public:
+/**
+ * @internal
+ *
+ * The initial value of Object.prototype (and thus all objects created
+ * with the Object constructor
+ */
+class KJS_EXPORT ObjectPrototype : public JSObject
+{
+public:
     ObjectPrototype(ExecState *exec, FunctionPrototype *funcProto);
-    
-    // Returns the lexical default object prototype for the given interpreter.
-    // This is just an alias for exec->lexicalInterpreter()->builtinObjectPrototype() 
-    // for uniformity with custom prototypes.
-    static JSObject* self(ExecState* exec);
-  };
 
-  /**
-   * @internal
-   *
-   * Class to implement all methods that are properties of the
-   * Object.prototype object
-   */
-  class ObjectProtoFunc : public InternalFunctionImp {
-  public:
-    ObjectProtoFunc(ExecState* exec, FunctionPrototype* funcProto, int i, int len, const Identifier&);
+    // Returns the lexical default object prototype for the given interpreter.
+    // This is just an alias for exec->lexicalInterpreter()->builtinObjectPrototype()
+    // for uniformity with custom prototypes.
+    static JSObject *self(ExecState *exec);
+};
+
+/**
+ * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * Object.prototype object
+ */
+class ObjectProtoFunc : public InternalFunctionImp
+{
+public:
+    ObjectProtoFunc(ExecState *exec, FunctionPrototype *funcProto, int i, int len, const Identifier &);
 
     virtual JSValue *callAsFunction(ExecState *, JSObject *, const List &args);
 
     enum { ToString, ToLocaleString, ValueOf, HasOwnProperty, IsPrototypeOf, PropertyIsEnumerable,
-           DefineGetter, DefineSetter, LookupGetter, LookupSetter };
-  private:
+           DefineGetter, DefineSetter, LookupGetter, LookupSetter
+         };
+private:
     int id;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of the global variable's "Object" property
-   */
-  class ObjectObjectImp : public InternalFunctionImp {
-  public:
+/**
+ * @internal
+ *
+ * The initial value of the global variable's "Object" property
+ */
+class ObjectObjectImp : public InternalFunctionImp
+{
+public:
 
     ObjectObjectImp(ExecState *exec,
                     ObjectPrototype *objProto,
@@ -78,7 +82,7 @@ namespace KJS {
     using KJS::JSObject::construct;
     virtual JSObject *construct(ExecState *, const List &args);
     virtual JSValue *callAsFunction(ExecState *, JSObject *, const List &args);
-  };
+};
 
 } // namespace
 

@@ -29,14 +29,15 @@
 #include "nodes.h"
 #include "opcodes.h"
 
-namespace KJS {
+namespace KJS
+{
 
-class Machine {
+class Machine
+{
 public:
-    static JSValue* runBlock(ExecState* exec, const CodeBlock& block, ExecState* parentExec = 0);
+    static JSValue *runBlock(ExecState *exec, const CodeBlock &block, ExecState *parentExec = 0);
 };
 
 }
 
 #endif
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

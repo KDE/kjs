@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 2006 George Staikos <staikos@kde.org>
@@ -36,4 +35,3 @@
 #endif
 
 #endif
-// vim: ts=2 sw=2 et

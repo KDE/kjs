@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  * This file is part of the KDE libraries
  * Copyright (C) 2005 Apple Computer, Inc.
@@ -25,59 +24,65 @@
 
 #include "global.h"
 
-namespace KJS {
+namespace KJS
+{
 
-    // to make it safe to use JavaScript on multiple threads, it is
-    // important to lock before doing anything that allocates a
-    // garbage-collected object or which may affect other shared state
-    // such as the protect count hash table. The simplest way to do
-    // this is by having a local JSLock object for the scope
-    // where the lock must be held. The lock is recursive so nesting
-    // is ok.
+// to make it safe to use JavaScript on multiple threads, it is
+// important to lock before doing anything that allocates a
+// garbage-collected object or which may affect other shared state
+// such as the protect count hash table. The simplest way to do
+// this is by having a local JSLock object for the scope
+// where the lock must be held. The lock is recursive so nesting
+// is ok.
 
-    // Sometimes it is necessary to temporarily release the lock -
-    // since it is recursive you have to actually release all locks
-    // held by your thread. This is safe to do if you are executing
-    // code that doesn't require the lock, and reacquire the right
-    // number of locks at the end. You can do this by constructing a
-    // locally scoped JSLock::DropAllLocks object.
+// Sometimes it is necessary to temporarily release the lock -
+// since it is recursive you have to actually release all locks
+// held by your thread. This is safe to do if you are executing
+// code that doesn't require the lock, and reacquire the right
+// number of locks at the end. You can do this by constructing a
+// locally scoped JSLock::DropAllLocks object.
 
-    class KJS_EXPORT JSLock
+class KJS_EXPORT JSLock
+{
+public:
+    JSLock()
+    {
+        lock();
+    }
+    ~JSLock()
+    {
+        unlock();
+    }
+
+    static void lock();
+    static void unlock();
+    static int lockCount();
+
+    class DropAllLocks
     {
     public:
-        JSLock() 
-        {
-            lock();
-        }
-        ~JSLock() { 
-            unlock(); 
-        }
-        
-        static void lock();
-        static void unlock();
-        static int lockCount();
-        
-        class DropAllLocks {
-        public:
-            DropAllLocks();
-            ~DropAllLocks();
-        private:
-            int m_lockCount;
-            
-            DropAllLocks(const DropAllLocks&);
-            DropAllLocks& operator=(const DropAllLocks&);
-        };
-        
+        DropAllLocks();
+        ~DropAllLocks();
     private:
-        JSLock(const JSLock&);
-        JSLock& operator=(const JSLock&);
+        int m_lockCount;
+
+        DropAllLocks(const DropAllLocks &);
+        DropAllLocks &operator=(const DropAllLocks &);
     };
 
+private:
+    JSLock(const JSLock &);
+    JSLock &operator=(const JSLock &);
+};
+
 #if !USE(MULTIPLE_THREADS)
-    inline void JSLock::lock()      {}
-    inline void JSLock::unlock()    {}
-    // Fix the lock count at 1 so assertions that the lock is held don't fail
-    inline int JSLock::lockCount()  { return 1; }
+inline void JSLock::lock()      {}
+inline void JSLock::unlock()    {}
+// Fix the lock count at 1 so assertions that the lock is held don't fail
+inline int JSLock::lockCount()
+{
+    return 1;
+}
 #endif
 
 } // namespace

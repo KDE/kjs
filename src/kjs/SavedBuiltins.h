@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -25,11 +24,13 @@
 #ifndef SavedBuiltins_H
 #define SavedBuiltins_H
 
-namespace KJS {
-    
+namespace KJS
+{
+
 class SavedBuiltinsInternal;
 
-class SavedBuiltins {
+class SavedBuiltins
+{
     friend class Interpreter;
 public:
     SavedBuiltins();
@@ -38,7 +39,8 @@ private:
     SavedBuiltinsInternal *_internal;
 };
 
-class SavedBuiltinsInternal {
+class SavedBuiltinsInternal
+{
     friend class Interpreter;
 private:
     ProtectedPtr<JSObject> m_Object;
@@ -50,7 +52,7 @@ private:
     ProtectedPtr<JSObject> m_Date;
     ProtectedPtr<JSObject> m_RegExp;
     ProtectedPtr<JSObject> m_Error;
-    
+
     ProtectedPtr<JSObject> m_ObjectPrototype;
     ProtectedPtr<JSObject> m_FunctionPrototype;
     ProtectedPtr<JSObject> m_ArrayPrototype;
@@ -60,14 +62,14 @@ private:
     ProtectedPtr<JSObject> m_DatePrototype;
     ProtectedPtr<JSObject> m_RegExpPrototype;
     ProtectedPtr<JSObject> m_ErrorPrototype;
-    
+
     ProtectedPtr<JSObject> m_EvalError;
     ProtectedPtr<JSObject> m_RangeError;
     ProtectedPtr<JSObject> m_ReferenceError;
     ProtectedPtr<JSObject> m_SyntaxError;
     ProtectedPtr<JSObject> m_TypeError;
     ProtectedPtr<JSObject> m_UriError;
-    
+
     ProtectedPtr<JSObject> m_EvalErrorPrototype;
     ProtectedPtr<JSObject> m_RangeErrorPrototype;
     ProtectedPtr<JSObject> m_ReferenceErrorPrototype;

@@ -22,10 +22,10 @@
 #include "nodes.h"
 #include "CompileState.h"
 
-namespace KJS {
-
-struct CompileReference
+namespace KJS
 {
+
+struct CompileReference {
     CompileReference() {}
 
     OpValue baseObj;
@@ -34,4 +34,3 @@ struct CompileReference
 
 }
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on; hl c++;

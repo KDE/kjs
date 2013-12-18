@@ -17,17 +17,17 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-
 #include "propertydescriptor.h"
 #include "object.h"
 #include "operations.h"
 
 #include <stdio.h>
 
-namespace KJS {
+namespace KJS
+{
 
 PropertyDescriptor::PropertyDescriptor()
-    : m_attributes(DontEnum|DontDelete|ReadOnly),
+    : m_attributes(DontEnum | DontDelete | ReadOnly),
       m_setAttributes(0),
       m_value(0),
       m_getter(0),
@@ -44,8 +44,9 @@ bool PropertyDescriptor::isAccessorDescriptor() const
 //ECMAScript Edition 5.1r6 - 8.10.2
 bool PropertyDescriptor::isDataDescriptor() const
 {
-    if (!m_value && !(writableSet()))
+    if (!m_value && !(writableSet())) {
         return false;
+    }
     return true;
 }
 
@@ -56,7 +57,7 @@ bool PropertyDescriptor::isGenericDescriptor() const
 }
 
 //ECMAScript Edition 5.1r6 - 8.10.4 - FromPropertyDescriptor
-JSObject* PropertyDescriptor::fromPropertyDescriptor(ExecState *exec)
+JSObject *PropertyDescriptor::fromPropertyDescriptor(ExecState *exec)
 {
     JSObject *ret = new JSObject(exec->lexicalInterpreter()->builtinObjectPrototype());
 
@@ -75,7 +76,7 @@ JSObject* PropertyDescriptor::fromPropertyDescriptor(ExecState *exec)
 }
 
 //ECMAScript Edition 5.1r6 - 8.10.5 - ToPropertyDescriptor
-bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValue* jsValue)
+bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValue *jsValue)
 {
     JSObject *obj = jsValue->getObject();
     if (!obj) {
@@ -83,20 +84,24 @@ bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValu
         return false;
     }
 
-    if (obj->hasProperty(exec, exec->propertyNames().enumerable))
+    if (obj->hasProperty(exec, exec->propertyNames().enumerable)) {
         setEnumerable(obj->get(exec, exec->propertyNames().enumerable)->toBoolean(exec));
+    }
 
-    if (obj->hasProperty(exec, exec->propertyNames().configurable))
+    if (obj->hasProperty(exec, exec->propertyNames().configurable)) {
         setConfigureable(obj->get(exec, exec->propertyNames().configurable)->toBoolean(exec));
+    }
 
-    if (obj->hasProperty(exec, exec->propertyNames().value))
+    if (obj->hasProperty(exec, exec->propertyNames().value)) {
         setValue(obj->get(exec, exec->propertyNames().value));
+    }
 
-    if (obj->hasProperty(exec, exec->propertyNames().writable))
+    if (obj->hasProperty(exec, exec->propertyNames().writable)) {
         setWritable(obj->get(exec, exec->propertyNames().writable)->toBoolean(exec));
+    }
 
     if (obj->hasProperty(exec, exec->propertyNames().get)) {
-        JSValue* getter = obj->get(exec, exec->propertyNames().get);
+        JSValue *getter = obj->get(exec, exec->propertyNames().get);
         if (!getter->isUndefined()) {
             if (!getter->implementsCall()) {
                 throwError(exec, TypeError, "Getter: \'" + getter->toString(exec) + "\' is not Callable");
@@ -107,7 +112,7 @@ bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValu
     }
 
     if (obj->hasProperty(exec, exec->propertyNames().set)) {
-        JSValue* setter = obj->get(exec, exec->propertyNames().set);
+        JSValue *setter = obj->get(exec, exec->propertyNames().set);
         if (!setter->isUndefined()) {
             if (!setter->implementsCall()) {
                 throwError(exec, TypeError, "Setter: \'" + setter->toString(exec) + "\' is not Callable");
@@ -126,13 +131,14 @@ bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValu
     return true;
 }
 
-bool PropertyDescriptor::setPropertyDescriptorValues(ExecState*, JSValue* value, unsigned int attributes)
+bool PropertyDescriptor::setPropertyDescriptorValues(ExecState *, JSValue *value, unsigned int attributes)
 {
     setEnumerable(!(attributes & DontEnum));
     setConfigureable(!(attributes & DontDelete));
 
-    if (!value)
+    if (!value) {
         return false;
+    }
     if (value->isUndefined() || value->type() != GetterSetterType) {
         setValue(value);
         setWritable(!(attributes & ReadOnly));
@@ -174,60 +180,63 @@ bool PropertyDescriptor::writableSet() const
     return m_setAttributes & WritableSet;
 }
 
-JSValue* PropertyDescriptor::getter() const
+JSValue *PropertyDescriptor::getter() const
 {
     return m_getter;
 }
 
-JSValue* PropertyDescriptor::setter() const
+JSValue *PropertyDescriptor::setter() const
 {
     return m_setter;
 }
 
-JSValue* PropertyDescriptor::value() const
+JSValue *PropertyDescriptor::value() const
 {
     return m_value;
 }
 
 void PropertyDescriptor::setEnumerable(bool enumerable)
 {
-    if (enumerable)
+    if (enumerable) {
         m_attributes &= ~DontEnum;
-    else
+    } else {
         m_attributes |= DontEnum;
+    }
     m_setAttributes |= EnumerableSet;
 }
 
 void PropertyDescriptor::setConfigureable(bool configureable)
 {
-    if (configureable)
+    if (configureable) {
         m_attributes &= ~DontDelete;
-    else
+    } else {
         m_attributes |= DontDelete;
+    }
     m_setAttributes |= ConfigurableSet;
 }
 
-void PropertyDescriptor::setValue(JSValue* value)
+void PropertyDescriptor::setValue(JSValue *value)
 {
     m_value = value;
 }
 
 void PropertyDescriptor::setWritable(bool writable)
 {
-    if (writable)
+    if (writable) {
         m_attributes &= ~ReadOnly;
-    else
+    } else {
         m_attributes |= ReadOnly;
+    }
     m_setAttributes |= WritableSet;
 }
 
-void PropertyDescriptor::setGetter(JSValue* getter)
+void PropertyDescriptor::setGetter(JSValue *getter)
 {
     m_getter = getter;
     m_attributes &= ~ReadOnly;
 }
 
-void PropertyDescriptor::setSetter(JSValue* setter)
+void PropertyDescriptor::setSetter(JSValue *setter)
 {
     m_setter = setter;
     m_attributes &= ~ReadOnly;
@@ -243,18 +252,18 @@ bool PropertyDescriptor::isEmpty() const
     return !m_setAttributes && !m_getter && !m_setter && !m_value;
 }
 
-inline bool compareValue(ExecState* exec, JSValue* a, JSValue* b)
+inline bool compareValue(ExecState *exec, JSValue *a, JSValue *b)
 {
     return (a == b || (a && b && sameValue(exec, a, b)));
 }
 
 // different from compareValue, if "own" getter/setter is missing (is 0) we are still the same
-inline bool compareFunction(ExecState* exec, JSValue* a, JSValue* b)
+inline bool compareFunction(ExecState *exec, JSValue *a, JSValue *b)
 {
     return (a == b || (b != 0 && a == 0) || (a && b && sameValue(exec, a, b)));
 }
 
-bool PropertyDescriptor::equalTo(ExecState* exec, PropertyDescriptor& other) const
+bool PropertyDescriptor::equalTo(ExecState *exec, PropertyDescriptor &other) const
 {
     return (compareValue(exec, m_value, other.value()) &&
             compareFunction(exec, m_getter, other.getter()) &&
@@ -262,23 +271,26 @@ bool PropertyDescriptor::equalTo(ExecState* exec, PropertyDescriptor& other) con
             attributes() == other.attributes());
 }
 
-unsigned int PropertyDescriptor::attributesWithOverride(PropertyDescriptor& other) const
+unsigned int PropertyDescriptor::attributesWithOverride(PropertyDescriptor &other) const
 {
     unsigned int mismatch = other.m_attributes ^ m_attributes;
     unsigned int sharedSeen = other.m_setAttributes & m_setAttributes;
-    unsigned int newAttributes = m_attributes & (DontEnum|DontDelete|ReadOnly);
+    unsigned int newAttributes = m_attributes & (DontEnum | DontDelete | ReadOnly);
 
-    if ((sharedSeen & WritableSet) && (mismatch & ReadOnly))
+    if ((sharedSeen & WritableSet) && (mismatch & ReadOnly)) {
         newAttributes ^= ReadOnly;
-    if ((sharedSeen & ConfigurableSet) && (mismatch & DontDelete))
+    }
+    if ((sharedSeen & ConfigurableSet) && (mismatch & DontDelete)) {
         newAttributes ^= DontDelete;
-    if ((sharedSeen & EnumerableSet) && (mismatch & DontEnum))
+    }
+    if ((sharedSeen & EnumerableSet) && (mismatch & DontEnum)) {
         newAttributes ^= DontEnum;
+    }
 
     return newAttributes;
 }
 
-bool PropertyDescriptor::operator==(PropertyDescriptor& other) const
+bool PropertyDescriptor::operator==(PropertyDescriptor &other) const
 {
     return (m_value == other.value() &&
             m_setter == other.setter() &&

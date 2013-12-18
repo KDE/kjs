@@ -26,83 +26,95 @@
 
 struct tm;
 
-namespace KJS {
+namespace KJS
+{
 
-    class FunctionPrototype;
-    class ObjectPrototype;
+class FunctionPrototype;
+class ObjectPrototype;
 
-    class DateInstance : public JSWrapperObject {
-    public:
-        DateInstance(JSObject *proto);
+class DateInstance : public JSWrapperObject
+{
+public:
+    DateInstance(JSObject *proto);
 
-        bool getTime(tm &t, int &gmtoffset) const;
-        bool getUTCTime(tm &t) const;
-        bool getTime(double &ms, int &gmtoffset) const;
-        bool getUTCTime(double &ms) const;
+    bool getTime(tm &t, int &gmtoffset) const;
+    bool getUTCTime(tm &t) const;
+    bool getTime(double &ms, int &gmtoffset) const;
+    bool getUTCTime(double &ms) const;
 
-        virtual const ClassInfo *classInfo() const { return &info; }
-        static const ClassInfo info;
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
+    static const ClassInfo info;
 
-        virtual JSObject* valueClone(Interpreter* targetCtx) const;
-    };
+    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+};
 
-    /**
-     * @internal
-     *
-     * The initial value of Date.prototype (and thus all objects created
-     * with the Date constructor
-     */
-    class DatePrototype : public DateInstance {
-    public:
-        DatePrototype(ExecState *, ObjectPrototype *);
-        using KJS::JSObject::getOwnPropertySlot;
-        virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot&);
-        virtual const ClassInfo *classInfo() const { return &info; }
-        static const ClassInfo info;
-    };
+/**
+ * @internal
+ *
+ * The initial value of Date.prototype (and thus all objects created
+ * with the Date constructor
+ */
+class DatePrototype : public DateInstance
+{
+public:
+    DatePrototype(ExecState *, ObjectPrototype *);
+    using KJS::JSObject::getOwnPropertySlot;
+    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
+    static const ClassInfo info;
+};
 
-    /**
-        * @internal
-     *
-     * Class to implement all methods that are properties of the
-     * Date.prototype object
-     */
-    class DateProtoFunc : public InternalFunctionImp {
-    public:
-        DateProtoFunc(ExecState *, int i, int len, const Identifier& date);
+/**
+    * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * Date.prototype object
+ */
+class DateProtoFunc : public InternalFunctionImp
+{
+public:
+    DateProtoFunc(ExecState *, int i, int len, const Identifier &date);
 
-        virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
 
-        enum { ToString, ToDateString, ToTimeString, ToLocaleString,
-            ToLocaleDateString, ToLocaleTimeString, ValueOf, GetTime,
-            GetFullYear, GetMonth, GetDate, GetDay, GetHours, GetMinutes,
-            GetSeconds, GetMilliSeconds, GetTimezoneOffset, SetTime,
-            SetMilliSeconds, SetSeconds, SetMinutes, SetHours, SetDate,
-            SetMonth, SetFullYear, ToUTCString, ToISOString, ToJSON,
-            // non-normative properties (Appendix B)
-            GetYear, SetYear, ToGMTString };
-    private:
-        short id;
-        bool utc;
-    };
+    enum { ToString, ToDateString, ToTimeString, ToLocaleString,
+           ToLocaleDateString, ToLocaleTimeString, ValueOf, GetTime,
+           GetFullYear, GetMonth, GetDate, GetDay, GetHours, GetMinutes,
+           GetSeconds, GetMilliSeconds, GetTimezoneOffset, SetTime,
+           SetMilliSeconds, SetSeconds, SetMinutes, SetHours, SetDate,
+           SetMonth, SetFullYear, ToUTCString, ToISOString, ToJSON,
+           // non-normative properties (Appendix B)
+           GetYear, SetYear, ToGMTString
+         };
+private:
+    short id;
+    bool utc;
+};
 
-    /**
-     * @internal
-     *
-     * The initial value of the global variable's "Date" property
-     */
-    class DateObjectImp : public InternalFunctionImp {
-        using InternalFunctionImp::construct;
-    public:
-        DateObjectImp(ExecState *, FunctionPrototype *, DatePrototype *);
+/**
+ * @internal
+ *
+ * The initial value of the global variable's "Date" property
+ */
+class DateObjectImp : public InternalFunctionImp
+{
+    using InternalFunctionImp::construct;
+public:
+    DateObjectImp(ExecState *, FunctionPrototype *, DatePrototype *);
 
-        virtual bool implementsConstruct() const;
-        virtual JSObject *construct(ExecState *, const List &args);
-        virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    virtual bool implementsConstruct() const;
+    virtual JSObject *construct(ExecState *, const List &args);
+    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
 
-        Completion execute(const List &);
-        JSObject *construct(const List &);
-    };
+    Completion execute(const List &);
+    JSObject *construct(const List &);
+};
 
 } // namespace
 

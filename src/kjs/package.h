@@ -26,53 +26,69 @@
 #include "identifier.h"
 #include "object.h"
 
-namespace KJS {
+namespace KJS
+{
 
-    class Package;
+class Package;
 
-    class KJS_EXPORT Package
+class KJS_EXPORT Package
+{
+public:
+    Package(Package *p, const Identifier &n) : prnt(p), nm(n) { }
+    virtual ~Package() { }
+
+    const Package *parent() const
     {
-    public:
-	Package(Package* p, const Identifier& n) : prnt(p), nm(n) { }
-	virtual ~Package() { }
-
-	const Package* parent() const { return prnt; }
-	Package* parent() { return prnt; }
-
-	Identifier name() const { return nm; }
-
-	virtual Package* loadSubPackage(const Identifier& n,
-					UString* err);
-	virtual void loadSymbol(ExecState* exec, JSObject* obj,
-				const Identifier& n);
-	virtual void loadAllSymbols(ExecState* exec, JSObject* obj);
-
-    private:
-	Package* prnt;
-	Identifier nm;
-    };
-
-    class KJS_EXPORT StandardGlobalPackage : public Package
+        return prnt;
+    }
+    Package *parent()
     {
-    public:
-	StandardGlobalPackage();
-	virtual Package* loadSubPackage(const Identifier& n,
-					UString* err);
-    };
+        return prnt;
+    }
 
-    class KJS_EXPORT PackageObject : public JSObject
+    Identifier name() const
     {
-    public:
-	PackageObject(Package *p) : pkg(p) { }
+        return nm;
+    }
 
-	Package* package() { return pkg; }
+    virtual Package *loadSubPackage(const Identifier &n,
+                                    UString *err);
+    virtual void loadSymbol(ExecState *exec, JSObject *obj,
+                            const Identifier &n);
+    virtual void loadAllSymbols(ExecState *exec, JSObject *obj);
 
-	virtual const ClassInfo *classInfo() const { return &info; }
-	static const ClassInfo info;
+private:
+    Package *prnt;
+    Identifier nm;
+};
 
-    private:
-	Package* pkg;
-    };
+class KJS_EXPORT StandardGlobalPackage : public Package
+{
+public:
+    StandardGlobalPackage();
+    virtual Package *loadSubPackage(const Identifier &n,
+                                    UString *err);
+};
+
+class KJS_EXPORT PackageObject : public JSObject
+{
+public:
+    PackageObject(Package *p) : pkg(p) { }
+
+    Package *package()
+    {
+        return pkg;
+    }
+
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
+    static const ClassInfo info;
+
+private:
+    Package *pkg;
+};
 }
 
 #endif

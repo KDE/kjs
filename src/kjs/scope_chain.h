@@ -29,13 +29,15 @@
 #endif
 #include <assert.h>
 
-namespace KJS {
+namespace KJS
+{
 
 class JSObject;
 class JSVariableObject;
 class ScopeChainNode;
 
-class KJS_EXPORT ScopeChainLink {
+class KJS_EXPORT ScopeChainLink
+{
 public:
     /* This class abstracts a link to a node in a scope chain. The node may be
         either a JSVariable, which stores the next pointer in one of its
@@ -48,60 +50,71 @@ public:
     uintptr_t ptr;
 
     // in lieu of constructor, for POD'ness
-    void init() {
+    void init()
+    {
         ptr = 0;
     }
 
-    void set(ScopeChainNode* node) {
+    void set(ScopeChainNode *node)
+    {
         ptr = reinterpret_cast<uintptr_t>(node) | 1;
     }
 
-    void set(JSVariableObject* act) {
+    void set(JSVariableObject *act)
+    {
         ptr = reinterpret_cast<uintptr_t>(act);
     }
 
     // these are inline in JSVariableObject.h
-    JSObject*      object() const;
+    JSObject      *object() const;
     ScopeChainLink next()   const;
 
     void deref();
     void ref();
 
-    bool isToScopeChainNode() const {
+    bool isToScopeChainNode() const
+    {
         return ptr & 1;
     }
 
-    JSVariableObject* asVariableObject() const {
-        assert (!isToScopeChainNode());
-        return reinterpret_cast<JSVariableObject*>(ptr);
+    JSVariableObject *asVariableObject() const
+    {
+        assert(!isToScopeChainNode());
+        return reinterpret_cast<JSVariableObject *>(ptr);
     }
 
-    ScopeChainNode* asScopeChainNode() const {
-        assert (isToScopeChainNode());
-        return reinterpret_cast<ScopeChainNode*>(ptr & ~1);
+    ScopeChainNode *asScopeChainNode() const
+    {
+        assert(isToScopeChainNode());
+        return reinterpret_cast<ScopeChainNode *>(ptr & ~1);
     }
 
-    bool operator == (const ScopeChainLink& other) const {
+    bool operator == (const ScopeChainLink &other) const
+    {
         return other.ptr == ptr;
     }
 
-    bool operator != (const ScopeChainLink& other) const {
+    bool operator != (const ScopeChainLink &other) const
+    {
         return other.ptr != ptr;
     }
 };
 
 // A ScopeChainNode is used to put things other than JSVariableObject's
 // in the scope chain.
-class KJS_EXPORT ScopeChainNode {
+class KJS_EXPORT ScopeChainNode
+{
 public:
     ScopeChainNode(ScopeChainLink n, JSObject *o)
-        : next(n), object(o), refCount(1) {
+        : next(n), object(o), refCount(1)
+    {
         // Note: we don't ref the next here, since its reference is
         // transferred from top pointer in ScopeChain to us
         // We ourselves are ref'd by the refCount(1)
     }
 
-    ~ScopeChainNode() {
+    ~ScopeChainNode()
+    {
         // ### non-recursive?
         next.deref();
     }
@@ -110,54 +123,86 @@ public:
     JSObject *object;
     int refCount;
 
-    void ref() { ++refCount; }
-    void deref() { --refCount; if (!refCount) delete this; }
+    void ref()
+    {
+        ++refCount;
+    }
+    void deref()
+    {
+        --refCount;
+        if (!refCount) {
+            delete this;
+        }
+    }
 };
 
-class KJS_EXPORT ScopeChainIterator {
+class KJS_EXPORT ScopeChainIterator
+{
 public:
     ScopeChainIterator(ScopeChainLink node) : m_node(node) {}
 
-    JSObject* operator*()  const { return m_node.object(); }
+    JSObject *operator*()  const
+    {
+        return m_node.object();
+    }
 
-    ScopeChainIterator& operator++() { m_node = m_node.next(); return *this; }
+    ScopeChainIterator &operator++()
+    {
+        m_node = m_node.next();
+        return *this;
+    }
 
     // postfix ++ intentionally omitted
 
-    bool operator==(const ScopeChainIterator& other) const { return m_node == other.m_node; }
-    bool operator!=(const ScopeChainIterator& other) const { return m_node != other.m_node; }
+    bool operator==(const ScopeChainIterator &other) const
+    {
+        return m_node == other.m_node;
+    }
+    bool operator!=(const ScopeChainIterator &other) const
+    {
+        return m_node != other.m_node;
+    }
 
 private:
     ScopeChainLink m_node;
 };
 
-class KJS_EXPORT ScopeChain {
+class KJS_EXPORT ScopeChain
+{
 public:
-    ScopeChain() {
+    ScopeChain()
+    {
         m_top.init();
     }
 
-    ~ScopeChain() {
+    ~ScopeChain()
+    {
         m_top.deref();
     }
 
     ScopeChain(const ScopeChain &c) : m_top(c.m_top)
-        { m_top.ref(); }
+    {
+        m_top.ref();
+    }
 
     ScopeChain &operator=(const ScopeChain &);
 
-    JSObject *top() const { return m_top.object(); }
+    JSObject *top() const
+    {
+        return m_top.object();
+    }
     JSObject *bottom() const;
 
     ScopeChainIterator begin() const;
     ScopeChainIterator end() const;
 
-    void push(JSObject* obj) {
+    void push(JSObject *obj)
+    {
         m_top.set(new ScopeChainNode(m_top, obj));
     }
 
     // inline def in JSVariableObject.h
-    void pushVariableObject(JSVariableObject* act);
+    void pushVariableObject(JSVariableObject *act);
 
     void pop();
     void mark(); // inline in JSVariableObject.h
@@ -172,15 +217,17 @@ private:
 
 inline void ScopeChainLink::deref()
 {
-    if (isToScopeChainNode())
+    if (isToScopeChainNode()) {
         asScopeChainNode()->deref();
+    }
     ptr = 0;
 }
 
 inline void ScopeChainLink::ref()
 {
-    if (isToScopeChainNode())
+    if (isToScopeChainNode()) {
         asScopeChainNode()->ref();
+    }
 }
 
 inline ScopeChainIterator ScopeChain::begin() const
@@ -207,8 +254,9 @@ inline ScopeChain &ScopeChain::operator=(const ScopeChain &c)
 inline JSObject *ScopeChain::bottom() const
 {
     ScopeChainLink last;
-    for (ScopeChainLink n = m_top; n.ptr; n = n.next())
+    for (ScopeChainLink n = m_top; n.ptr; n = n.next()) {
         last = n;
+    }
     return last.object();
 }
 
@@ -224,4 +272,3 @@ inline void ScopeChain::pop()
 } // namespace KJS
 
 #endif // KJS_SCOPE_CHAIN_H
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

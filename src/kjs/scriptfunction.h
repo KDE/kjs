@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -26,23 +25,25 @@
 
 #include "function.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class ActivationImp;
-  class FunctionBodyNode;
+class ActivationImp;
+class FunctionBodyNode;
 
-  /**
-   * @short Implementation class for internal Functions.
-   */
-  class KJS_EXPORT FunctionImp : public InternalFunctionImp {
+/**
+ * @short Implementation class for internal Functions.
+ */
+class KJS_EXPORT FunctionImp : public InternalFunctionImp
+{
     friend class ActivationImp;
-  public:
-    FunctionImp(ExecState* exec, const Identifier& n, FunctionBodyNode* b, const ScopeChain &sc);
+public:
+    FunctionImp(ExecState *exec, const Identifier &n, FunctionBodyNode *b, const ScopeChain &sc);
     virtual ~FunctionImp();
 
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot&);
-    virtual bool getOwnPropertyDescriptor(ExecState*, const Identifier&, PropertyDescriptor&);
+    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    virtual bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &);
     using KJS::JSObject::put;
     virtual void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None);
     using KJS::JSObject::deleteProperty;
@@ -61,7 +62,10 @@ namespace KJS {
     // that will never get set, due to later param having the same name
     Identifier getParameterName(size_t index);
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
 
     RefPtr<FunctionBodyNode> body;
@@ -92,25 +96,31 @@ namespace KJS {
      * @param exec The current execution state
      * @return The function's scope
      */
-    const ScopeChain &scope() const { return _scope; }
-    void setScope(const ScopeChain &s) { _scope = s; }
+    const ScopeChain &scope() const
+    {
+        return _scope;
+    }
+    void setScope(const ScopeChain &s)
+    {
+        _scope = s;
+    }
 
     virtual void mark();
-  private:
-    void initialCompile(ExecState* newExec);
-  
+private:
+    void initialCompile(ExecState *newExec);
+
     ScopeChain _scope;
 
-    static JSValue *argumentsGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot&);
-    static JSValue *callerGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot&);
-    static JSValue *lengthGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot&);
-    static JSValue *nameGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot&);
+    static JSValue *argumentsGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
+    static JSValue *callerGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
+    static JSValue *lengthGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
+    static JSValue *nameGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
 
     void passInParameters(ExecState *exec, const List &);
-  };
+};
 
-  // For compatibility...
-  typedef FunctionImp DeclaredFunctionImp;
+// For compatibility...
+typedef FunctionImp DeclaredFunctionImp;
 } // namespace
 
 #endif

@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -26,40 +25,43 @@
 #include "object_object.h"
 #include "function.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  /**
-   * @internal
-   *
-   * Class to implement all methods that are properties of the
-   * Function.prototype object
-   */
-  class FunctionProtoFunc : public InternalFunctionImp {
-  public:
-    FunctionProtoFunc(ExecState*, FunctionPrototype*, int i, int len, const Identifier&);
+/**
+ * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * Function.prototype object
+ */
+class FunctionProtoFunc : public InternalFunctionImp
+{
+public:
+    FunctionProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
     enum { ToString, Apply, Call, Bind };
-  private:
+private:
     int id;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of the global variable's "Function" property
-   */
-  class FunctionObjectImp : public InternalFunctionImp {
-  public:
-    FunctionObjectImp(ExecState*, FunctionPrototype*);
+/**
+ * @internal
+ *
+ * The initial value of the global variable's "Function" property
+ */
+class FunctionObjectImp : public InternalFunctionImp
+{
+public:
+    FunctionObjectImp(ExecState *, FunctionPrototype *);
     virtual ~FunctionObjectImp();
 
     virtual bool implementsConstruct() const;
-    virtual JSObject* construct(ExecState*, const List& args);
-    virtual JSObject* construct(ExecState*, const List& args, const Identifier& functionName, const UString& sourceURL, int lineNumber);
-    virtual JSValue* callAsFunction(ExecState*, JSObject* thisObj, const List& args);
-  };
+    virtual JSObject *construct(ExecState *, const List &args);
+    virtual JSObject *construct(ExecState *, const List &args, const Identifier &functionName, const UString &sourceURL, int lineNumber);
+    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+};
 
 } // namespace
 

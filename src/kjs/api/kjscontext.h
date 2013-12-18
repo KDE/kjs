@@ -54,17 +54,17 @@ public:
     /**
      * Throws a general exception with the specified error message.
      */
-    KJSObject throwException(const QString& message) const;
+    KJSObject throwException(const QString &message) const;
     /**
      * Returns the currently executing interpreter.
      */
     KJSInterpreter interpreter();
 private:
-    KJSContext(KJSContextHandle* h);
-    KJSContext(const KJSContext&); // undefined
-    KJSContext& operator=(const KJSContext&); // undefined
+    KJSContext(KJSContextHandle *h);
+    KJSContext(const KJSContext &); // undefined
+    KJSContext &operator=(const KJSContext &); // undefined
 
-    KJSContextHandle* hnd;
+    KJSContextHandle *hnd;
 };
 
 #endif

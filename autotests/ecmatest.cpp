@@ -21,58 +21,54 @@
 #include <QtCore/QMap>
 #include <QtCore/QDebug>
 
-
 // Let the interpreter create its own global Object instead of using our selfcreated
 #define USE_KJS_GLOBAL 1
 
 // from khtml/ecma/kjs_binding.cpp"
 KJS::UString::UString(const QString &d)
 {
-  unsigned int len = d.length();
-  KJS::UChar *dat = static_cast<KJS::UChar*>(fastMalloc(sizeof(KJS::UChar)*len));
-  memcpy(dat, d.unicode(), len * sizeof(KJS::UChar));
-  m_rep = KJS::UString::Rep::create(dat, len);
+    unsigned int len = d.length();
+    KJS::UChar *dat = static_cast<KJS::UChar *>(fastMalloc(sizeof(KJS::UChar) * len));
+    memcpy(dat, d.unicode(), len * sizeof(KJS::UChar));
+    m_rep = KJS::UString::Rep::create(dat, len);
 }
 
 QString KJS::UString::qstring() const
 {
-  return QString((QChar*) data(), size());
+    return QString((QChar *) data(), size());
 }
 
 // from khtml/ecma/debugger/value2string.cpp
-QString valueToString(KJS::JSValue* value)
+QString valueToString(KJS::JSValue *value)
 {
-    switch(value->type())
-    {
-        case KJS::NumberType:
-        {
-            double v = 0.0;
-            value->getNumber(v);
-            return QString::number(v);
-        }
-        case KJS::BooleanType:
-            return value->getBoolean() ? "true" : "false";
-        case KJS::StringType:
-        {
-            KJS::UString s;
-            value->getString(s);
-            return '"' + s.qstring() + '"';
-        }
-        case KJS::UndefinedType:
-            return "undefined";
-        case KJS::NullType:
-            return "null";
-        case KJS::ObjectType:
-            return "[object " + static_cast<KJS::JSObject*>(value)->className().qstring() +"]";
-        case KJS::GetterSetterType:
-        case KJS::UnspecifiedType:
-        default:
-            return QString();
+    switch (value->type()) {
+    case KJS::NumberType: {
+        double v = 0.0;
+        value->getNumber(v);
+        return QString::number(v);
+    }
+    case KJS::BooleanType:
+        return value->getBoolean() ? "true" : "false";
+    case KJS::StringType: {
+        KJS::UString s;
+        value->getString(s);
+        return '"' + s.qstring() + '"';
+    }
+    case KJS::UndefinedType:
+        return "undefined";
+    case KJS::NullType:
+        return "null";
+    case KJS::ObjectType:
+        return "[object " + static_cast<KJS::JSObject *>(value)->className().qstring() + "]";
+    case KJS::GetterSetterType:
+    case KJS::UnspecifiedType:
+    default:
+        return QString();
     }
 }
 
 // from khtml/ecma/debugger/debugwindow.cpp
-static QString exceptionToString(KJS::ExecState* exec, KJS::JSValue* exceptionObj)
+static QString exceptionToString(KJS::ExecState *exec, KJS::JSValue *exceptionObj)
 {
     QString exceptionMsg = valueToString(exceptionObj);
 
@@ -80,51 +76,47 @@ static QString exceptionToString(KJS::ExecState* exec, KJS::JSValue* exceptionOb
     // string serialization ourselves.
     //### might be easier to export class info for ErrorInstance ---
 
-    KJS::JSObject* valueObj = exceptionObj->getObject();
-    KJS::JSValue*  protoObj = valueObj ? valueObj->prototype() : 0;
+    KJS::JSObject *valueObj = exceptionObj->getObject();
+    KJS::JSValue  *protoObj = valueObj ? valueObj->prototype() : 0;
 
     bool exception   = false;
     bool syntaxError = false;
-    if (protoObj == exec->lexicalInterpreter()->builtinSyntaxErrorPrototype())
-    {
+    if (protoObj == exec->lexicalInterpreter()->builtinSyntaxErrorPrototype()) {
         exception   = true;
         syntaxError = true;
     }
 
     if (protoObj == exec->lexicalInterpreter()->builtinErrorPrototype()          ||
-        protoObj == exec->lexicalInterpreter()->builtinEvalErrorPrototype()      ||
-        protoObj == exec->lexicalInterpreter()->builtinReferenceErrorPrototype() ||
-        protoObj == exec->lexicalInterpreter()->builtinRangeErrorPrototype()     ||
-        protoObj == exec->lexicalInterpreter()->builtinTypeErrorPrototype()      ||
-        protoObj == exec->lexicalInterpreter()->builtinURIErrorPrototype())
-    {
+            protoObj == exec->lexicalInterpreter()->builtinEvalErrorPrototype()      ||
+            protoObj == exec->lexicalInterpreter()->builtinReferenceErrorPrototype() ||
+            protoObj == exec->lexicalInterpreter()->builtinRangeErrorPrototype()     ||
+            protoObj == exec->lexicalInterpreter()->builtinTypeErrorPrototype()      ||
+            protoObj == exec->lexicalInterpreter()->builtinURIErrorPrototype()) {
         exception = true;
     }
 
-    if (!exception)
+    if (!exception) {
         return exceptionMsg;
+    }
 
     // Clear exceptions temporarily so we can get/call a few things.
     // We memorize the old exception first, of course. Note that
     // This is not always the same as exceptionObj since we may be
     //  asked to translate a non-active exception
-    KJS::JSValue* oldExceptionObj = exec->exception();
+    KJS::JSValue *oldExceptionObj = exec->exception();
     exec->clearException();
 
     // We want to serialize the syntax errors ourselves, to provide the line number.
     // The URL is in "sourceURL" and the line is in "line"
     // ### TODO: Perhaps we want to use 'sourceId' in case of eval contexts.
-    if (syntaxError)
-    {
-        KJS::JSValue* lineValue = valueObj->get(exec, "line");
-        KJS::JSValue* urlValue  = valueObj->get(exec, "sourceURL");
+    if (syntaxError) {
+        KJS::JSValue *lineValue = valueObj->get(exec, "line");
+        KJS::JSValue *urlValue  = valueObj->get(exec, "sourceURL");
 
         int      line = lineValue->toNumber(exec);
         QString  url  = urlValue->toString(exec).qstring();
         exceptionMsg = QString::fromLatin1("Parse error at %1 line %2").arg(url).arg(line + 1);
-    }
-    else
-    {
+    } else {
         // ### it's still not 100% safe to call toString here, even on
         // native exception objects, since someone might have changed the toString property
         // of the exception prototype, but I'll punt on this case for now.
@@ -135,17 +127,21 @@ static QString exceptionToString(KJS::ExecState* exec, KJS::JSValue* exceptionOb
 }
 
 #ifndef USE_KJS_GLOBAL
-class GlobalImp : public KJS::JSGlobalObject {
+class GlobalImp : public KJS::JSGlobalObject
+{
 public:
-  virtual KJS::UString className() const { return "global"; }
+    virtual KJS::UString className() const
+    {
+        return "global";
+    }
 };
 
-static GlobalImp* global;
+static GlobalImp *global;
 #endif
-static QString basedir( "" );
+static QString basedir("");
 static QByteArray testrunner;
 static QMap<QByteArray, QByteArray> includes;
-static QStringList expectedBroken;	// list of tests we know that will fail
+static QStringList expectedBroken;  // list of tests we know that will fail
 
 /**
  * load the given file from the harness directory
@@ -154,12 +150,13 @@ static QStringList expectedBroken;	// list of tests we know that will fail
  *
  * Will load the given file into the "includes" map
  */
-static bool loadInclude( const QByteArray &fn )
+static bool loadInclude(const QByteArray &fn)
 {
-    QFile runnerfile( basedir + QLatin1String( "test/harness/" ) + QString::fromLatin1( fn.constData() ) );
+    QFile runnerfile(basedir + QLatin1String("test/harness/") + QString::fromLatin1(fn.constData()));
 
-    if ( !runnerfile.open( QIODevice::ReadOnly ) )
+    if (!runnerfile.open(QIODevice::ReadOnly)) {
         return false;
+    }
 
     includes[ fn ] = runnerfile.readAll();
 
@@ -170,28 +167,30 @@ QTEST_MAIN(ECMAscriptTest)
 
 void ECMAscriptTest::initTestCase()
 {
-    basedir = QString::fromUtf8( qgetenv( "ECMATEST_BASEDIR" ).constData() );
+    basedir = QString::fromUtf8(qgetenv("ECMATEST_BASEDIR").constData());
 
-    if ( basedir.isEmpty() )
-        qFatal( "ECMATEST_BASEDIR not set" );
+    if (basedir.isEmpty()) {
+        qFatal("ECMATEST_BASEDIR not set");
+    }
 
-    if ( !basedir.endsWith( QLatin1Char( '/' ) ) )
-        basedir += QLatin1Char( '/' );
+    if (!basedir.endsWith(QLatin1Char('/'))) {
+        basedir += QLatin1Char('/');
+    }
 
-    QVERIFY( loadInclude( "sta.js" ) );
-    QVERIFY( loadInclude( "ed.js" ) );
+    QVERIFY(loadInclude("sta.js"));
+    QVERIFY(loadInclude("ed.js"));
 
     testrunner = includes[ "sta.js" ] + includes[ "ed.js" ] + '\n';
 
-    const QString brokenFn = QString::fromLatin1( qgetenv( "ECMATEST_BROKEN" ).constData() );
-    if ( !brokenFn.isEmpty() ) {
-        QFile brokenF( brokenFn );
-        if ( !brokenF.open( QIODevice::ReadOnly ) ) {
+    const QString brokenFn = QString::fromLatin1(qgetenv("ECMATEST_BROKEN").constData());
+    if (!brokenFn.isEmpty()) {
+        QFile brokenF(brokenFn);
+        if (!brokenF.open(QIODevice::ReadOnly)) {
             const QByteArray errmsg = QByteArray("cannot open ") + QFile::encodeName(brokenFn);
-            QWARN( errmsg.constData() );
+            QWARN(errmsg.constData());
         } else {
-            expectedBroken = QString::fromLatin1( brokenF.readAll().constData() ).split( QLatin1Char( '\n' ) )
-                                               .filter( QRegExp( "^[^#].*" ) );
+            expectedBroken = QString::fromLatin1(brokenF.readAll().constData()).split(QLatin1Char('\n'))
+                             .filter(QRegExp("^[^#].*"));
         }
     }
 
@@ -199,21 +198,24 @@ void ECMAscriptTest::initTestCase()
     m_failed = 0;
 }
 
-static QByteArray getTextProperty( const QByteArray &property, const QByteArray &code )
+static QByteArray getTextProperty(const QByteArray &property, const QByteArray &code)
 {
-    int from = code.indexOf( property );
-    if ( from == -1 )
+    int from = code.indexOf(property);
+    if (from == -1) {
         return QByteArray();
+    }
 
     from += property.length();
-    while ( code[ from ] == ' ' )
+    while (code[ from ] == ' ') {
         from++;
+    }
 
-    int to = code.indexOf( '\n', from );
-    if (code[to - 1] == '\r')
+    int to = code.indexOf('\n', from);
+    if (code[to - 1] == '\r') {
         to--;
+    }
     // poor mans escaping
-    return code.mid( from, to - from ).replace( "\\", "\\\\" ).replace( "\"", "\\\"" );
+    return code.mid(from, to - from).replace("\\", "\\\\").replace("\"", "\\\"");
 }
 
 #define ECMATEST_VERIFY( expr ) \
@@ -237,18 +239,19 @@ void ECMAscriptTest::runAllTests()
     QFETCH(QString, filename);
     QByteArray expectedError;
 
-    QFile input( filename );
+    QFile input(filename);
 
-    Q_FOREACH( const QByteArray &skip, skips.keys() ) {
-        if ( skip == QTest::currentDataTag() )
-            QSKIP( skips[ skip ].constData() );
+    Q_FOREACH (const QByteArray &skip, skips.keys()) {
+        if (skip == QTest::currentDataTag()) {
+            QSKIP(skips[ skip ].constData());
+        }
     }
 
-    QVERIFY( input.open( QIODevice::ReadOnly ) );
+    QVERIFY(input.open(QIODevice::ReadOnly));
 
     const QByteArray testdata = input.readAll();
 
-    QVERIFY( ! testdata.isEmpty() );
+    QVERIFY(! testdata.isEmpty());
 
 #ifdef USE_KJS_GLOBAL
     RefPtr<KJS::Interpreter> interp = new KJS::Interpreter();
@@ -261,21 +264,23 @@ void ECMAscriptTest::runAllTests()
     QByteArray testscript;
 
     // test is expected to fail
-    if ( testdata.indexOf( "@negative" ) >= 0 ) {
-        expectedError = getTextProperty( "@negative", testdata );
-        if ( expectedError.isEmpty() )
+    if (testdata.indexOf("@negative") >= 0) {
+        expectedError = getTextProperty("@negative", testdata);
+        if (expectedError.isEmpty()) {
             expectedError = ".";
+        }
     }
 
     int from = 0;
-    while ( ( from = testdata.indexOf( include, from ) ) >= 0 ) {
-        int endq = testdata.indexOf( "\"", from + include.length() );
-        QVERIFY( endq >= 0 );
+    while ((from = testdata.indexOf(include, from)) >= 0) {
+        int endq = testdata.indexOf("\"", from + include.length());
+        QVERIFY(endq >= 0);
 
-        const QByteArray includeFile = testdata.mid( from + include.length(), endq - from - include.length() );
+        const QByteArray includeFile = testdata.mid(from + include.length(), endq - from - include.length());
 
-        if ( ! includes.contains( includeFile ) )
-            QVERIFY( loadInclude( includeFile ) );
+        if (! includes.contains(includeFile)) {
+            QVERIFY(loadInclude(includeFile));
+        }
 
         testscript += includes[ includeFile ];
         from = endq;
@@ -285,34 +290,34 @@ void ECMAscriptTest::runAllTests()
 
     testscript += testdata;
 
-    const QFileInfo info( input );
+    const QFileInfo info(input);
 
-    const QString scriptutf = QString::fromUtf8( testscript.constData() );
+    const QString scriptutf = QString::fromUtf8(testscript.constData());
 
 //     QWARN(filename.toAscii().data());
     KJS::Completion completion = interp->evaluate(info.fileName().toLatin1().constData(), 0, scriptutf);
 
-    const bool knownBroken = expectedBroken.contains( QString::fromLatin1( QTest::currentDataTag() ) );
+    const bool knownBroken = expectedBroken.contains(QString::fromLatin1(QTest::currentDataTag()));
 
-    if ( expectedError.isEmpty() ) {
-        ECMATEST_VERIFY( completion.complType() != KJS::Throw );
+    if (expectedError.isEmpty()) {
+        ECMATEST_VERIFY(completion.complType() != KJS::Throw);
     } else {
-        if ( knownBroken && completion.complType() != KJS::Throw ) {
+        if (knownBroken && completion.complType() != KJS::Throw) {
             QEXPECT_FAIL(QTest::currentDataTag(), "It is known that KJS doesn't pass this test", Abort);
             m_failed++;
         }
 
-        QCOMPARE( completion.complType(), KJS::Throw );
-        QVERIFY( completion.value() != NULL );
+        QCOMPARE(completion.complType(), KJS::Throw);
+        QVERIFY(completion.value() != NULL);
 
-        const QString eMsg = exceptionToString( interp->execState(), completion.value() );
+        const QString eMsg = exceptionToString(interp->execState(), completion.value());
 
-        if ( expectedError == "^((?!NotEarlyError).)*$" ) {
-            ECMATEST_VERIFY( eMsg.indexOf( "NotEarlyError" ) == -1 );
-        } else if ( expectedError == "." ) {
+        if (expectedError == "^((?!NotEarlyError).)*$") {
+            ECMATEST_VERIFY(eMsg.indexOf("NotEarlyError") == -1);
+        } else if (expectedError == ".") {
             // means "every exception passes
         } else {
-            ECMATEST_VERIFY( eMsg.indexOf( expectedError ) >= 0 );
+            ECMATEST_VERIFY(eMsg.indexOf(expectedError) >= 0);
         }
     }
 }
@@ -323,16 +328,17 @@ void ECMAscriptTest::runAllTests_data()
     global = new GlobalImp();
 #endif
 
-    QTest::addColumn<QString>( "filename" );
+    QTest::addColumn<QString>("filename");
 
-    const QStringList js( QLatin1String( "*.js" ) );
-    const QStringList all( QLatin1String( "*" ) );
-    const QString chapter = QString::fromLatin1( qgetenv( "ECMATEST_CHAPTER" ).constData() );
+    const QStringList js(QLatin1String("*.js"));
+    const QStringList all(QLatin1String("*"));
+    const QString chapter = QString::fromLatin1(qgetenv("ECMATEST_CHAPTER").constData());
 
-    if ( !chapter.isEmpty() )
-        QWARN( QByteArray("===> Testing chapter " + chapter.toLatin1()).constData() );
+    if (!chapter.isEmpty()) {
+        QWARN(QByteArray("===> Testing chapter " + chapter.toLatin1()).constData());
+    }
 
-    if ( chapter.isEmpty() || chapter.startsWith("ch15")) {
+    if (chapter.isEmpty() || chapter.startsWith("ch15")) {
         const QByteArray timeZoneDepend = "this test depends on the timezone and may or may not fail, avoid it for the moment";
         // The tests are timezone dependent because of the Date implementation in kjs.
         // It only affects the limit by +/- 24h (or less, depending on your timezone),
@@ -347,7 +353,7 @@ void ECMAscriptTest::runAllTests_data()
 
 #ifndef USE_KJS_GLOBAL
     // some tests fail when the suite is run as a whole
-    if ( chapter.isEmpty() || chapter.startsWith("ch15") || chapter.startsWith("ch12")) {
+    if (chapter.isEmpty() || chapter.startsWith("ch15") || chapter.startsWith("ch12")) {
         const QByteArray endlessLoop = "this test causes an endless loop, avoid it for the moment";
         const QByteArray crashTest = "this test causes a crash when run as part of the whole suite";
         skips[ "S12.7_A9_T1" ] = endlessLoop;
@@ -362,20 +368,21 @@ void ECMAscriptTest::runAllTests_data()
     }
 #endif
 
-    QDirIterator it( basedir + QLatin1String("test/suite/") + chapter, QDirIterator::Subdirectories);
-    while ( it.hasNext() ) {
+    QDirIterator it(basedir + QLatin1String("test/suite/") + chapter, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
         it.next();
 
         const QFileInfo info = it.fileInfo();
 
-        if ( !info.isFile() )
+        if (!info.isFile()) {
             continue;
+        }
 
         QString filename = info.fileName();
 
         filename.chop(3); // .js
 
-        QTest::newRow( filename.toLatin1().constData() ) << info.absoluteFilePath();
+        QTest::newRow(filename.toLatin1().constData()) << info.absoluteFilePath();
     }
 }
 

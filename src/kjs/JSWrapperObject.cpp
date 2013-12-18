@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  Copyright (C) 2006 Maks Orlovich <maksim@kde.org>
  *  Copyright (C) 2006 Apple Computer, Inc.
@@ -22,15 +21,18 @@
 
 #include "JSWrapperObject.h"
 
-namespace KJS {
+namespace KJS
+{
 
-void JSWrapperObject::mark() 
+void JSWrapperObject::mark()
 {
     JSObject::mark();
-    if (m_internalValue && !m_internalValue->marked())
+    if (m_internalValue && !m_internalValue->marked()) {
         m_internalValue->mark();
-    if (!m_originalProto->marked())
-	m_originalProto->mark();
+    }
+    if (!m_originalProto->marked()) {
+        m_originalProto->mark();
+    }
 }
 
 } // namespace KJS

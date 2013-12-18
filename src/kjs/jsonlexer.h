@@ -24,44 +24,46 @@
 
 #include "ustring.h"
 
-
-namespace KJS {
+namespace KJS
+{
 
 class ExecState;
 class JSValue;
 class JSObject;
 class JSONParser;
 
-namespace JSONParserState {
-    enum ParserState {
-        JSONValue = 1,
-        JSONObject,
-        JSONArray
-    };
-
-    enum TokenType {
-        TokLBracket, // [
-        TokRBracket, // ]
-        TokLBrace,   // {
-        TokRBrace,   // }
-        TokString,
-        TokIdentifier,
-        TokNumber,
-        TokColon,
-        TokLParen,
-        TokRParen,
-        TokComma,
-        TokTrue,
-        TokFalse,
-        TokNull,
-        TokEnd,
-        TokError };
+namespace JSONParserState
+{
+enum ParserState {
+    JSONValue = 1,
+    JSONObject,
+    JSONArray
 };
 
+enum TokenType {
+    TokLBracket, // [
+    TokRBracket, // ]
+    TokLBrace,   // {
+    TokRBrace,   // }
+    TokString,
+    TokIdentifier,
+    TokNumber,
+    TokColon,
+    TokLParen,
+    TokRParen,
+    TokComma,
+    TokTrue,
+    TokFalse,
+    TokNull,
+    TokEnd,
+    TokError
+};
+};
 
-class JSONLexer {
+class JSONLexer
+{
 public:
-    explicit JSONLexer(const UString& code);
+    explicit JSONLexer(const UString &code);
 
     JSONParserState::TokenType next();
     JSONParserState::TokenType current();
@@ -82,23 +84,22 @@ private:
     double m_numberToken;
 };
 
-
-class JSONParser {
+class JSONParser
+{
 public:
-    explicit JSONParser(const UString& code);
+    explicit JSONParser(const UString &code);
 
     // Returns the root parsed JSValue*
     // or NULL on failure
-    JSValue* tryParse(ExecState* exec);
+    JSValue *tryParse(ExecState *exec);
 
 private:
-    JSValue* parse(ExecState* exec, JSONParserState::ParserState state = JSONParserState::JSONValue);
+    JSValue *parse(ExecState *exec, JSONParserState::ParserState state = JSONParserState::JSONValue);
     inline bool nextParseIsEOF();
 
     JSONParserState::ParserState m_state;
     JSONLexer m_lexer;
 };
-
 
 } // namespace KJS
 

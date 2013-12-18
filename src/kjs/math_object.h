@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -24,29 +23,36 @@
 
 #include "function_object.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class MathObjectImp : public JSObject {
-  public:
+class MathObjectImp : public JSObject
+{
+public:
     MathObjectImp(ExecState *exec,
                   ObjectPrototype *objProto);
     using KJS::JSObject::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
     JSValue *getValueProperty(ExecState *exec, int token) const;
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
     enum { Euler, Ln2, Ln10, Log2E, Log10E, Pi, Sqrt1_2, Sqrt2,
            Abs, ACos, ASin, ATan, ATan2, Ceil, Cos, Pow,
-           Exp, Floor, Log, Max, Min, Random, Round, Sin, Sqrt, Tan };
-  };
+           Exp, Floor, Log, Max, Min, Random, Round, Sin, Sqrt, Tan
+         };
+};
 
-  class MathFuncImp : public InternalFunctionImp {
-  public:
-    MathFuncImp(ExecState *exec, int i, int l, const Identifier&);
+class MathFuncImp : public InternalFunctionImp
+{
+public:
+    MathFuncImp(ExecState *exec, int i, int l, const Identifier &);
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
-  private:
+private:
     int id;
-  };
+};
 
 } // namespace
 

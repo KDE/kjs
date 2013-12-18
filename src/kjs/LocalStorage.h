@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
  *  Copyright (C) 2003, 2006, 2007, 2008 Apple Inc. All rights reserved.
@@ -34,35 +33,37 @@
 #include <wtf/VectorTraits.h>
 #include "scope_chain.h" // for ScopeChainLink
 
-namespace KJS {
-    class JSValue;
+namespace KJS
+{
+class JSValue;
 
-    struct LocalStorageEntry {
-        LocalStorageEntry()
-        {
-        }
+struct LocalStorageEntry {
+    LocalStorageEntry()
+    {
+    }
 
-        LocalStorageEntry(JSValue* v, unsigned a) :
-            attributes(a)
-        {
-          val.valueVal = v;
-        }
+    LocalStorageEntry(JSValue *v, unsigned a) :
+        attributes(a)
+    {
+        val.valueVal = v;
+    }
 
-        union {
-          double   numberVal; //### TODO: use 2 entries for this on 32-bit..
-          JSValue* valueVal;
-          bool     boolVal;
-          int32_t  int32Val;
-	  ScopeChainLink scopeVal;
-        } val;
-        unsigned attributes;
-    };
+    union {
+        double   numberVal; //### TODO: use 2 entries for this on 32-bit..
+        JSValue *valueVal;
+        bool     boolVal;
+        int32_t  int32Val;
+        ScopeChainLink scopeVal;
+    } val;
+    unsigned attributes;
+};
 
-    typedef Vector<LocalStorageEntry, 32> LocalStorage;
+typedef Vector<LocalStorageEntry, 32> LocalStorage;
 }
 
-namespace WTF {
-    template<> struct VectorTraits<KJS::LocalStorageEntry> : VectorTraitsBase<true, KJS::LocalStorageEntry> { };
+namespace WTF
+{
+template<> struct VectorTraits<KJS::LocalStorageEntry> : VectorTraitsBase<true, KJS::LocalStorageEntry> { };
 }
 
 #endif // KJS_LOCAL_STORAGE_H

@@ -42,25 +42,25 @@
 #define LIST_HANDLE(l) reinterpret_cast<const KJSArgumentsHandle*>(l)
 #define LIST(h) reinterpret_cast<const KJS::List*>((h)->hnd)
 
-static inline KJS::UString toUString(const QString& s)
+static inline KJS::UString toUString(const QString &s)
 {
     // ### can be done faster. see khtml/ecma/kjs_binding.cpp
     int l = s.length();
-    const KJS::UChar* u = reinterpret_cast<const KJS::UChar*>(s.unicode());
+    const KJS::UChar *u = reinterpret_cast<const KJS::UChar *>(s.unicode());
     return KJS::UString(u, l);
 }
 
-static inline KJS::Identifier toIdentifier(const QString& s)
+static inline KJS::Identifier toIdentifier(const QString &s)
 {
     int l = s.length();
-    const KJS::UChar* u = reinterpret_cast<const KJS::UChar*>(s.unicode());
+    const KJS::UChar *u = reinterpret_cast<const KJS::UChar *>(s.unicode());
     return KJS::Identifier(u, l);
 }
 
-static inline QString toQString(const KJS::UString& s)
+static inline QString toQString(const KJS::UString &s)
 {
     int l = s.size();
-    const QChar* u = reinterpret_cast<const QChar*>(s.data());
+    const QChar *u = reinterpret_cast<const QChar *>(s.data());
     return QString(u, l);
 }
 

@@ -50,37 +50,37 @@ public:
     /**
      * Add a read-only numerical property to this object.
      */
-    void defineConstant(const QString& name, double value);
+    void defineConstant(const QString &name, double value);
     /**
      * Add a read-only string property to this object.
      *
      * @overload
      */
-    void defineConstant(const QString& name, const QString& value);
+    void defineConstant(const QString &name, const QString &value);
     /**
      * Add a read-only object property to this object.
      *
      * @overload
      */
-    void defineConstant(const QString& name, const KJSObject& value);
+    void defineConstant(const QString &name, const KJSObject &value);
     /**
      * Function signature for a property getter function. Describes
      * one of the defineProperty() argument types.
      */
-    typedef KJSObject (*PropertyGetter)(KJSContext* context, void* object);
+    typedef KJSObject(*PropertyGetter)(KJSContext *context, void *object);
     /**
      * Function signature for a property setter function. Describes
      * one of the defineProperty() argument types.
      */
-    typedef void (*PropertySetter)(KJSContext* context, void* object,
+    typedef void (*PropertySetter)(KJSContext *context, void *object,
                                    KJSObject value);
     /**
      * Defines a property of this prototype with C++ callback
      * functions for getting and setting the property value. If the
      * setter is set to 0 then the property is treated as read-only.
      */
-    void defineProperty(KJSContext* ctx,
-                        const QString& name,
+    void defineProperty(KJSContext *ctx,
+                        const QString &name,
                         PropertyGetter getter,
                         PropertySetter setter = 0);
 
@@ -89,15 +89,15 @@ public:
      * defineFunction() function parameter accepts a reference to a
      * function of this type as a parameter.
      */
-    typedef KJSObject (*FunctionCall)(KJSContext* context, void* object,
-                                      const KJSArguments& arguments);
+    typedef KJSObject(*FunctionCall)(KJSContext *context, void *object,
+                                     const KJSArguments &arguments);
 
     /**
      * Define a function. The specified C++ callback function will
      * be called upon invocation.
      */
-    void defineFunction(KJSContext* ctx,
-                        const QString& name, FunctionCall callback);
+    void defineFunction(KJSContext *ctx,
+                        const QString &name, FunctionCall callback);
 
 #if 0
     /**
@@ -115,7 +115,7 @@ public:
      *
      * @todo Provide a better type than void*
      */
-    KJSObject constructObject(KJSContext* ctx, void *internalValue = 0);
+    KJSObject constructObject(KJSContext *ctx, void *internalValue = 0);
 
     /**
      * Similar to constructObject() but specialized on the
@@ -124,10 +124,10 @@ public:
     KJSGlobalObject constructGlobalObject(void *internalValue = 0);
 
 private:
-    KJSPrototype(const KJSPrototype&); // undefined
-    KJSPrototype& operator=(const KJSPrototype&); // undefined
+    KJSPrototype(const KJSPrototype &); // undefined
+    KJSPrototype &operator=(const KJSPrototype &); // undefined
 
-    KJSPrototypeHandle* hnd;
+    KJSPrototypeHandle *hnd;
 };
 
 #endif

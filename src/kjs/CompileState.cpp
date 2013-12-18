@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -28,7 +27,8 @@
 #include <wtf/Assertions.h>
 #include <wtf/Vector.h>
 
-namespace KJS {
+namespace KJS
+{
 
 CompileState::~CompileState()
 {
@@ -37,12 +37,12 @@ CompileState::~CompileState()
     deleteAllValues(freeNonMarkTemps);
 }
 
-CodeBlock& CompileState::codeBlock()
+CodeBlock &CompileState::codeBlock()
 {
     return fbody->code();
 }
 
-void CompileState::requestTemporary(OpType type, OpValue* value, OpValue* reference)
+void CompileState::requestTemporary(OpType type, OpValue *value, OpValue *reference)
 {
     ASSERT(type == OpType_value || type == OpType_bool || type == OpType_int32 || type == OpType_number);
 
@@ -52,7 +52,7 @@ void CompileState::requestTemporary(OpType type, OpValue* value, OpValue* refere
     reference->type      = OpType_reg;
     reference->immediate = true;
 
-    RegDescriptor* temp = 0;
+    RegDescriptor *temp = 0;
 
     bool markable = (type == OpType_value);
 
@@ -83,7 +83,7 @@ OpValue CompileState::localReadVal(Register regNum)
     val.immediate = false;
     val.type      = OpType_value;
 
-    RegDescriptor* desc = locals[regNum];
+    RegDescriptor *desc = locals[regNum];
     if (!desc) {
         desc = new RegDescriptor(this, regNum, true, false /*not a temp!*/);
         locals[regNum] = desc;
@@ -93,15 +93,16 @@ OpValue CompileState::localReadVal(Register regNum)
     return val;
 }
 
-void CompileState::localFlushAll(CodeBlock& block)
+void CompileState::localFlushAll(CodeBlock &block)
 {
     for (Register r = 0; r < initialMaxTemp; ++r) {
-        if (locals[r] && locals[r]->live())
+        if (locals[r] && locals[r]->live()) {
             flushLocal(block, r);
+        }
     }
 }
 
-void CompileState::flushLocal(CodeBlock& /*block*/, Register regNum)
+void CompileState::flushLocal(CodeBlock & /*block*/, Register regNum)
 {
     if (locals[regNum] && locals[regNum]->live()) {
         OpValue localVal;
@@ -121,7 +122,7 @@ void CompileState::flushLocal(CodeBlock& /*block*/, Register regNum)
     }
 }
 
-OpValue CompileState::localWriteRef(CodeBlock& block, Register regNum)
+OpValue CompileState::localWriteRef(CodeBlock &block, Register regNum)
 {
     // Detach any live value copies.
     flushLocal(block, regNum);
@@ -133,10 +134,11 @@ OpValue CompileState::localWriteRef(CodeBlock& block, Register regNum)
     return rval;
 }
 
-bool CompileState::pushLabel(const Identifier& label)
+bool CompileState::pushLabel(const Identifier &label)
 {
-    if (!seenLabels.add(label).second)
-        return false; // Dupe!
+    if (!seenLabels.add(label).second) {
+        return false;    // Dupe!
+    }
 
     seenLabelsStack.append(label);
     pendingLabels.append(label);
@@ -149,48 +151,52 @@ void CompileState::popLabel()
     Identifier name = seenLabelsStack.last();
 
     seenLabelsStack.removeLast();
-    seenLabels.remove  (name);
+    seenLabels.remove(name);
     labelTargets.remove(name);
     ASSERT(pendingLabels.isEmpty());
 }
 
-void CompileState::bindLabels(Node* node)
+void CompileState::bindLabels(Node *node)
 {
-    for (size_t l = 0; l < pendingLabels.size(); ++l)
+    for (size_t l = 0; l < pendingLabels.size(); ++l) {
         labelTargets.set(pendingLabels[l], node);
+    }
     pendingLabels.clear();
 }
 
-Node* CompileState::resolveBreakLabel(Identifier label)
+Node *CompileState::resolveBreakLabel(Identifier label)
 {
     if (label.isEmpty()) {
-        if (defaultBreakTargets.isEmpty())
+        if (defaultBreakTargets.isEmpty()) {
             return 0;
-        else
+        } else {
             return defaultBreakTargets.last();
+        }
     } else {
         return labelTargets.get(label);
     }
 }
 
-Node* CompileState::resolveContinueLabel(Identifier label)
+Node *CompileState::resolveContinueLabel(Identifier label)
 {
     if (label.isEmpty()) {
-        if (defaultContinueTargets.isEmpty())
+        if (defaultContinueTargets.isEmpty()) {
             return 0;
-        else
+        } else {
             return defaultContinueTargets.last();
+        }
     } else {
         return labelTargets.get(label);
     }
 }
 
-void CompileState::pushNest(NestType type, Node* node)
+void CompileState::pushNest(NestType type, Node *node)
 {
-    if (type == Scope)
+    if (type == Scope) {
         ++scopeDepth;
-    else if (type == TryFinally)
+    } else if (type == TryFinally) {
         ++finallyDepth;
+    }
 
     NestInfo inf;
     inf.type = type;
@@ -202,20 +208,21 @@ void CompileState::pushNest(NestType type, Node* node)
 
 void CompileState::popNest()
 {
-    if (nests.last().type == Scope)
+    if (nests.last().type == Scope) {
         --scopeDepth;
-    else if (nests.last().type == TryFinally)
+    } else if (nests.last().type == TryFinally) {
         --finallyDepth;
-        
+    }
+
     nests.removeLast();
 }
 
-void CompileState::pushDefaultBreak(Node* node)
+void CompileState::pushDefaultBreak(Node *node)
 {
     defaultBreakTargets.append(node);
 }
 
-void CompileState::pushDefaultContinue(Node* node)
+void CompileState::pushDefaultContinue(Node *node)
 {
     defaultContinueTargets.append(node);
 }
@@ -230,54 +237,59 @@ void CompileState::popDefaultContinue()
     defaultContinueTargets.removeLast();
 }
 
-void CompileState::addPendingBreak(Node* node, Addr addr)
+void CompileState::addPendingBreak(Node *node, Addr addr)
 {
-    if (!pendingBreaks.contains(node))
+    if (!pendingBreaks.contains(node)) {
         pendingBreaks.set(node, new WTF::Vector<Addr>());
+    }
     pendingBreaks.get(node)->append(addr);
 }
 
-void CompileState::addPendingContinue(Node* node, Addr addr)
+void CompileState::addPendingContinue(Node *node, Addr addr)
 {
-    if (!pendingContinues.contains(node))
+    if (!pendingContinues.contains(node)) {
         pendingContinues.set(node, new WTF::Vector<Addr>());
+    }
     pendingContinues.get(node)->append(addr);
 }
 
-void CompileState::resolvePendingBreaks(Node* node, Addr dest)
+void CompileState::resolvePendingBreaks(Node *node, Addr dest)
 {
-    const WTF::Vector<Addr>* stats = pendingBreaks.get(node);
-    if (!stats)
+    const WTF::Vector<Addr> *stats = pendingBreaks.get(node);
+    if (!stats) {
         return;
+    }
 
-    CodeBlock& block = codeBlock();
+    CodeBlock &block = codeBlock();
     OpValue newDest = OpValue::immAddr(dest);
-    for (size_t c = 0; c < stats->size(); ++c)
+    for (size_t c = 0; c < stats->size(); ++c) {
         CodeGen::patchOpArgument(block, (*stats)[c], 0, newDest);
+    }
 
     pendingBreaks.remove(node);
     delete stats;
 }
 
-void CompileState::resolvePendingContinues(Node* node, Addr dest)
+void CompileState::resolvePendingContinues(Node *node, Addr dest)
 {
-    const WTF::Vector<Addr>* stats = pendingContinues.get(node);
-    if (!stats)
+    const WTF::Vector<Addr> *stats = pendingContinues.get(node);
+    if (!stats) {
         return;
+    }
 
-    CodeBlock& block = codeBlock();
+    CodeBlock &block = codeBlock();
     OpValue newDest = OpValue::immAddr(dest);
-    for (size_t c = 0; c < stats->size(); ++c)
+    for (size_t c = 0; c < stats->size(); ++c) {
         CodeGen::patchOpArgument(block, (*stats)[c], 0, newDest);
+    }
 
     pendingContinues.remove(node);
     delete stats;
 }
 
+static OpValue *addrDummy;
 
-static OpValue* addrDummy;
-
-OpValue* OpValue::dummyAddr()
+OpValue *OpValue::dummyAddr()
 {
     if (!addrDummy) {
         addrDummy = new OpValue;
@@ -286,7 +298,5 @@ OpValue* OpValue::dummyAddr()
     return addrDummy;
 }
 
-
 } //namespace KJS
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -25,56 +24,64 @@
 #include "function_object.h"
 #include "JSWrapperObject.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class NumberInstance : public JSWrapperObject {
-  public:
+class NumberInstance : public JSWrapperObject
+{
+public:
     NumberInstance(JSObject *proto);
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
 
-    virtual JSObject* valueClone(Interpreter* targetCtx) const;
-  };
+    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of Number.prototype (and thus all objects created
-   * with the Number constructor
-   */
-  class NumberPrototype : public NumberInstance {
-  public:
+/**
+ * @internal
+ *
+ * The initial value of Number.prototype (and thus all objects created
+ * with the Number constructor
+ */
+class NumberPrototype : public NumberInstance
+{
+public:
     NumberPrototype(ExecState *exec,
-                       ObjectPrototype *objProto,
-                       FunctionPrototype *funcProto);
-  };
+                    ObjectPrototype *objProto,
+                    FunctionPrototype *funcProto);
+};
 
-  /**
-   * @internal
-   *
-   * Class to implement all methods that are properties of the
-   * Number.prototype object
-   */
-  class NumberProtoFunc : public InternalFunctionImp {
-  public:
-    NumberProtoFunc(ExecState*, FunctionPrototype*, int i, int len, const Identifier&);
+/**
+ * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * Number.prototype object
+ */
+class NumberProtoFunc : public InternalFunctionImp
+{
+public:
+    NumberProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
     enum { ToString, ToLocaleString, ValueOf, ToFixed, ToExponential, ToPrecision };
-  private:
+private:
     int id;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of the global variable's "Number" property
-   */
-  class NumberObjectImp : public InternalFunctionImp {
+/**
+ * @internal
+ *
+ * The initial value of the global variable's "Number" property
+ */
+class NumberObjectImp : public InternalFunctionImp
+{
     using InternalFunctionImp::construct;
-  public:
+public:
     NumberObjectImp(ExecState *exec,
                     FunctionPrototype *funcProto,
                     NumberPrototype *numberProto);
@@ -85,16 +92,19 @@ namespace KJS {
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
     using KJS::JSObject::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
     JSValue *getValueProperty(ExecState *exec, int token) const;
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
     enum { NaNValue, NegInfinity, PosInfinity, MaxValue, MinValue };
 
     Completion execute(const List &);
     JSObject *construct(const List &);
-  };
+};
 
 } // namespace
 

@@ -20,7 +20,7 @@
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
  * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef WTF_MathExtras_h
@@ -60,13 +60,34 @@ const float piOverFourFloat = static_cast<float>(M_PI_4);
 #if COMPILER(MSVC)
 
 #ifndef BUILDING_KDE__
- inline bool isinf(double num) { return !_finite(num) && !_isnan(num); }
- inline bool isnan(double num) { return _isnan(num); }
- inline long lround(double num) { return num > 0 ? num + 0.5 : ceil(num - 0.5); }
- inline long lroundf(float num) { return num > 0 ? num + 0.5f : ceilf(num - 0.5f); }
- inline double round(double num) { return num > 0 ? floor(num + 0.5) : ceil(num - 0.5); }
- inline float roundf(float num) { return num > 0 ? floorf(num + 0.5f) : ceilf(num - 0.5f); }
- inline bool signbit(double num) { return _copysign(1.0, num) < 0; }
+inline bool isinf(double num)
+{
+    return !_finite(num) && !_isnan(num);
+}
+inline bool isnan(double num)
+{
+    return _isnan(num);
+}
+inline long lround(double num)
+{
+    return num > 0 ? num + 0.5 : ceil(num - 0.5);
+}
+inline long lroundf(float num)
+{
+    return num > 0 ? num + 0.5f : ceilf(num - 0.5f);
+}
+inline double round(double num)
+{
+    return num > 0 ? floor(num + 0.5) : ceil(num - 0.5);
+}
+inline float roundf(float num)
+{
+    return num > 0 ? floorf(num + 0.5f) : ceilf(num - 0.5f);
+}
+inline bool signbit(double num)
+{
+    return _copysign(1.0, num) < 0;
+}
 #endif
 
 #ifndef BUILDING_KDE__
@@ -79,16 +100,17 @@ inline double wtf_atan2(double x, double y)
 
     double result = KJS::NaN;
 
-    if (x == posInf && y == posInf)
+    if (x == posInf && y == posInf) {
         result = piOverFourDouble;
-    else if (x == posInf && y == negInf)
+    } else if (x == posInf && y == negInf) {
         result = 3 * piOverFourDouble;
-    else if (x == negInf && y == posInf)
+    } else if (x == negInf && y == posInf) {
         result = -piOverFourDouble;
-    else if (x == negInf && y == negInf)
+    } else if (x == negInf && y == negInf) {
         result = -3 * piOverFourDouble;
-    else
+    } else {
         result = ::atan2(x, y);
+    }
 
     return result;
 }
@@ -101,7 +123,10 @@ inline double wtf_atan2(double x, double y)
 #if COMPILER(MSVC)
 
 // Work around a bug in the Microsoft CRT, where fmod(x, +-infinity) yields NaN instead of x.
-inline double wtf_fmod(double x, double y) { return (!isinf(x) && isinf(y)) ? x : fmod(x, y); }
+inline double wtf_fmod(double x, double y)
+{
+    return (!isinf(x) && isinf(y)) ? x : fmod(x, y);
+}
 
 #define fmod(x, y) wtf_fmod(x, y)
 
@@ -111,18 +136,54 @@ inline double wtf_fmod(double x, double y) { return (!isinf(x) && isinf(y)) ? x 
 
 #endif // #if PLATFORM(WIN)
 
-inline double deg2rad(double d)  { return d * piDouble / 180.0; }
-inline double rad2deg(double r)  { return r * 180.0 / piDouble; }
-inline double deg2grad(double d) { return d * 400.0 / 360.0; }
-inline double grad2deg(double g) { return g * 360.0 / 400.0; }
-inline double rad2grad(double r) { return r * 200.0 / piDouble; }
-inline double grad2rad(double g) { return g * piDouble / 200.0; }
+inline double deg2rad(double d)
+{
+    return d * piDouble / 180.0;
+}
+inline double rad2deg(double r)
+{
+    return r * 180.0 / piDouble;
+}
+inline double deg2grad(double d)
+{
+    return d * 400.0 / 360.0;
+}
+inline double grad2deg(double g)
+{
+    return g * 360.0 / 400.0;
+}
+inline double rad2grad(double r)
+{
+    return r * 200.0 / piDouble;
+}
+inline double grad2rad(double g)
+{
+    return g * piDouble / 200.0;
+}
 
-inline float deg2rad(float d)  { return d * piFloat / 180.0f; }
-inline float rad2deg(float r)  { return r * 180.0f / piFloat; }
-inline float deg2grad(float d) { return d * 400.0f / 360.0f; }
-inline float grad2deg(float g) { return g * 360.0f / 400.0f; }
-inline float rad2grad(float r) { return r * 200.0f / piFloat; }
-inline float grad2rad(float g) { return g * piFloat / 200.0f; }
+inline float deg2rad(float d)
+{
+    return d * piFloat / 180.0f;
+}
+inline float rad2deg(float r)
+{
+    return r * 180.0f / piFloat;
+}
+inline float deg2grad(float d)
+{
+    return d * 400.0f / 360.0f;
+}
+inline float grad2deg(float g)
+{
+    return g * 360.0f / 400.0f;
+}
+inline float rad2grad(float r)
+{
+    return r * 200.0f / piFloat;
+}
+inline float grad2rad(float g)
+{
+    return g * piFloat / 200.0f;
+}
 
 #endif // #ifndef WTF_MathExtras_h

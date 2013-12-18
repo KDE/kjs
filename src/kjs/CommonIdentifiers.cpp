@@ -22,9 +22,10 @@
 
 #include "JSLock.h"
 
-namespace KJS {
+namespace KJS
+{
 
-const char* const nullCString = 0;
+const char *const nullCString = 0;
 
 #define INITIALIZE_PROPERTY_NAME(name) , name ( #name )
 
@@ -35,9 +36,9 @@ CommonIdentifiers::CommonIdentifiers()
 {
 }
 
-CommonIdentifiers* CommonIdentifiers::shared()
+CommonIdentifiers *CommonIdentifiers::shared()
 {
-    static CommonIdentifiers* sharedInstance;
+    static CommonIdentifiers *sharedInstance;
     if (!sharedInstance) {
         JSLock lock;
         sharedInstance = new CommonIdentifiers;

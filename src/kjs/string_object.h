@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -26,67 +25,83 @@
 #include "JSWrapperObject.h"
 #include "internal.h"
 
-namespace KJS {
+namespace KJS
+{
 
-  class StringInstance : public JSWrapperObject {
-  public:
+class StringInstance : public JSWrapperObject
+{
+public:
     StringInstance(JSObject *proto);
-    StringInstance(JSObject *proto, StringImp*);
-    StringInstance(JSObject *proto, const UString&);
+    StringInstance(JSObject *proto, StringImp *);
+    StringInstance(JSObject *proto, const UString &);
 
-    virtual bool getOwnPropertySlot(ExecState*, const Identifier&, PropertySlot&);
-    virtual bool getOwnPropertySlot(ExecState*, unsigned propertyName, PropertySlot&);
+    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    virtual bool getOwnPropertySlot(ExecState *, unsigned propertyName, PropertySlot &);
 
     using KJS::JSObject::put;
-    virtual void put(ExecState* exec, const Identifier& propertyName, JSValue*, int attr = None);
+    virtual void put(ExecState *exec, const Identifier &propertyName, JSValue *, int attr = None);
     using KJS::JSObject::deleteProperty;
-    virtual bool deleteProperty(ExecState* exec, const Identifier& propertyName);
-    virtual void getOwnPropertyNames(ExecState*, PropertyNameArray&, PropertyMap::PropertyMode mode);
-    virtual bool getOwnPropertyDescriptor(ExecState*, const Identifier&, PropertyDescriptor&);
+    virtual bool deleteProperty(ExecState *exec, const Identifier &propertyName);
+    virtual void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode);
+    virtual bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &);
 
     virtual UString toString(ExecState *exec) const;
-    virtual JSObject* valueClone(Interpreter* targetCtx) const;    
+    virtual JSObject *valueClone(Interpreter *targetCtx) const;
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
 
-    StringImp* internalValue() const { return static_cast<StringImp*>(JSWrapperObject::internalValue());}
+    StringImp *internalValue() const
+    {
+        return static_cast<StringImp *>(JSWrapperObject::internalValue());
+    }
 
-    bool conversionsCustomized() const { return m_conversionsCustomized; }
-  private:
-    bool inlineGetOwnPropertySlot(ExecState*, unsigned, PropertySlot&);
+    bool conversionsCustomized() const
+    {
+        return m_conversionsCustomized;
+    }
+private:
+    bool inlineGetOwnPropertySlot(ExecState *, unsigned, PropertySlot &);
 
-    static JSValue* lengthGetter(ExecState*, JSObject *, const Identifier&, const PropertySlot&);
-    static JSValue* indexGetter(ExecState*, JSObject *, unsigned, const PropertySlot&);
-  
-    bool m_conversionsCustomized;    
-  };
+    static JSValue *lengthGetter(ExecState *, JSObject *, const Identifier &, const PropertySlot &);
+    static JSValue *indexGetter(ExecState *, JSObject *, unsigned, const PropertySlot &);
 
-  /**
-   * @internal
-   *
-   * The initial value of String.prototype (and thus all objects created
-   * with the String constructor
-   */
-  class StringPrototype : public StringInstance {
-  public:
+    bool m_conversionsCustomized;
+};
+
+/**
+ * @internal
+ *
+ * The initial value of String.prototype (and thus all objects created
+ * with the String constructor
+ */
+class StringPrototype : public StringInstance
+{
+public:
     StringPrototype(ExecState *exec,
-                       ObjectPrototype *objProto);
+                    ObjectPrototype *objProto);
     using KJS::StringInstance::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * Class to implement all methods that are properties of the
-   * String.prototype object
-   */
-  class StringProtoFunc : public InternalFunctionImp {
-  public:
-    StringProtoFunc(ExecState *exec, int i, int len, const Identifier&);
+/**
+ * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * String.prototype object
+ */
+class StringProtoFunc : public InternalFunctionImp
+{
+public:
+    StringProtoFunc(ExecState *exec, int i, int len, const Identifier &);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
@@ -98,21 +113,22 @@ namespace KJS {
            , Big, Small, Blink, Bold, Fixed, Italics, Strike, Sub, Sup,
            Fontcolor, Fontsize, Anchor, Link, TrimLeft, TrimRight
 #endif
-    };
+         };
 
     static void setToLowerFunction(UnicodeSupport::StringConversionFunction f);
     static void setToUpperFunction(UnicodeSupport::StringConversionFunction f);
-  private:
+private:
     int id;
-  };
+};
 
-  /**
-   * @internal
-   *
-   * The initial value of the global variable's "String" property
-   */
-  class StringObjectImp : public InternalFunctionImp {
-  public:
+/**
+ * @internal
+ *
+ * The initial value of the global variable's "String" property
+ */
+class StringObjectImp : public InternalFunctionImp
+{
+public:
     StringObjectImp(ExecState *exec,
                     FunctionPrototype *funcProto,
                     StringPrototype *stringProto);
@@ -121,19 +137,20 @@ namespace KJS {
     using KJS::JSObject::construct;
     virtual JSObject *construct(ExecState *exec, const List &args);
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
-  };
+};
 
-  /**
-   * @internal
-   *
-   * Class to implement all methods that are properties of the
-   * String object
-   */
-  class StringObjectFuncImp : public InternalFunctionImp {
-  public:
-    StringObjectFuncImp(ExecState*, FunctionPrototype*, const Identifier&);
+/**
+ * @internal
+ *
+ * Class to implement all methods that are properties of the
+ * String object
+ */
+class StringObjectFuncImp : public InternalFunctionImp
+{
+public:
+    StringObjectFuncImp(ExecState *, FunctionPrototype *, const Identifier &);
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
-  };
+};
 
 } // namespace
 

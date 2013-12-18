@@ -23,7 +23,8 @@
 
 #include "opcodes.h"
 
-namespace KJS {
+namespace KJS
+{
 
 class Node;
 class RegDescriptor;
@@ -33,8 +34,7 @@ class RegDescriptor;
 // Note that the union field names should correspond to codes.def types ---
 // type foo will be accessed as fooVal
 
-union NarrowArg
-{
+union NarrowArg {
     bool     boolVal;
     int32_t  int32Val;
     Addr     addrVal;
@@ -42,14 +42,13 @@ union NarrowArg
     unsigned char asBytes[4];
 };
 
-union WideArg
-{
-    JSValue*    valueVal;
-    Identifier* identVal;
-    UString*    stringVal;
+union WideArg {
+    JSValue    *valueVal;
+    Identifier *identVal;
+    UString    *stringVal;
     double      numberVal;
-    Node*       nodeVal;
-    const char* cstrVal;
+    Node       *nodeVal;
+    const char *cstrVal;
     unsigned char asBytes[8];
 };
 
@@ -60,8 +59,7 @@ union WideArg
 // Note: there is a difference between values stored in registers, and register names.
 // The former have immediate = false, and some type such as OpType_Bool; the latter have
 // immediate = true, and type = OpType_reg.
-struct OpValue
-{
+struct OpValue {
     bool   immediate;
     OpType type;
     RefPtr<RegDescriptor> ownedReg; // Register the lifetime of which we reserve, including the register #
@@ -75,22 +73,23 @@ struct OpValue
     // A few helpers for making immediate values... These are actually inside CompileState.h
     // due to them touching the ownedTemp;
 
-    static void initImm(OpValue* val, OpType type) {
+    static void initImm(OpValue *val, OpType type)
+    {
         val->immediate = true;
         val->type      = type;
     }
 
     // A placeholder address value, will be patched up later
-    static OpValue* dummyAddr();
+    static OpValue *dummyAddr();
 
     static OpValue immInt32(int32_t in);
     static OpValue immNumber(double in);
-    static OpValue immValue(JSValue* in);
+    static OpValue immValue(JSValue *in);
     static OpValue immBool(bool in);
-    static OpValue immString(UString* in);
-    static OpValue immIdent(Identifier* in);
-    static OpValue immNode(Node* in);
-    static OpValue immCStr(const char* in);
+    static OpValue immString(UString *in);
+    static OpValue immIdent(Identifier *in);
+    static OpValue immNode(Node *in);
+    static OpValue immCStr(const char *in);
     static OpValue immAddr(Addr in);
 };
 
@@ -98,4 +97,3 @@ struct OpValue
 
 #endif
 
-// kate: indent-width 4; replace-tabs on; tab-width 4; space-indent on;

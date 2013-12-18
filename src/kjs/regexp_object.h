@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -27,49 +26,64 @@
 #include "regexp.h"
 #include <wtf/OwnArrayPtr.h>
 
-namespace KJS {
-  class ExecState;
-  class RegExpPrototype : public JSObject {
-  public:
+namespace KJS
+{
+class ExecState;
+class RegExpPrototype : public JSObject
+{
+public:
     RegExpPrototype(ExecState *exec,
-                       ObjectPrototype *objProto,
-                       FunctionPrototype *funcProto);
-    virtual const ClassInfo *classInfo() const { return &info; }
+                    ObjectPrototype *objProto,
+                    FunctionPrototype *funcProto);
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
-  };
+};
 
-  class RegExpProtoFunc : public InternalFunctionImp {
-  public:
-    RegExpProtoFunc(ExecState*, FunctionPrototype*, int i, int len, const Identifier&);
+class RegExpProtoFunc : public InternalFunctionImp
+{
+public:
+    RegExpProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 
     enum { Exec, Test, ToString, Compile };
-  private:
+private:
     int id;
-  };
+};
 
-  class RegExpImp : public JSObject {
-  public:
+class RegExpImp : public JSObject
+{
+public:
     RegExpImp(RegExpPrototype *regexpProto);
     ~RegExpImp();
-    void setRegExp(ExecState* exec, RegExp* r);
-    RegExp* regExp() const { return reg; }
+    void setRegExp(ExecState *exec, RegExp *r);
+    RegExp *regExp() const
+    {
+        return reg;
+    }
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
     static const ClassInfo info;
 
-    virtual JSObject* valueClone(Interpreter* targetCtx) const;
-  private:
+    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+private:
     RegExp *reg;
-  };
+};
 
-  struct RegExpObjectImpPrivate;
+struct RegExpObjectImpPrivate;
 
-  class RegExpObjectImp : public InternalFunctionImp {
-  public:
+class RegExpObjectImp : public InternalFunctionImp
+{
+public:
     enum { Dollar1, Dollar2, Dollar3, Dollar4, Dollar5, Dollar6, Dollar7, Dollar8, Dollar9,
-           Input, Multiline, LastMatch, LastParen, LeftContext, RightContext };
+           Input, Multiline, LastMatch, LastParen, LeftContext, RightContext
+         };
 
     RegExpObjectImp(ExecState *exec,
                     FunctionPrototype *funcProto,
@@ -83,26 +97,29 @@ namespace KJS {
     virtual void put(ExecState *, const Identifier &, JSValue *, int attr = None);
     void putValueProperty(ExecState *, int token, JSValue *, int attr);
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier&, PropertySlot&);
+    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
     JSValue *getValueProperty(ExecState *, int token) const;
 
     // If resources are exhaused during a match, exec parameter will have an exception
     // set, and endOffset will be -1
-    UString performMatch(RegExp *, ExecState *, const RegExpStringContext&, const UString&,
+    UString performMatch(RegExp *, ExecState *, const RegExpStringContext &, const UString &,
                          int startOffset = 0, int *endOffset = 0, int **ovector = 0);
     JSObject *arrayOfMatches(ExecState *exec, const UString &result) const;
 
     static void throwRegExpError(ExecState *);
 
-    virtual const ClassInfo *classInfo() const { return &info; }
+    virtual const ClassInfo *classInfo() const
+    {
+        return &info;
+    }
 
     /*
      Attempts to create a new regular expression engine for the string p
      and the flags stored in flagsInput. If this succeeds, it returns the
      engine. If not, it returns 0, and raises an exception in exec
     */
-    static RegExp* makeEngine(ExecState *exec, const UString &p, JSValue *flagsInput);
-  private:
+    static RegExp *makeEngine(ExecState *exec, const UString &p, JSValue *flagsInput);
+private:
     JSValue *getBackref(int) const;
     JSValue *getLastMatch() const;
     JSValue *getLastParen() const;
@@ -112,7 +129,7 @@ namespace KJS {
     OwnPtr<RegExpObjectImpPrivate> d;
 
     static const ClassInfo info;
-  };
+};
 
 } // namespace
 

@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
@@ -39,8 +38,9 @@
 #include <float.h>
 #endif
 
-namespace KJS {
-    
+namespace KJS
+{
+
 #if !PLATFORM(DARWIN)
 
 // FIXME: Should probably be inlined on non-Darwin platforms too, and controlled exclusively
@@ -115,52 +115,65 @@ bool equal(ExecState *exec, JSValue *v1, JSValue *v2)
 {
     JSType t1 = v1->type();
     JSType t2 = v2->type();
-    
+
     if (t1 != t2) {
-        if (t1 == UndefinedType)
+        if (t1 == UndefinedType) {
             t1 = NullType;
-        if (t2 == UndefinedType)
+        }
+        if (t2 == UndefinedType) {
             t2 = NullType;
-        
-        if (t1 == BooleanType)
+        }
+
+        if (t1 == BooleanType) {
             t1 = NumberType;
-        if (t2 == BooleanType)
+        }
+        if (t2 == BooleanType) {
             t2 = NumberType;
-        
+        }
+
         if (t1 == NumberType && t2 == StringType) {
             // use toNumber
-        } else if (t1 == StringType && t2 == NumberType)
+        } else if (t1 == StringType && t2 == NumberType) {
             t1 = NumberType;
-            // use toNumber
+        }
+        // use toNumber
         else {
-            if ((t1 == StringType || t1 == NumberType) && t2 >= ObjectType)
+            if ((t1 == StringType || t1 == NumberType) && t2 >= ObjectType) {
                 return equal(exec, v1, v2->toPrimitive(exec));
-            if (t1 == NullType && t2 == ObjectType)
+            }
+            if (t1 == NullType && t2 == ObjectType) {
                 return static_cast<JSObject *>(v2)->masqueradeAsUndefined();
-            if (t1 >= ObjectType && (t2 == StringType || t2 == NumberType))
+            }
+            if (t1 >= ObjectType && (t2 == StringType || t2 == NumberType)) {
                 return equal(exec, v1->toPrimitive(exec), v2);
-            if (t1 == ObjectType && t2 == NullType)
+            }
+            if (t1 == ObjectType && t2 == NullType) {
                 return static_cast<JSObject *>(v1)->masqueradeAsUndefined();
-            if (t1 != t2)
+            }
+            if (t1 != t2) {
                 return false;
+            }
         }
     }
-    
-    if (t1 == UndefinedType || t1 == NullType)
+
+    if (t1 == UndefinedType || t1 == NullType) {
         return true;
-    
+    }
+
     if (t1 == NumberType) {
         double d1 = v1->toNumber(exec);
         double d2 = v2->toNumber(exec);
         return d1 == d2;
     }
-    
-    if (t1 == StringType)
+
+    if (t1 == StringType) {
         return v1->toString(exec) == v2->toString(exec);
-    
-    if (t1 == BooleanType)
+    }
+
+    if (t1 == BooleanType) {
         return v1->toBoolean(exec) == v2->toBoolean(exec);
-    
+    }
+
     // types are Object
     return v1 == v2;
 }
@@ -169,26 +182,31 @@ bool strictEqual(ExecState *exec, JSValue *v1, JSValue *v2)
 {
     JSType t1 = v1->type();
     JSType t2 = v2->type();
-    
-    if (t1 != t2)
+
+    if (t1 != t2) {
         return false;
-    if (t1 == UndefinedType || t1 == NullType)
+    }
+    if (t1 == UndefinedType || t1 == NullType) {
         return true;
+    }
     if (t1 == NumberType) {
         double n1 = v1->toNumber(exec);
         double n2 = v2->toNumber(exec);
-        if (n1 == n2)
+        if (n1 == n2) {
             return true;
+        }
         return false;
-    } else if (t1 == StringType)
+    } else if (t1 == StringType) {
         return v1->toString(exec) == v2->toString(exec);
-    else if (t2 == BooleanType)
+    } else if (t2 == BooleanType) {
         return v1->toBoolean(exec) == v2->toBoolean(exec);
-    
-    if (v1 == v2)
+    }
+
+    if (v1 == v2) {
         return true;
+    }
     /* TODO: joined objects */
-    
+
     return false;
 }
 
@@ -196,34 +214,38 @@ int relation(ExecState *exec, JSValue *v1, JSValue *v2, bool leftFirst)
 {
     double n1;
     double n2;
-    JSValue* p1;
-    JSValue* p2;
+    JSValue *p1;
+    JSValue *p2;
 
     bool wasNotString1;
     bool wasNotString2;
 
     if (leftFirst) {
         wasNotString1 = v1->getPrimitiveNumber(exec, n1, p1);
-        if (exec->hadException())
+        if (exec->hadException()) {
             return -1;
+        }
         wasNotString2 = v2->getPrimitiveNumber(exec, n2, p2);
     } else {
         wasNotString1 = v2->getPrimitiveNumber(exec, n2, p2);
-        if (exec->hadException())
+        if (exec->hadException()) {
             return -1;
+        }
         wasNotString2 = v1->getPrimitiveNumber(exec, n1, p1);
     }
 
     if (wasNotString1 || wasNotString2) {
-        if (n1 < n2)
+        if (n1 < n2) {
             return 1;
-        if (n1 >= n2)
+        }
+        if (n1 >= n2) {
             return 0;
+        }
         return -1; // must be NaN, so undefined
     }
 
     assert(p1->isString() && p2->isString());
-    return static_cast<const StringImp*>(p1)->value() < static_cast<const StringImp*>(p2)->value() ? 1 : 0;
+    return static_cast<const StringImp *>(p1)->value() < static_cast<const StringImp *>(p2)->value() ? 1 : 0;
 }
 
 //EMCA 9.12
@@ -233,27 +255,34 @@ bool sameValue(ExecState *exec, JSValue *v1, JSValue *v2)
     JSType t1 = v1->type();
     JSType t2 = v2->type();
 
-    if (t1 != t2)
+    if (t1 != t2) {
         return false;
-    if (t1 == UndefinedType || t1 == NullType)
+    }
+    if (t1 == UndefinedType || t1 == NullType) {
         return true;
+    }
     if (t1 == NumberType) {
         double n1 = v1->toNumber(exec);
         double n2 = v2->toNumber(exec);
-        if (isNaN(n1) && isNaN(n2))
+        if (isNaN(n1) && isNaN(n2)) {
             return true;
-        if (signbit(n1) != signbit(n2))
+        }
+        if (signbit(n1) != signbit(n2)) {
             return false;
-        if (n1 == n2)
+        }
+        if (n1 == n2) {
             return true;
+        }
         return false;
-    } else if (t1 == StringType)
+    } else if (t1 == StringType) {
         return v1->toString(exec) == v2->toString(exec);
-    else if (t2 == BooleanType)
+    } else if (t2 == BooleanType) {
         return v1->toBoolean(exec) == v2->toBoolean(exec);
+    }
 
-    if (v1 == v2)
+    if (v1 == v2) {
         return true;
+    }
     /* TODO: joined objects */
 
     return false;
@@ -262,16 +291,19 @@ bool sameValue(ExecState *exec, JSValue *v1, JSValue *v2)
 int relation(ExecState *exec, JSValue *v1, double n2)
 {
     double n1;
-    JSValue* p1;
+    JSValue *p1;
 
     v1->getPrimitiveNumber(exec, n1, p1);
-    if (exec->hadException())
+    if (exec->hadException()) {
         return -1;
+    }
 
-    if (n1 < n2)
-	return 1;
-    if (n1 >= n2)
-	return 0;
+    if (n1 < n2) {
+        return 1;
+    }
+    if (n1 >= n2) {
+        return 0;
+    }
     return -1; // must be NaN, so undefined
 }
 

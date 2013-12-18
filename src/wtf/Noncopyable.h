@@ -1,4 +1,3 @@
-// -*- mode: c++; c-basic-offset: 4 -*-
 /*
  *  Copyright (C) 2006 Apple Computer, Inc.
  *
@@ -27,15 +26,17 @@
 // We don't want argument-dependent lookup to pull in everything from the WTF
 // namespace when you use Noncopyable, so put it in its own namespace.
 
-namespace WTFNoncopyable {
+namespace WTFNoncopyable
+{
 
-    class KJS_EXPORT Noncopyable {
-        Noncopyable(const Noncopyable&);
-        Noncopyable& operator=(const Noncopyable&);
-    protected:
-        Noncopyable() { }
-        ~Noncopyable() { }
-    };
+class KJS_EXPORT Noncopyable
+{
+    Noncopyable(const Noncopyable &);
+    Noncopyable &operator=(const Noncopyable &);
+protected:
+    Noncopyable() { }
+    ~Noncopyable() { }
+};
 
 } // namespace WTFNoncopyable
 

@@ -1,4 +1,3 @@
-// -*- c-basic-offset: 2 -*-
 /*
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2001 Harri Porten (porten@kde.org)
@@ -39,91 +38,119 @@
 #define I18N_NOOP(s) s
 #endif
 
-namespace KJS {
+namespace KJS
+{
 
+// ---------------------------------------------------------------------------
+//                            Primitive impls
+// ---------------------------------------------------------------------------
 
-  // ---------------------------------------------------------------------------
-  //                            Primitive impls
-  // ---------------------------------------------------------------------------
-
-  class StringImp : public JSCell {
-  public:
+class StringImp : public JSCell
+{
+public:
     StringImp() : val(UString::empty) { }
-    StringImp(const UString& v) : val(v) { Collector::reportExtraMemoryCost(v.cost()); }
+    StringImp(const UString &v) : val(v)
+    {
+        Collector::reportExtraMemoryCost(v.cost());
+    }
     enum HasOtherOwnerType { HasOtherOwner }; // e.g. storage cost already accounted for
-    StringImp(const UString& value, HasOtherOwnerType) : val(value) { }
-    StringImp(const char* v) : val(v) { }
-    StringImp(const char* v, int len) : val(v, len) { }
-    const UString& value() const { return val; }
+    StringImp(const UString &value, HasOtherOwnerType) : val(value) { }
+    StringImp(const char *v) : val(v) { }
+    StringImp(const char *v, int len) : val(v, len) { }
+    const UString &value() const
+    {
+        return val;
+    }
 
-    virtual JSType type() const { return StringType; }
+    virtual JSType type() const
+    {
+        return StringType;
+    }
 
     virtual JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState*, double& number, JSValue*& value);
+    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
     virtual bool toBoolean(ExecState *exec) const;
     virtual double toNumber(ExecState *exec) const;
     virtual UString toString(ExecState *exec) const;
     virtual JSObject *toObject(ExecState *exec) const;
 
-  private:
+private:
     UString val;
-  };
+};
 
-  class NumberImp : public JSCell {
+class NumberImp : public JSCell
+{
     friend class ConstantValues;
     friend KJS_EXPORT JSValue *jsNumberCell(double);
-  public:
-    double value() const { return val; }
+public:
+    double value() const
+    {
+        return val;
+    }
 
-    JSType type() const { return NumberType; }
+    JSType type() const
+    {
+        return NumberType;
+    }
 
     JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState*, double& number, JSValue*& value);
+    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
     bool toBoolean(ExecState *exec) const;
     double toNumber(ExecState *exec) const;
     UString toString(ExecState *exec) const;
     JSObject *toObject(ExecState *exec) const;
 
-  private:
+private:
     NumberImp(double v) : val(v) { }
 
-    virtual bool getUInt32(uint32_t&) const;
-    virtual bool getTruncatedInt32(int32_t&) const;
-    virtual bool getTruncatedUInt32(uint32_t&) const;
+    virtual bool getUInt32(uint32_t &) const;
+    virtual bool getTruncatedInt32(int32_t &) const;
+    virtual bool getTruncatedUInt32(uint32_t &) const;
 
     double val;
-  };
+};
 
-  // ---------------------------------------------------------------------------
-  //                            Evaluation
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//                            Evaluation
+// ---------------------------------------------------------------------------
 
-  struct AttachedInterpreter;
-  class DebuggerImp {
-  public:
+struct AttachedInterpreter;
+class DebuggerImp
+{
+public:
 
-    DebuggerImp() {
-      interps = 0;
-      isAborted = false;
+    DebuggerImp()
+    {
+        interps = 0;
+        isAborted = false;
     }
 
-    void abort() { isAborted = true; }
-    bool aborted() const { return isAborted; }
+    void abort()
+    {
+        isAborted = true;
+    }
+    bool aborted() const
+    {
+        return isAborted;
+    }
 
     AttachedInterpreter *interps;
     bool isAborted;
-  };
+};
 
-  // helper function for toInteger, toInt32, toUInt32 and toUInt16
-  double roundValue(double d);
-  inline double roundValue(ExecState *e, JSValue *v) { return roundValue(v->toNumber(e)); }
+// helper function for toInteger, toInt32, toUInt32 and toUInt16
+double roundValue(double d);
+inline double roundValue(ExecState *e, JSValue *v)
+{
+    return roundValue(v->toNumber(e));
+}
 
-  int32_t toInt32(double dd);
-  uint32_t toUInt32(double dd);
-  uint16_t toUInt16(double dd);
+int32_t toInt32(double dd);
+uint32_t toUInt32(double dd);
+uint16_t toUInt16(double dd);
 
 //#ifndef NDEBUG
-  void printInfo(ExecState *exec, const char *s, JSValue *, int lineno = -1);
+void printInfo(ExecState *exec, const char *s, JSValue *, int lineno = -1);
 //#endif
 
 } // namespace

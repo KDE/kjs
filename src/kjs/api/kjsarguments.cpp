@@ -24,16 +24,17 @@
 
 int KJSArguments::count() const
 {
-    const KJS::List* l = LIST(this);
+    const KJS::List *l = LIST(this);
     return l->size();
 }
 
 KJSObject KJSArguments::at(int idx) const
 {
-    const KJS::List* l = LIST(this);
-    if (idx < 0 || idx >= l->size())
+    const KJS::List *l = LIST(this);
+    if (idx < 0 || idx >= l->size()) {
         return KJSUndefined();
-    KJS::JSValue* a = l->at(idx);
+    }
+    KJS::JSValue *a = l->at(idx);
     return KJSObject(JSVALUE_HANDLE(a));
 }
 
