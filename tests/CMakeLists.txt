@@ -21,3 +21,8 @@ ecm_mark_nongui_executable(testkjs)
 
 target_link_libraries(testkjs KF5::JS Qt5::Core)
 
+if (WIN32)
+   # for timeGetTime() we need winmm
+   target_link_libraries(testkjs winmm)
+   target_link_libraries(testkjs_static winmm)
+endif()
