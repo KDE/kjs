@@ -191,6 +191,7 @@ endif()
 if(PCRE_FOUND)
    target_link_libraries(KF5JS PRIVATE ${PCRE_LIBRARIES})
 endif()
+target_compile_definitions(KF5JS PRIVATE MAKE_KJS_LIB=1)
 
 set_target_properties(KF5JS PROPERTIES VERSION ${KJS_VERSION_STRING}
                                        SOVERSION ${KJS_SOVERSION}
