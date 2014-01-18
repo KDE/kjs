@@ -28,7 +28,7 @@
 
 #include <math.h>
 
-#if PLATFORM(WIN)
+#if PLATFORM(WIN_OS)
 
 #include "kjs/JSImmediate.h"
 #include <xmath.h>
@@ -133,7 +133,7 @@ inline double wtf_fmod(double x, double y)
 
 #define atan2(x, y) wtf_atan2(x, y)
 
-#endif // #if PLATFORM(WIN)
+#endif // #if COMPILER(MSVC)
 
 inline double deg2rad(double d)
 {
