@@ -10,6 +10,7 @@ include(FeatureSummary)
 include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 include(ECMSetupVersion)
+include(ECMMarkNonGuiExecutable)
 
 set(KF5_VERSION "5.0.0")
 
