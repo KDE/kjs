@@ -10,10 +10,6 @@ include(ConfigureChecks.cmake)
 check_cxx_compiler_flag(-fvisibility=hidden __KDE_HAVE_GCC_VISIBILITY)
 configure_file(global.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/global.h )
 
-include_directories(
-  ${KDEWIN_INCLUDES}
-)
-
 # the check for pcre is in ../CMakeLists.txt
 if(PCRE_FOUND AND NOT KJS_FORCE_DISABLE_PCRE)
    include_directories(${PCRE_INCLUDE_DIR})
@@ -183,10 +179,6 @@ set(kjs_INCLUDES
 )
 
 target_include_directories(KF5JS PUBLIC "$<BUILD_INTERFACE:${kjs_INCLUDES}>")
-
-if(WIN32)
-   target_link_libraries(KF5JS PRIVATE ${KDEWIN_LIBRARIES})
-endif()
 
 if(CMAKE_THREAD_LIBS_INIT)
    target_link_libraries(KF5JS PRIVATE ${CMAKE_THREAD_LIBS_INIT})

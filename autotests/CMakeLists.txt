@@ -7,7 +7,7 @@ add_executable(ecmatest
   ecmatest.cpp
 )
 ecm_mark_as_test(ecmatest)
-target_link_libraries(ecmatest KF5::JS ${KDEWIN_LIBRARIES} Qt5::Test)
+target_link_libraries(ecmatest KF5::JS Qt5::Test)
 
 function(ADD_ECMATEST ECMA262_CHAPTER)
    if (IS_DIRECTORY "${ECMATEST_BASEDIR}/test/suite/${ECMA262_CHAPTER}")
