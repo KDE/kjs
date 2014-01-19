@@ -78,6 +78,7 @@ const ClassInfo MathObjectImp::info = { "Math", 0, &mathTable, 0 };
   tanh          MathObjectImp::TanH     DontEnum|Function 1
   trunc         MathObjectImp::Trunc    DontEnum|Function 1
   hypot         MathObjectImp::Hypot    DontEnum|Function 0
+  imul          MathObjectImp::Imul     DontEnum|Function 2
 @end
 */
 
@@ -323,6 +324,20 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
             return jsNumber(KJS::NaN);
 
         result = ::sqrt(sum);
+        break;
+    }
+    case MathObjectImp::Imul:
+    {
+        if (args.size() < 2)
+            return jsUndefined();
+        int32_t a = args[0]->toInt32(exec);
+        if (exec->hadException())
+            return jsNumber(a);
+        int32_t b = args[1]->toInt32(exec);
+        if (exec->hadException())
+            return jsNumber(b);
+
+        result = a * b;
         break;
     }
 

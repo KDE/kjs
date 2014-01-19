@@ -45,7 +45,7 @@ public:
            //ES6 (draft 08.11.2013)
            ACosH, ASinH, ATanH, Cbrt, CosH, Exmp1,
            Log1p, Log10, Log2, Sign, SinH, TanH, Trunc,
-           Hypot
+           Hypot, Imul
          };
 };
 
