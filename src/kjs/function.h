@@ -278,6 +278,9 @@ private:
 static const double mantissaOverflowLowerBound = 9007199254740992.0;
 double parseIntOverflow(const char *s, int length, int radix);
 
+double parseInt(const UString &s, int radix);
+double parseFloat(const UString &s);
+
 } // namespace
 
 #endif

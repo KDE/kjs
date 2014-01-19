@@ -103,7 +103,7 @@ public:
     enum { NaNValue, NegInfinity, PosInfinity, MaxValue, MinValue,
         //ES6 (Draft 08.11.2013)
         MaxSafeInteger, MinSafeInteger,
-        IsFinite, IsInteger, IsNaN, IsSafeInteger
+        IsFinite, IsInteger, IsNaN, IsSafeInteger, ParseInt, ParseFloat
     };
 
     Completion execute(const List &);
