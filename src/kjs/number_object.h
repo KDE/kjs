@@ -100,10 +100,22 @@ public:
         return &info;
     }
     static const ClassInfo info;
-    enum { NaNValue, NegInfinity, PosInfinity, MaxValue, MinValue };
+    enum { NaNValue, NegInfinity, PosInfinity, MaxValue, MinValue,
+        //ES6 (Draft 08.11.2013)
+        MaxSafeInteger, MinSafeInteger,
+        IsFinite, IsInteger, IsNaN, IsSafeInteger
+    };
 
     Completion execute(const List &);
     JSObject *construct(const List &);
+};
+
+class NumberFuncImp : public InternalFunctionImp {
+public:
+    NumberFuncImp(ExecState *exec, int i, int l, const Identifier&);
+    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+private:
+    int id;
 };
 
 } // namespace
