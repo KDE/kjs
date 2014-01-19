@@ -44,7 +44,9 @@ public:
 
     enum { GetOwnPropertyDescriptor, DefineProperty, GetPrototypeOf,
            GetOwnPropertyNames, Keys, DefineProperties, Create, IsExtensible,
-           PreventExtensible, IsSealed, Seal, IsFrozen, Freeze
+           PreventExtensible, IsSealed, Seal, IsFrozen, Freeze,
+           //ES6
+           Is
          };
 
 private:
@@ -202,6 +204,7 @@ ObjectObjectImp::ObjectObjectImp(ExecState *exec, ObjectPrototype *objProto, Fun
     static const Identifier *isFrozenName = new Identifier("isFrozen");
     static const Identifier *isExtensibleName = new Identifier("isExtensible");
     static const Identifier *keys = new Identifier("keys");
+    static const Identifier* isName = new Identifier("is");
 
     // ECMA 15.2.3.1
     putDirect(exec->propertyNames().prototype, objProto, DontEnum | DontDelete | ReadOnly);
@@ -219,6 +222,8 @@ ObjectObjectImp::ObjectObjectImp(ExecState *exec, ObjectPrototype *objProto, Fun
     putDirectFunction(new ObjectObjectFuncImp(exec, funcProto, ObjectObjectFuncImp::IsFrozen, 1, *isFrozenName), DontEnum);
     putDirectFunction(new ObjectObjectFuncImp(exec, funcProto, ObjectObjectFuncImp::IsExtensible, 1, *isExtensibleName), DontEnum);
     putDirectFunction(new ObjectObjectFuncImp(exec, funcProto, ObjectObjectFuncImp::Keys, 1, *keys), DontEnum);
+    //ES6
+    putDirectFunction(new ObjectObjectFuncImp(exec, funcProto, ObjectObjectFuncImp::Is, 2, *isName), DontEnum);
 
     // no. of arguments for constructor
     putDirect(exec->propertyNames().length, jsNumber(1), ReadOnly | DontDelete | DontEnum);
@@ -482,6 +487,9 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
             return throwError(exec, TypeError, "Not an Object");
         }
         return jsBoolean(jso->isExtensible());
+    }
+    case Is: { //ES6 (Draft 08.11.2013) - 19.1.2.10
+        return jsBoolean(sameValue(exec, args[0], args[1]));
     }
     default:
         return jsUndefined();
