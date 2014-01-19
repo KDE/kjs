@@ -77,6 +77,7 @@ const ClassInfo MathObjectImp::info = { "Math", 0, &mathTable, 0 };
   sinh          MathObjectImp::SinH     DontEnum|Function 1
   tanh          MathObjectImp::TanH     DontEnum|Function 1
   trunc         MathObjectImp::Trunc    DontEnum|Function 1
+  hypot         MathObjectImp::Hypot    DontEnum|Function 0
 @end
 */
 
@@ -292,6 +293,39 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         case MathObjectImp::Trunc:
         result = ::trunc(arg);
     break;
+    case MathObjectImp::Hypot:
+    {
+        if (args.size() == 0)
+        {
+            result = 0;
+            break;
+        }
+
+        double sum = 0.0;
+        bool foundNaN = false;
+        for (int i = 0; i < args.size(); ++i)
+        {
+            double num = args[i]->toNumber(exec);
+            if (isInf(num))
+                return jsNumber(KJS::Inf);
+            if (foundNaN)
+                continue;
+            if (isNaN(num))
+            {
+                foundNaN = true;
+                continue;
+            }
+
+            sum += ::pow(num, 2);
+        }
+
+        if (foundNaN)
+            return jsNumber(KJS::NaN);
+
+        result = ::sqrt(sum);
+        break;
+    }
+
     default:
         result = 0.0;
         assert(0);
