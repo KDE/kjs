@@ -64,6 +64,19 @@ const ClassInfo MathObjectImp::info = { "Math", 0, &mathTable, 0 };
   sin           MathObjectImp::Sin      DontEnum|Function 1
   sqrt          MathObjectImp::Sqrt     DontEnum|Function 1
   tan           MathObjectImp::Tan      DontEnum|Function 1
+  acosh         MathObjectImp::ACosH    DontEnum|Function 1
+  acosh         MathObjectImp::ASinH    DontEnum|Function 1
+  atanh         MathObjectImp::ATanH    DontEnum|Function 1
+  cbrt          MathObjectImp::Cbrt     DontEnum|Function 1
+  cosh          MathObjectImp::CosH     DontEnum|Function 1
+  exmp1         MathObjectImp::Exmp1    DontEnum|Function 1
+  log1p         MathObjectImp::Log1p    DontEnum|Function 1
+  log10         MathObjectImp::Log10    DontEnum|Function 1
+  log2          MathObjectImp::Log2     DontEnum|Function 1
+  sign          MathObjectImp::Sign     DontEnum|Function 1
+  sinh          MathObjectImp::SinH     DontEnum|Function 1
+  tanh          MathObjectImp::TanH     DontEnum|Function 1
+  trunc         MathObjectImp::Trunc    DontEnum|Function 1
 @end
 */
 
@@ -222,6 +235,63 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         result = ::tan(arg);
         break;
 
+    //ES6 (draft 08.11.2013)
+    case MathObjectImp::ACosH:
+        result = ::acosh(arg);
+        break;
+    case MathObjectImp::ASinH:
+        result = ::asinh(arg);
+        break;
+    case MathObjectImp::ATanH:
+        result = ::atanh(arg);
+        break;
+    case MathObjectImp::Cbrt:
+        result = ::cbrt(arg);
+        break;
+    case MathObjectImp::CosH:
+        result = ::cosh(arg);
+        break;
+    case MathObjectImp::Exmp1:
+        result = ::expm1(arg);
+        break;
+    case MathObjectImp::Log1p:
+        result = ::log1p(arg);
+        break;
+    case MathObjectImp::Log10:
+        result = ::log10(arg);
+        break;
+    case MathObjectImp::Log2:
+        result = ::log2(arg);
+        break;
+    case MathObjectImp::Sign:
+        if (isNaN(arg))
+        {
+            result = KJS::NaN;
+        }
+        else if (signbit(arg))
+        {
+            if (arg == 0)
+                result = -0.0;
+            else
+                result = -1.0;
+        }
+        else
+        {
+            if (arg == 0)
+                result = 0.0;
+            else
+                result = 1.0;
+        }
+    break;
+        case MathObjectImp::SinH:
+        result = ::sinh(arg);
+    break;
+        case MathObjectImp::TanH:
+        result = ::tanh(arg);
+    break;
+        case MathObjectImp::Trunc:
+        result = ::trunc(arg);
+    break;
     default:
         result = 0.0;
         assert(0);
