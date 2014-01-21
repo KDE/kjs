@@ -551,7 +551,7 @@ private:
 
     const HashEntry *findPropertyHashEntry(const Identifier &propertyName) const;
     JSValue *_proto;
-#ifdef WIN32
+#ifdef _WIN32
     JSObject(const JSObject &);
     JSObject &operator=(const JSObject &);
 #endif

@@ -61,7 +61,7 @@ public:
 
 private:
     Identifier m_name;
-#ifdef WIN32
+#ifdef _WIN32
     InternalFunctionImp(const InternalFunctionImp &);
     InternalFunctionImp &operator=(const InternalFunctionImp &);
 #endif
