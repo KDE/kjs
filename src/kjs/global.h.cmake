@@ -95,12 +95,26 @@
 #cmakedefine01 HAVE_SYS_TIME_H
 #cmakedefine01 HAVE_UNISTD_H
 #cmakedefine01 HAVE_GETTIMEOFDAY
+
 #cmakedefine01 HAVE_FLOAT_H
 #cmakedefine01 HAVE_IEEEFP_H
+
 #cmakedefine01 HAVE_FUNC_FINITE
-#cmakedefine01 HAVE_FUNC_ISINF
 #cmakedefine01 HAVE_FUNC__FINITE
+#cmakedefine01 HAVE_FUNC_STD_ISFINITE
+
+#cmakedefine01 HAVE_FUNC_ISINF
+#cmakedefine01 HAVE_FUNC_STD_ISINF
 #cmakedefine01 HAVE_FUNC_ISNAN
+#cmakedefine01 HAVE_FUNC_STD_ISNAN
+
+#cmakedefine01 HAVE_FUNC_COPYSIGN
+#cmakedefine01 HAVE_FUNC__COPYSIGN
+#cmakedefine01 HAVE_FUNC___SIGNBIT
+#cmakedefine01 HAVE_FUNC_STD_SIGNBIT
+
+#cmakedefine01 HAVE_FUNC__FPCLASS
+
 #cmakedefine01 HAVE_PTHREAD_NP_H
 #cmakedefine01 HAVE_FUNC_POSIX_MEMALIGN
 #cmakedefine01 HAVE_PCREPOSIX
@@ -109,6 +123,6 @@
 #cmakedefine01 HAVE_PTHREAD_ATTR_GET_NP
 #cmakedefine01 HAVE_PTHREAD_GETATTR_NP
 #cmakedefine01 HAVE_MEMCHECK_H
-#cmakedefine01 HAVE_CRTDBG_H 
+#cmakedefine01 HAVE_CRTDBG_H
 
 #endif

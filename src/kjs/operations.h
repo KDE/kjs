@@ -23,7 +23,19 @@
 #define _KJS_OPERATIONS_H_
 
 #include "global.h"
-#include <math.h>
+#include <cmath>
+#include <stdio.h>
+#include <wtf/MathExtras.h>
+
+#if HAVE(IEEEFP_H)
+#   if HAVE(FUNC_ISINF) || HAVE(FUNC_FINITE)
+#       include <ieeefp.h>
+#   endif
+#endif
+
+#if HAVE(FLOAT_H)
+#   include <float.h>
+#endif
 
 namespace KJS
 {
@@ -67,29 +79,91 @@ enum Operator { OpEqual,
                 OpInstanceOf
               };
 
-#if PLATFORM(DARWIN)
+inline bool isNaN(double d);
+inline bool isFinite(double d);
+inline bool isInf(double d);
+inline double signBit(double d);
+inline bool isPosInf(double d);
+inline bool isNegInf(double d);
+
 inline bool isNaN(double d)
 {
-    return isnan(d);
+#if HAVE(FUNC_STD_ISNAN)
+    return std::isnan(d);
+#elif HAVE(FUNC_ISNAN)
+    return isnan(d) != 0;
+#elif HAVE(FLOAT_H)
+    return _isnan(d) != 0;
+#else
+    return !(d == d);
+#endif
 }
+
+inline bool isFinite(double d)
+{
+#if HAVE(FUNC_STD_ISFINITE)
+    return std::isfinite(d) != 0;
+#elif HAVE(FUNC_FINITE)
+    return finite(d) != 0;
+#elif HAVE(FUNC__FINITE)
+    return _finite(d) != 0;
+#else
+    return !isNaN(d) && !isInf(d);
+#endif
+}
+
 inline bool isInf(double d)
 {
+#if HAVE(FUNC_STD_ISINF)
+    return std::isinf(d);
+#elif HAVE(FUNC_ISINF)
     return isinf(d);
+#elif HAVE(FUNC_FINITE)
+    return finite(d) == 0 && d == d;
+#elif HAVE(FUNC__FINITE)
+    return _finite(d) == 0 && d == d;
+#elif HAVE(FUNC__FPCLASS)
+    int fpClass = _fpclass(d);
+    return _FPCLASS_PINF == fpClass || _FPCLASS_NINF == fpClass;
+#else
+# error "Your platform does not provide a Infinity checking function."
+    return false;
+#endif
 }
+
+inline double signBit(double d)
+{
+#if HAVE(FUNC_SIGNBIT)
+    return std::signbit(d);
+#elif HAVE(FUNC___SIGNBIT)
+    return __signbit(d);
+#elif HAVE(FUNC__COPYSIGN)
+    return _copysign(1.0, d) < 0 ? 1.0 : 0.0;
+#elif HAVE(FUNC_COPYSIGN)
+    return copysign(1.0, d) < 0 ? 1.0 : 0.0;
+#else
+# error "Your platform does not provide a signbit/copysign function."
+    return false;
+#endif
+}
+
 inline bool isPosInf(double d)
 {
-    return isinf(d) && d > 0;
+#if HAVE(FPCLASS)
+    return _FPCLASS_PINF == _fpclass(d);
+#else
+    return isInf(d) && !signBit(d);
+#endif
 }
+
 inline bool isNegInf(double d)
 {
-    return isinf(d) && d < 0;
-}
+#if HAVE(FUNC_FPCLASS)
+    return _FPCLASS_PINF == _fpclass(d);
 #else
-KJS_EXPORT bool isNaN(double d);
-KJS_EXPORT bool isInf(double d);
-KJS_EXPORT bool isPosInf(double d);
-KJS_EXPORT bool isNegInf(double d);
+    return isInf(d) && signBit(d);
 #endif
+}
 
 bool equal(ExecState *exec, JSValue *v1, JSValue *v2);
 bool strictEqual(ExecState *exec, JSValue *v1, JSValue *v2);

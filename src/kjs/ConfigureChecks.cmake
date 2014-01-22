@@ -32,9 +32,21 @@ if(NOT WIN32)
     set(CMAKE_REQUIRED_LIBRARIES "-lm")
 endif(NOT WIN32)
 
-check_function_exists(_finite    HAVE_FUNC__FINITE)
-check_function_exists(finite     HAVE_FUNC_FINITE)
 check_function_exists(posix_memalign     HAVE_FUNC_POSIX_MEMALIGN)
 check_function_exists(gettimeofday    HAVE_GETTIMEOFDAY)
+
+check_function_exists(copysign HAVE_FUNC_COPYSIGN)
+check_function_exists(_copysign HAVE_FUNC__COPYSIGN)
+check_function_exists(__signbit HAVE_FUNC___SIGNBIT)
+check_cxx_symbol_exists(signbit "cmath" HAVE_FUNC_STD_SIGNBIT)
+
+check_function_exists(_finite    HAVE_FUNC__FINITE)
+check_function_exists(finite     HAVE_FUNC_FINITE)
+check_cxx_symbol_exists(isfinite    "cmath" HAVE_FUNC_STD_ISFINITE)
+
 check_symbol_exists(isnan   "math.h" HAVE_FUNC_ISNAN)
+check_cxx_symbol_exists(isnan   "cmath" HAVE_FUNC_STD_ISNAN)
 check_symbol_exists(isinf   "math.h" HAVE_FUNC_ISINF)
+check_cxx_symbol_exists(isinf   "cmath" HAVE_FUNC_STD_ISINF)
+
+check_function_exists(_fpclass HAVE_FUNC__FPCLASS)

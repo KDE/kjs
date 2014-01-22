@@ -30,8 +30,7 @@
 
 #if PLATFORM(WIN)
 
-#include "kjs/operations.h"
-#include "kjs/value.h"
+#include "kjs/JSImmediate.h"
 #include <xmath.h>
 #include <limits>
 
