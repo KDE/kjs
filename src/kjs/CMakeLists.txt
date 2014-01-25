@@ -320,3 +320,7 @@ install(FILES
 )
 
 install(FILES create_hash_table DESTINATION ${DATA_INSTALL_DIR}/kjs/ )
+
+include(ECMGeneratePriFile)
+ecm_generate_pri_file(BASE_NAME KJS LIB_NAME KF5JS DEPS "core" FILENAME_VAR PRI_FILENAME)
+install(FILES ${PRI_FILENAME} DESTINATION ${ECM_MKSPECS_INSTALL_DIR})
