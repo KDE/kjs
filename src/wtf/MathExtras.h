@@ -31,7 +31,6 @@
 #if PLATFORM(WIN_OS)
 
 #include "kjs/JSImmediate.h"
-#include <xmath.h>
 #include <limits>
 
 #if HAVE(FLOAT_H)

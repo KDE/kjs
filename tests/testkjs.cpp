@@ -42,6 +42,7 @@
 
 #if PLATFORM(WIN_OS)
 #include <windows.h>
+#include <timeapi.h>
 #if HAVE_CRTDBG_H
 #include <crtdbg.h>
 #endif
