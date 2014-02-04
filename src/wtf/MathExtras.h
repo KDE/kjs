@@ -118,8 +118,6 @@ inline double wtf_atan2(double x, double y)
 
 #endif     // !BUILDING_KDE__
 
-#if COMPILER(MSVC)
-
 // Work around a bug in the Microsoft CRT, where fmod(x, +-infinity) yields NaN instead of x.
 inline double wtf_fmod(double x, double y)
 {
@@ -127,8 +125,6 @@ inline double wtf_fmod(double x, double y)
 }
 
 #define fmod(x, y) wtf_fmod(x, y)
-
-#endif // #if COMPILER(MSVC)
 
 #define atan2(x, y) wtf_atan2(x, y)
 
