@@ -113,8 +113,10 @@ void TimeoutChecker::startTimeoutCheck(Interpreter *interpreter)
     s_executingInterpreter = interpreter;
 
     itimerval tv = {
-        { interpreter->m_timeoutTime / 1000, (interpreter->m_timeoutTime % 1000) * 1000 },
-        { interpreter->m_timeoutTime / 1000, (interpreter->m_timeoutTime % 1000) * 1000 }
+        { time_t(interpreter->m_timeoutTime / 1000),
+          suseconds_t((interpreter->m_timeoutTime % 1000) * 1000) },
+        { time_t(interpreter->m_timeoutTime / 1000),
+          suseconds_t((interpreter->m_timeoutTime % 1000) * 1000) }
     };
     setitimer(ITIMER_REAL, &tv, &m_oldtv);
 
