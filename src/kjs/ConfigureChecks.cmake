@@ -4,7 +4,7 @@ include(CheckLibraryExists)
 include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
-include(CheckCXXSymbolExists)
+include(CheckCXXSourceCompiles)
 include(CheckFunctionExists)
 include(CheckStructHasMember)
 
@@ -31,18 +31,32 @@ endif(NOT WIN32)
 check_function_exists(posix_memalign     HAVE_FUNC_POSIX_MEMALIGN)
 check_function_exists(gettimeofday    HAVE_GETTIMEOFDAY)
 
-check_function_exists(copysign HAVE_FUNC_COPYSIGN)
-check_function_exists(_copysign HAVE_FUNC__COPYSIGN)
-check_function_exists(__signbit HAVE_FUNC___SIGNBIT)
-check_cxx_symbol_exists(signbit "cmath" HAVE_FUNC_STD_SIGNBIT)
+macro (check_math_expr _expr _var)
+    check_cxx_source_compiles("
+#include <math.h>
+#include <cmath>
+int main(int argc, char ** argv)
+{
+    (void)${_expr};
+    return 0;
+}
+" ${_var})
+endmacro()
 
-check_function_exists(_finite    HAVE_FUNC__FINITE)
-check_function_exists(finite     HAVE_FUNC_FINITE)
-check_cxx_symbol_exists(isfinite    "cmath" HAVE_FUNC_STD_ISFINITE)
+check_math_expr("copysign(1.0, 1.0)"     HAVE_FUNC_COPYSIGN)
+check_math_expr("_copysign(1.0, 1.0)"    HAVE_FUNC__COPYSIGN)
 
-check_symbol_exists(isnan   "math.h" HAVE_FUNC_ISNAN)
-check_cxx_symbol_exists(isnan   "cmath" HAVE_FUNC_STD_ISNAN)
-check_symbol_exists(isinf   "math.h" HAVE_FUNC_ISINF)
-check_cxx_symbol_exists(isinf   "cmath" HAVE_FUNC_STD_ISINF)
+check_math_expr("signbit(1.0)"      HAVE_FUNC_SIGNBIT)
+check_math_expr("__signbit(1.0)"    HAVE_FUNC___SIGNBIT)
+check_math_expr("std::signbit(1.0)" HAVE_FUNC_STD_SIGNBIT)
+
+check_math_expr("_finite(1.0)"       HAVE_FUNC__FINITE)
+check_math_expr("finite(1.0)"        HAVE_FUNC_FINITE)
+check_math_expr("std::isfinite(1.0)" HAVE_FUNC_STD_ISFINITE)
+
+check_math_expr("isnan(1.0)"       HAVE_FUNC_ISNAN)
+check_math_expr("std::isnan(1.0)"  HAVE_FUNC_STD_ISNAN)
+check_math_expr("isinf(1.0)"       HAVE_FUNC_ISINF)
+check_math_expr("std::isinf(1.0)"  HAVE_FUNC_STD_ISINF)
 
 check_function_exists(_fpclass HAVE_FUNC__FPCLASS)

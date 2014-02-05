@@ -23,6 +23,7 @@
 #define _KJS_OPERATIONS_H_
 
 #include "global.h"
+#include <math.h>
 #include <cmath>
 #include <stdio.h>
 #include <wtf/MathExtras.h>
@@ -133,8 +134,10 @@ inline bool isInf(double d)
 
 inline double signBit(double d)
 {
-#if HAVE(FUNC_SIGNBIT)
+#if HAVE(FUNC_STD_SIGNBIT)
     return std::signbit(d);
+#elif HAVE(FUNC_SIGNBIT)
+    return signbit(d);
 #elif HAVE(FUNC___SIGNBIT)
     return __signbit(d);
 #elif HAVE(FUNC__COPYSIGN)

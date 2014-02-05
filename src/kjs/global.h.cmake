@@ -110,6 +110,7 @@
 
 #cmakedefine01 HAVE_FUNC_COPYSIGN
 #cmakedefine01 HAVE_FUNC__COPYSIGN
+#cmakedefine01 HAVE_FUNC_SIGNBIT
 #cmakedefine01 HAVE_FUNC___SIGNBIT
 #cmakedefine01 HAVE_FUNC_STD_SIGNBIT
 
