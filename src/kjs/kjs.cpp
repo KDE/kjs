@@ -86,6 +86,7 @@ static UString readFile(const char *fileName)
     c[dataRead] = '\0';
     UString s = c;
     delete[] c;
+    close(fd);
     return s;
 }
 
