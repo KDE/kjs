@@ -108,7 +108,9 @@ public:
     enum { ToString, ValueOf, CharAt, CharCodeAt, Concat, IndexOf, LastIndexOf,
            Match, Replace, Search, Slice, Split,
            Substr, Substring, FromCharCode, ToLowerCase, ToUpperCase,
-           ToLocaleLowerCase, ToLocaleUpperCase, Trim, LocaleCompare
+           ToLocaleLowerCase, ToLocaleUpperCase, Trim, LocaleCompare,
+           // ES6 (Draft 08.11.2013
+           Repeat
 #ifndef KJS_PURE_ECMA
            , Big, Small, Blink, Bold, Fixed, Italics, Strike, Sub, Sup,
            Fontcolor, Fontsize, Anchor, Link, TrimLeft, TrimRight

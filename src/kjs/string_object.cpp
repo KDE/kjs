@@ -185,6 +185,8 @@ const ClassInfo StringPrototype::info = {"String", &StringInstance::info, &strin
   toLocaleUpperCase     StringProtoFunc::ToLocaleUpperCase DontEnum|Function    0
   trim                  StringProtoFunc::Trim           DontEnum|Function       0
   localeCompare         StringProtoFunc::LocaleCompare  DontEnum|Function       1
+  repeat                StringProtoFunc::Repeat         DontEnum|Function       1
+  
 #
 # Under here: html extension, should only exist if KJS_PURE_ECMA is not defined
 # I guess we need to generate two hashtables in the .lut.h file, and use #ifdef
@@ -841,6 +843,20 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
             return jsNumber(0);
         }
         return jsNumber(localeCompare(s, a0->toString(exec)));
+    case Repeat: {
+        double n = args[0]->toInteger(exec);
+        if (exec->hadException())
+            return jsUndefined();
+        if (n < 0 || KJS::isPosInf(n))
+            return throwError(exec, RangeError);
+
+        UString ret;
+        for (int i = 0; i < n; ++i)
+        {
+            ret += s;
+        }
+        return jsString(ret);
+    }
     case Trim:
     case TrimRight:
     case TrimLeft: {
