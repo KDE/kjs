@@ -245,7 +245,7 @@ sub output() {
       if (defined($entry)) {
         my $key = $keys[$entry];
         print "   \{ \"" . $key . "\"";
-        print ", " . $values[$entry];
+        print ", static_cast<int>(" . $values[$entry] . ")";
         my $kjsattrs = $attrs[$entry];
         if ($kjsattrs ne "0") {
          $kjsattrs =~ s/([^|]+)/KJS::$1/g; # DontDelete|Function -> KJS::DontDelete|KJS::Function
