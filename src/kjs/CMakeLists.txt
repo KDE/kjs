@@ -203,15 +203,11 @@ install(TARGETS KF5JS EXPORT KF5JSTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 set(kjs_SRCS kjs.cpp)
 
-#required by win32 see  kdelibs/cmake/modules/kde4Macros.cmake kde4_add_manifest
-set (kjs_bin_OUTPUT_NAME kjs5)
-
 # 'kjs_bin' because cmake doesn't like having a lib and app with the same name
 # This is a developer tool, not intended for normal user installs
 add_executable(kjs_bin ${kjs_SRCS})
 ecm_mark_nongui_executable(kjs_bin)
-
-set_target_properties(kjs_bin PROPERTIES RUNTIME_OUTPUT_NAME ${kjs_bin_OUTPUT_NAME})
+set_target_properties(kjs_bin PROPERTIES RUNTIME_OUTPUT_NAME kjs5)
 
 target_link_libraries(kjs_bin KF5JS)
 
