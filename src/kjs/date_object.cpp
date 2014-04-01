@@ -62,8 +62,10 @@
 
 #if PLATFORM(WIN_OS)
 #include <windows.h>
+#if COMPILER(MSVC)
 #define copysign(x, y) _copysign(x, y)
 #define snprintf _snprintf
+#endif 
 #if !COMPILER(GCC)
 #define isfinite(x) _finite(x)
 #ifndef strncasecmp
@@ -81,6 +83,7 @@ using std::strcpy;
 using std::strncpy;
 using std::memset;
 using std::memcpy;
+using std::isnan;
 
 using namespace WTF;
 

@@ -49,7 +49,7 @@
 namespace KJS
 {
 
-#if PLATFORM(WIN_OS)
+#if COMPILER(MSVC)
 #define copysign _copysign
 #endif
 
