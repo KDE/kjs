@@ -67,7 +67,6 @@
 #define snprintf _snprintf
 #endif 
 #if !COMPILER(GCC)
-#define isfinite(x) _finite(x)
 #ifndef strncasecmp
 #define strncasecmp(x, y, z) strnicmp(x, y, z)
 #endif
@@ -814,7 +813,7 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
     if (id == SetYear || id == SetMilliSeconds || id == SetSeconds ||
             id == SetMinutes || id == SetHours || id == SetDate ||
             id == SetMonth || id == SetFullYear) {
-        result = jsNumber(isnan(ms) ? ms : timeClip(makeTime(&t, ms, utc)));
+        result = jsNumber(isNaN(ms) ? ms : timeClip(makeTime(&t, ms, utc)));
         thisDateObj->setInternalValue(result);
     }
 
@@ -1553,7 +1552,7 @@ static double parseDate(const UString &date)
 
 double timeClip(double t)
 {
-    if (isnan(t) || isInf(t)) {
+    if (isNaN(t) || isInf(t)) {
         return NaN;
     }
     double at = fabs(t);
