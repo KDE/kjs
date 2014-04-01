@@ -83,7 +83,6 @@ using std::strcpy;
 using std::strncpy;
 using std::memset;
 using std::memcpy;
-using std::isnan;
 
 using namespace WTF;
 
