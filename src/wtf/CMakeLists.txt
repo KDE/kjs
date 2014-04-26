@@ -7,7 +7,7 @@
 #add_library(wtf SHARED ${wtf_LIB_SRCS})
 
 #set_target_properties(wtf PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} )
-#install(TARGETS wtf ${INSTALL_TARGETS_DEFAULT_ARGS} )
+#install(TARGETS wtf ${KF5_INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install(FILES
   AlwaysInline.h
@@ -38,6 +38,6 @@ install(FILES
   UnusedParam.h
   Vector.h
   VectorTraits.h
-  DESTINATION ${INCLUDE_INSTALL_DIR}/wtf
+  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/wtf
   COMPONENT Devel
 )

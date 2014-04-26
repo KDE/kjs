@@ -18,7 +18,7 @@ set_target_properties(KF5JSApi PROPERTIES VERSION ${KJS_VERSION_STRING}
                                           SOVERSION ${KJS_SOVERSION}
                                           EXPORT_NAME JSApi
 )
-install(TARGETS KF5JSApi EXPORT KF5JSTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS KF5JSApi EXPORT KF5JSTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/kjsapi_export.h
@@ -27,7 +27,7 @@ install(FILES
         kjsobject.h
         kjsprototype.h
         kjsarguments.h
-        DESTINATION  ${INCLUDE_INSTALL_DIR}/kjs)
+        DESTINATION  ${KF5_INCLUDE_INSTALL_DIR}/kjs)
 
 include(ECMGeneratePriFile)
 ecm_generate_pri_file(BASE_NAME KJSApi LIB_NAME KF5JSApi DEPS "core" FILENAME_VAR PRI_FILENAME)

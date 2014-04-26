@@ -197,7 +197,7 @@ set_target_properties(KF5JS PROPERTIES VERSION ${KJS_VERSION_STRING}
                                        SOVERSION ${KJS_SOVERSION}
                                        EXPORT_NAME JS
 )
-install(TARGETS KF5JS EXPORT KF5JSTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS KF5JS EXPORT KF5JSTargets ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
 
 ########### kjs - basic shell ###############
 
@@ -211,7 +211,7 @@ set_target_properties(kjs_bin PROPERTIES RUNTIME_OUTPUT_NAME kjs5)
 
 target_link_libraries(kjs_bin KF5JS)
 
-install(TARGETS kjs_bin ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(TARGETS kjs_bin ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
 
 ########### KDE-specific API ##############
 
@@ -245,7 +245,7 @@ add_subdirectory(api)
 #
 #     ${CMAKE_CURRENT_BINARY_DIR}/global.h
 #
-#     DESTINATION  ${INCLUDE_INSTALL_DIR}/kjs COMPONENT Devel )
+#     DESTINATION  ${KF5_INCLUDE_INSTALL_DIR}/kjs COMPONENT Devel )
 install(FILES
   array_instance.h
   array_object.h
@@ -306,7 +306,7 @@ install(FILES
   value.h
   operations.h
   ${CMAKE_CURRENT_BINARY_DIR}/global.h
-  DESTINATION ${INCLUDE_INSTALL_DIR}/kjs
+  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/kjs
   COMPONENT Devel
 )
 
