@@ -1,4 +1,4 @@
-include(ECMMarkAsTest)
+include(ECMAddTests)
 
 find_package(Qt5Test 5.2.0 REQUIRED NO_MODULE)
 ########### ecmatest ##############
@@ -6,13 +6,14 @@ find_package(Qt5Test 5.2.0 REQUIRED NO_MODULE)
 add_executable(ecmatest
   ecmatest.cpp
 )
+ecm_mark_nongui_executable(ecmatest)
 ecm_mark_as_test(ecmatest)
 target_link_libraries(ecmatest KF5::JS Qt5::Test)
 
 function(ADD_ECMATEST ECMA262_CHAPTER)
    if (IS_DIRECTORY "${ECMATEST_BASEDIR}/test/suite/${ECMA262_CHAPTER}")
       string(REPLACE "/15" "" ECMA262_TESTNAME "${ECMA262_CHAPTER}")
-      add_test(ECMAscript262_${ECMA262_TESTNAME} ecmatest)
+      add_test(NAME ECMAscript262_${ECMA262_TESTNAME} COMMAND ecmatest)
       if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ecmatest_broken_${ECMA262_TESTNAME}")
          set(_test262_broken_env ";ECMATEST_BROKEN=${CMAKE_CURRENT_SOURCE_DIR}/ecmatest_broken_${ECMA262_TESTNAME}")
       else ()
@@ -46,7 +47,4 @@ endif ()
 
 ##################### kjsapitest ################
 
-add_executable(kjsapitest kjsapitest.cpp)
-ecm_mark_as_test(kjsapitest)
-add_test(kjsapitest kjsapitest)
-target_link_libraries(kjsapitest KF5::JSApi Qt5::Test)
+ecm_add_test(kjsapitest.cpp LINK_LIBRARIES KF5::JSApi Qt5::Test)
