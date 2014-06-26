@@ -891,7 +891,7 @@ static double makeTimeFromList(ExecState *exec, const List &args, bool utc)
         t.tm_isdst = -1;
     }
     double ms = (numArgs >= 7) ? roundValue(exec, args[6]) : 0;
-    return makeTime(&t, ms, true);
+    return makeTime(&t, ms, utc);
 }
 
 // ECMA 15.9.3
