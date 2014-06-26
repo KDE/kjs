@@ -304,7 +304,6 @@ install(FILES
   types.h
   ustring.h
   value.h
-  operations.h
   ${CMAKE_CURRENT_BINARY_DIR}/global.h
   DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/kjs
   COMPONENT Devel
