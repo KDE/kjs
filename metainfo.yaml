@@ -7,3 +7,9 @@ platforms:
 portingAid: true
 deprecated: true
 release: true
+libraries:
+ - qmake: KJSApi
+   cmake: "KF5::JSApi"
+ - qmake: KJS
+   cmake: "KF5::JS"
+cmakename: KF5JS
