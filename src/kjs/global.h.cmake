@@ -114,6 +114,8 @@
 #cmakedefine01 HAVE_FUNC___SIGNBIT
 #cmakedefine01 HAVE_FUNC_STD_SIGNBIT
 
+#cmakedefine01 HAVE_FUNC_BUILTIN_CLZ
+
 #cmakedefine01 HAVE_FUNC__FPCLASS
 
 #cmakedefine01 HAVE_PTHREAD_NP_H

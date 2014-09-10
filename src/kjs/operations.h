@@ -87,6 +87,25 @@ inline double signBit(double d);
 inline bool isPosInf(double d);
 inline bool isNegInf(double d);
 
+inline int clz32(unsigned int d)
+{
+#if HAVE(FUNC_BUILTIN_CLZ)
+    //NOTE: __builtin_clz(0); is undefined
+    //buschinski: and returns 1 for me, for whatever reason
+    if (d == 0)
+        return 32;
+    return __builtin_clz(d);
+#else
+    int count = 0;
+    while (d != 0)
+    {
+        ++count;
+        d >>= 1;
+    }
+    return 32 - count;
+#endif
+}
+
 inline bool isNaN(double d)
 {
 #if HAVE(FUNC_STD_ISNAN)

@@ -59,4 +59,6 @@ check_math_expr("std::isnan(1.0)"  HAVE_FUNC_STD_ISNAN)
 check_math_expr("isinf(1.0)"       HAVE_FUNC_ISINF)
 check_math_expr("std::isinf(1.0)"  HAVE_FUNC_STD_ISINF)
 
+check_math_expr("__builtin_clz(1)"  HAVE_FUNC_BUILTIN_CLZ)
+
 check_function_exists(_fpclass HAVE_FUNC__FPCLASS)

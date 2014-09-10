@@ -80,6 +80,7 @@ const ClassInfo MathObjectImp::info = { "Math", 0, &mathTable, 0 };
   hypot         MathObjectImp::Hypot    DontEnum|Function 0
   imul          MathObjectImp::Imul     DontEnum|Function 2
   fround        MathObjectImp::FRound   DontEnum|Function 1
+  clz32         MathObjectImp::Clz32    DontEnum|Function 1
 @end
 */
 
@@ -347,8 +348,13 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
 
         result = static_cast<double>(static_cast<float>(arg));
         break;
-
-
+    case MathObjectImp::Clz32:
+    {
+        uint32_t n = args[0]->toUInt32(exec);
+        if (exec->hadException())
+            return jsUndefined();
+        return jsNumber(clz32(n));
+    }
     default:
         result = 0.0;
         assert(0);
