@@ -535,10 +535,6 @@ UChar JSONLexer::parseEscapeChar(bool *error)
         }
 
         UChar next = Lexer::convertUnicode(m_code[m_pos + 1].uc, m_code[m_pos + 2].uc, m_code[m_pos + 3].uc, m_code[m_pos + 4].uc);
-        if (next.uc <= InvalidJSONUnicode) {
-            *error = true;
-            return UChar(' ');
-        }
 
         *error = false;
         m_pos += 5;
