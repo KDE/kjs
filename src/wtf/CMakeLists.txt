@@ -38,6 +38,6 @@ install(FILES
   UnusedParam.h
   Vector.h
   VectorTraits.h
-  DESTINATION ${KF5_INCLUDE_INSTALL_DIR}/wtf
+  DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5}/wtf
   COMPONENT Devel
 )
