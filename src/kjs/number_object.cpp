@@ -610,7 +610,7 @@ JSValue* NumberFuncImp::callAsFunction(ExecState* exec, JSObject* /*thisObj*/, c
         double num = args[0]->toInteger(exec);
         if (num != arg)
             return jsBoolean(false);
-        return jsBoolean(abs(num) < MAX_SAFE_INTEGER);
+        return jsBoolean(fabs(num) <= MAX_SAFE_INTEGER);
     }
     case NumberObjectImp::ParseInt:
         return jsNumber(KJS::parseInt(args[0]->toString(exec), args[1]->toInt32(exec)));
