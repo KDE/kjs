@@ -1,6 +1,6 @@
 maintainer: buschinski
 description: Support for JS scripting in applications
-tier: 1
+tier: 3
 type: functional
 platforms:
     - name: All
