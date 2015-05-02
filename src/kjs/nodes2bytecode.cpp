@@ -883,6 +883,7 @@ OpValue BinaryOperatorNode::generateEvalCode(CompileState *comp)
         break;
 
     default:
+        codeOp = Op_InstanceOf; // Initialize it to something just to silence -Wsometimes-uninitialized
         assert(!"BinaryOperatorNode: unhandled switch case");
     }
 
@@ -1065,6 +1066,7 @@ OpValue AssignNode::generateEvalCode(CompileState *comp)
             codeOp = Op_BitOr;
             break;
         default:
+            codeOp = Op_BitOr; // Initialize it to something just to silence -Wsometimes-uninitialized
             ASSERT(0);
         }
 
