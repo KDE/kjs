@@ -1021,7 +1021,7 @@ static double makeTime(tm *t, double ms, bool utc)
 #if PLATFORM(WIN_OS)
         // FIXME: not thread safe
         (void)localtime(&zero);
-#if COMPILER(BORLAND) || COMPILER(CYGWIN)
+#if COMPILER(BORLAND) || COMPILER(CYGWIN) || COMPILER(MSVC)
         utcOffset = - _timezone;
 #else
         utcOffset = - timezone;
