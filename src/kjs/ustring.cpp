@@ -1297,6 +1297,10 @@ UString UString::substr(int pos, int len) const
     return UString(Rep::create(m_rep, pos, len));
 }
 
+size_t UString::maxUChars() {
+  return ::KJS::maxUChars();
+}
+
 void UString::copyForWriting()
 {
     int l = size();
