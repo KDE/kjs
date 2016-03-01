@@ -66,7 +66,9 @@ static inline size_t overflowIndicator()
 }
 static inline size_t maxUChars()
 {
-    return std::numeric_limits<size_t>::max() / sizeof(UChar);
+    // We don't want strings to get too crazy, since OOM hurts... and since we use 32-bit lengths
+    // on 64-bit, too, keeping this small prevents overflows.
+    return 0xFFFFFFF;
 }
 
 static inline UChar *allocChars(size_t length)
