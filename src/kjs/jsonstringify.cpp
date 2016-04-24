@@ -432,4 +432,4 @@ UString JSONStringify::stringifyValue(KJS::ExecState *exec, KJS::JSValue *object
     return UString("null");
 }
 
-};
+}

@@ -58,7 +58,7 @@ enum TokenType {
     TokEnd,
     TokError
 };
-};
+}
 
 class JSONLexer
 {
