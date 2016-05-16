@@ -1,1 +1,1 @@
-add_subdirectory(kjs)
+add_subdirectory(kjs5)
