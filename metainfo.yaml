@@ -13,3 +13,7 @@ libraries:
  - qmake: KJS
    cmake: "KF5::JS"
 cmakename: KF5JS
+
+public_lib: true
+group: Frameworks
+subgroup: Porting Aids
