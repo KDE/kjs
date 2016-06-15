@@ -3,7 +3,9 @@ description: Support for JS scripting in applications
 tier: 3
 type: functional
 platforms:
-    - name: All
+    - name: Linux
+    - name: Windows
+    - name: MacOSX
 portingAid: true
 deprecated: true
 release: true
