@@ -65,7 +65,7 @@ const ClassInfo MathObjectImp::info = { "Math", 0, &mathTable, 0 };
   sqrt          MathObjectImp::Sqrt     DontEnum|Function 1
   tan           MathObjectImp::Tan      DontEnum|Function 1
   acosh         MathObjectImp::ACosH    DontEnum|Function 1
-  acosh         MathObjectImp::ASinH    DontEnum|Function 1
+  asinh         MathObjectImp::ASinH    DontEnum|Function 1
   atanh         MathObjectImp::ATanH    DontEnum|Function 1
   cbrt          MathObjectImp::Cbrt     DontEnum|Function 1
   cosh          MathObjectImp::CosH     DontEnum|Function 1
