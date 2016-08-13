@@ -109,7 +109,7 @@ JSValue *MathObjectImp::getValueProperty(ExecState *, int token) const
     case Log2E:
         return jsNumber(1.0 / log(2.0));
     case Log10E:
-        return jsNumber(1.0 / log(10.0));
+        return jsNumber(0.4342944819032518);
     case Pi:
         return jsNumber(piDouble);
     case Sqrt1_2:
