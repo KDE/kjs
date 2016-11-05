@@ -47,11 +47,11 @@ private:
 };
 
 /**
- * @internal
+ * @internal (but exported for KHTML)
  *
  * The initial value of the global variable's "Function" property
  */
-class FunctionObjectImp : public InternalFunctionImp
+class KJS_EXPORT FunctionObjectImp : public InternalFunctionImp
 {
 public:
     FunctionObjectImp(ExecState *, FunctionPrototype *);
