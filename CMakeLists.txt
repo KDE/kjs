@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(KJS)
+set(KF5_VERSION "5.30.0") # handled by release scripts
+project(KJS VERSION ${KF5_VERSION})
 
 # ECM setup
 include(FeatureSummary)
@@ -16,9 +17,7 @@ include(ECMPackageConfigHelpers)
 include(ECMSetupVersion)
 include(ECMMarkNonGuiExecutable)
 
-set(KF5_VERSION "5.30.0") # handled by release scripts
-
-ecm_setup_version(${KF5_VERSION} VARIABLE_PREFIX KJS
+ecm_setup_version(PROJECT VARIABLE_PREFIX KJS
                         VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/kjs_version.h"
                         PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/KF5JSConfigVersion.cmake"
                         SOVERSION 5)
