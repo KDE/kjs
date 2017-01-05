@@ -27,6 +27,9 @@ include(KDEInstallDirs)
 include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(KDECMakeSettings)
 
+# Most of KJS doesn't even require Qt, thus we can't use Q_DECL_OVERRIDE
+string(REPLACE "-Wsuggest-override" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
 set(REQUIRED_QT_VERSION 5.5.0)
 find_package(Qt5Core ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE)
 
