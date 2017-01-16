@@ -57,7 +57,7 @@ Debugger::Debugger()
 
 Debugger::~Debugger()
 {
-    detach(0);
+    detach(nullptr);
     delete rep;
 }
 
@@ -83,7 +83,7 @@ void Debugger::detach(Interpreter *interp)
     while ((q = *p)) {
         if (!interp || q->interp == interp) {
             *p = q->next;
-            q->interp->setDebugger(0);
+            q->interp->setDebugger(nullptr);
             delete q;
         } else {
             p = &q->next;

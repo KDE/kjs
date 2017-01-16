@@ -96,7 +96,7 @@ public:
         return _valid;
     }
 
-    UString match(const RegExpStringContext &c, const UString &s, bool *error, int i, int *pos = 0, int **ovector = 0);
+    UString match(const RegExpStringContext &c, const UString &s, bool *error, int i, int *pos = nullptr, int **ovector = nullptr);
     unsigned subPatterns() const
     {
         return _numSubPatterns;

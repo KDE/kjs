@@ -124,7 +124,7 @@ inline UChar::UChar(unsigned short u) : uc(u) { }
 class KJS_EXPORT CString
 {
 public:
-    CString() : data(0), length(0) { }
+    CString() : data(nullptr), length(0) { }
     CString(const char *c);
     CString(const char *c, size_t len);
     CString(const CString &);
@@ -440,7 +440,7 @@ public:
      * Attempts an conversion to a 32-bit integer. ok will be set
      * according to the success.
      */
-    uint32_t toStrictUInt32(bool *ok = 0) const;
+    uint32_t toStrictUInt32(bool *ok = nullptr) const;
 
     /**
      * Attempts an conversion to an array index. The "ok" boolean will be set
@@ -448,7 +448,7 @@ public:
      * ECMA 15.2 about what an array index is. It must exactly match the string
      * form of an unsigned integer, and be less than 2^32 - 1.
      */
-    unsigned toArrayIndex(bool *ok = 0) const;
+    unsigned toArrayIndex(bool *ok = nullptr) const;
 
     /**
      * @return Position of first occurrence of f starting at position pos.

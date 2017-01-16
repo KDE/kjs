@@ -444,7 +444,7 @@ static double setDateFields(ExecState *exec, const List &args, int id, double ms
 
 // ------------------------------ DateInstance ------------------------------
 
-const ClassInfo DateInstance::info = {"Date", 0, 0, 0};
+const ClassInfo DateInstance::info = {"Date", nullptr, nullptr, nullptr};
 
 DateInstance::DateInstance(JSObject *proto)
     : JSWrapperObject(proto)
@@ -558,7 +558,7 @@ static bool isNaNorInf(double value)
 
 // ------------------------------ DatePrototype -----------------------------
 
-const ClassInfo DatePrototype::info = {"Date", &DateInstance::info, &dateTable, 0};
+const ClassInfo DatePrototype::info = {"Date", &DateInstance::info, &dateTable, nullptr};
 
 /* Source for date_object.lut.h
    We use a negative ID to denote the "UTC" variant.
@@ -664,13 +664,13 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
 
     DateInstance *thisDateObj = static_cast<DateInstance *>(thisObj);
 
-    JSValue *result = 0;
+    JSValue *result = nullptr;
 #if !PLATFORM(MAC)
     const int bufsize = 100;
     char timebuffer[bufsize];
-    CString oldlocale = setlocale(LC_TIME, 0);
+    CString oldlocale = setlocale(LC_TIME, nullptr);
     if (!oldlocale.size()) {
-        oldlocale = setlocale(LC_ALL, 0);
+        oldlocale = setlocale(LC_ALL, nullptr);
     }
     // FIXME: Where's the code to set the locale back to oldlocale?
 #endif
@@ -859,7 +859,7 @@ static double getCurrentUTCTime()
     double utc = timebuffer.time * msPerSecond + timebuffer.millitm;
 #else
     struct timeval tv;
-    gettimeofday(&tv, 0);
+    gettimeofday(&tv, nullptr);
     double utc = floor(tv.tv_sec * msPerSecond + tv.tv_usec / 1000);
 #endif
     return utc;
@@ -926,7 +926,7 @@ JSObject *DateObjectImp::construct(ExecState *exec, const List &args)
 // ECMA 15.9.2
 JSValue *DateObjectImp::callAsFunction(ExecState * /*exec*/, JSObject * /*thisObj*/, const List &/*args*/)
 {
-    time_t t = time(0);
+    time_t t = time(nullptr);
     tm ts = *localtime(&t);
     return jsString(formatDate(ts).append(' ').append(formatTime(ts, false)));
 }

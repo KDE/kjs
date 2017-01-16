@@ -86,7 +86,7 @@ Lexer::Lexer()
     , stackToken(-1)
     , lastToken(-1)
     , pos(0)
-    , code(0)
+    , code(nullptr)
     , length(0)
 #ifndef KJS_PURE_ECMA
     , bol(true)
@@ -515,7 +515,7 @@ int Lexer::lex()
 
     double dval = 0;
     if (state == Number) {
-        dval = kjs_strtod(m_buffer8.data(), 0L);
+        dval = kjs_strtod(m_buffer8.data(), nullptr);
     } else if (state == Hex) { // scan hex numbers
         const char *p = m_buffer8.data() + 2;
         while (char c = *p++) {
@@ -953,9 +953,9 @@ void Lexer::clear()
     newBuffer16.reserveCapacity(initialReadBufferCapacity);
     m_buffer16.swap(newBuffer16);
 
-    m_pattern = 0;
-    m_flags = 0;
-    m_sourceURL = 0;
+    m_pattern = nullptr;
+    m_flags = nullptr;
+    m_sourceURL = nullptr;
 }
 
 Identifier *Lexer::makeIdentifier(const Vector<KJS::UChar> &buffer)

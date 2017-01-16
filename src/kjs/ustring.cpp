@@ -75,7 +75,7 @@ static inline UChar *allocChars(size_t length)
 {
     assert(length);
     if (length > maxUChars()) {
-        return 0;
+        return nullptr;
     }
     return static_cast<UChar *>(fastMalloc(sizeof(UChar) * length));
 }
@@ -84,7 +84,7 @@ static inline UChar *reallocChars(UChar *buffer, size_t length)
 {
     ASSERT(length);
     if (length > maxUChars()) {
-        return 0;
+        return nullptr;
     }
     return static_cast<UChar *>(fastRealloc(buffer, sizeof(UChar) * length));
 }
@@ -111,7 +111,7 @@ CString::CString(const CString &b)
         data = new char[length + 1];
         memcpy(data, b.data, length + 1);
     } else {
-        data = 0;
+        data = nullptr;
     }
 }
 
@@ -146,7 +146,7 @@ CString &CString::operator=(const CString &str)
         data = new char[length + 1];
         memcpy(data, str.data, length + 1);
     } else {
-        data = 0;
+        data = nullptr;
     }
 
     return *this;
@@ -160,10 +160,10 @@ bool operator==(const CString &c1, const CString &c2)
 
 // Hack here to avoid a global with a constructor; point to an unsigned short instead of a UChar.
 static unsigned short almostUChar;
-UString::Rep UString::Rep::null = { 0, 0, 1, 0, 0, &UString::Rep::null, 0, 0, 0, 0, 0, 0 };
+UString::Rep UString::Rep::null = { 0, 0, 1, 0, 0, &UString::Rep::null, 0, nullptr, 0, 0, 0, 0 };
 UString::Rep UString::Rep::empty = { 0, 0, 1, 0, 0, &UString::Rep::empty, 0, reinterpret_cast<UChar *>(&almostUChar), 0, 0, 0, 0 };
 const int normalStatBufferSize = 4096;
-static char *statBuffer = 0; // FIXME: This buffer is never deallocated.
+static char *statBuffer = nullptr; // FIXME: This buffer is never deallocated.
 static int statBufferSize = 0;
 
 PassRefPtr<UString::Rep> UString::Rep::createCopying(const UChar *d, int length)
@@ -213,7 +213,7 @@ PassRefPtr<UString::Rep> UString::Rep::create(PassRefPtr<Rep> base, int offset, 
     r->isIdentifier = 0;
     r->baseString = base.releaseRef();
     r->reportedCost = 0;
-    r->buf = 0;
+    r->buf = nullptr;
     r->usedCapacity = 0;
     r->capacity = 0;
     r->usedPreCapacity = 0;
@@ -648,7 +648,7 @@ UString UString::from(double d)
     int decimalPoint;
     int sign;
 
-    char *result = kjs_dtoa(d, 0, 0, &decimalPoint, &sign, NULL);
+    char *result = kjs_dtoa(d, 0, 0, &decimalPoint, &sign, nullptr);
     int length = static_cast<int>(strlen(result));
 
     int i = 0;
@@ -1334,7 +1334,7 @@ bool operator==(const UString &s1, const UString &s2)
 
 bool operator==(const UString &s1, const char *s2)
 {
-    if (s2 == 0) {
+    if (s2 == nullptr) {
         return s1.isEmpty();
     }
 

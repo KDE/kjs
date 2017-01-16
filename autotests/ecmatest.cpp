@@ -77,7 +77,7 @@ static QString exceptionToString(KJS::ExecState *exec, KJS::JSValue *exceptionOb
     //### might be easier to export class info for ErrorInstance ---
 
     KJS::JSObject *valueObj = exceptionObj->getObject();
-    KJS::JSValue  *protoObj = valueObj ? valueObj->prototype() : 0;
+    KJS::JSValue  *protoObj = valueObj ? valueObj->prototype() : nullptr;
 
     bool exception   = false;
     bool syntaxError = false;
@@ -308,7 +308,7 @@ void ECMAscriptTest::runAllTests()
         }
 
         QCOMPARE(completion.complType(), KJS::Throw);
-        QVERIFY(completion.value() != NULL);
+        QVERIFY(completion.value() != nullptr);
 
         const QString eMsg = exceptionToString(interp->execState(), completion.value());
 

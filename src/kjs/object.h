@@ -75,7 +75,7 @@ public:
         return GetterSetterType;
     }
 
-    GetterSetterImp() : getter(0), setter(0) { }
+    GetterSetterImp() : getter(nullptr), setter(nullptr) { }
 
     virtual JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
     virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);

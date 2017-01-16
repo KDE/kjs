@@ -537,7 +537,7 @@ public:
 
 template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits>
 inline HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::HashTable()
-    : m_table(0)
+    : m_table(nullptr)
     , m_tableSize(0)
     , m_tableSizeMask(0)
     , m_keyCount(0)
@@ -598,7 +598,7 @@ inline Value *HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>
     int i = h & sizeMask;
 
     if (!table) {
-        return 0;
+        return nullptr;
     }
 
 #if DUMP_HASHTABLE_STATS
@@ -616,11 +616,11 @@ inline Value *HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>
             }
 
             if (isEmptyBucket(*entry)) {
-                return 0;
+                return nullptr;
             }
         } else {
             if (isEmptyBucket(*entry)) {
-                return 0;
+                return nullptr;
             }
 
             if (!isDeletedBucket(*entry) && HashTranslator::equal(Extractor::extract(*entry), key)) {
@@ -656,7 +656,7 @@ inline typename HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTrait
     int probeCount = 0;
 #endif
 
-    ValueType *deletedEntry = 0;
+    ValueType *deletedEntry = nullptr;
 
     while (1) {
         ValueType *entry = table + i;
@@ -714,7 +714,7 @@ inline typename HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTrait
     int probeCount = 0;
 #endif
 
-    ValueType *deletedEntry = 0;
+    ValueType *deletedEntry = nullptr;
 
     while (1) {
         ValueType *entry = table + i;
@@ -781,7 +781,7 @@ inline pair<typename HashTable<Key, Value, Extractor, HashFunctions, Traits, Key
     int probeCount = 0;
 #endif
 
-    ValueType *deletedEntry = 0;
+    ValueType *deletedEntry = nullptr;
     ValueType *entry;
     while (1) {
         entry = table + i;
@@ -1081,7 +1081,7 @@ void HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::clear()
 {
     invalidateIterators();
     deallocateTable(m_table, m_tableSize);
-    m_table = 0;
+    m_table = nullptr;
     m_tableSize = 0;
     m_tableSizeMask = 0;
     m_keyCount = 0;
@@ -1089,7 +1089,7 @@ void HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::clear()
 
 template<typename Key, typename Value, typename Extractor, typename HashFunctions, typename Traits, typename KeyTraits>
 HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::HashTable(const HashTable &other)
-    : m_table(0)
+    : m_table(nullptr)
     , m_tableSize(0)
     , m_tableSizeMask(0)
     , m_keyCount(0)

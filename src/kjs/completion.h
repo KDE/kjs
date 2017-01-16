@@ -52,7 +52,7 @@ enum ComplType { Normal, Break, Continue, ReturnValue, Throw, Interrupted };
 class KJS_EXPORT Completion
 {
 public:
-    explicit Completion(ComplType c = Normal, JSValue *v = NULL, Addr t = 0)
+    explicit Completion(ComplType c = Normal, JSValue *v = nullptr, Addr t = 0)
         : comp(c), val(v), tar(t) { }
 
     /**

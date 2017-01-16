@@ -70,7 +70,7 @@ private:
 
 inline JSWrapperObject::JSWrapperObject(JSValue *proto)
     : JSObject(proto)
-    , m_internalValue(0)
+    , m_internalValue(nullptr)
     , m_originalProto(proto)
 {
 }

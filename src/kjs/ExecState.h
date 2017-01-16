@@ -151,7 +151,7 @@ public:
      */
     JSValue *exception() const
     {
-        return m_completion.complType() == Throw ? m_completion.value() : 0;
+        return m_completion.complType() == Throw ? m_completion.value() : nullptr;
     }
 
     /**

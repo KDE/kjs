@@ -90,7 +90,7 @@ private:
 };
 
 #if HAVE_SYS_TIME_H
-Interpreter *TimeoutChecker::s_executingInterpreter = 0;
+Interpreter *TimeoutChecker::s_executingInterpreter = nullptr;
 #endif
 
 void TimeoutChecker::startTimeoutCheck(Interpreter *interpreter)
@@ -144,7 +144,7 @@ void TimeoutChecker::stopTimeoutCheck(Interpreter *interpreter)
 
     s_executingInterpreter = m_oldInterpreter;
 
-    setitimer(ITIMER_REAL, &m_oldtv, 0L);
+    setitimer(ITIMER_REAL, &m_oldtv, nullptr);
     signal(SIGALRM, m_oldAlarmHandler);
 #endif
 }
@@ -175,7 +175,7 @@ void TimeoutChecker::pauseTimeoutCheck(Interpreter *interpreter)
         return;
     }
 
-    setitimer(ITIMER_REAL, 0L, &m_pausetv);
+    setitimer(ITIMER_REAL, nullptr, &m_pausetv);
 #endif
 
     interpreter->m_pauseTimeoutCheckCount++;
@@ -208,19 +208,19 @@ void TimeoutChecker::resumeTimeoutCheck(Interpreter *interpreter)
         return;
     }
 
-    setitimer(ITIMER_REAL, &m_pausetv, 0L);
+    setitimer(ITIMER_REAL, &m_pausetv, nullptr);
 
     // Unblock signal
     currentSignalHandler = signal(SIGALRM, alarmHandler);
 #endif
 }
 
-Interpreter *Interpreter::s_hook = 0;
+Interpreter *Interpreter::s_hook = nullptr;
 
 Interpreter::Interpreter(JSGlobalObject *globalObject)
     : m_globalObject(globalObject),
       m_globalExec(this, globalObject),
-      globPkg(0)
+      globPkg(nullptr)
 {
     init();
 }
@@ -228,7 +228,7 @@ Interpreter::Interpreter(JSGlobalObject *globalObject)
 Interpreter::Interpreter()
     : m_globalObject(new JSGlobalObject()),
       m_globalExec(this, m_globalObject),
-      globPkg(0)
+      globPkg(nullptr)
 {
     init();
 }
@@ -242,10 +242,10 @@ void Interpreter::init()
     m_refCount = 0;
     m_timeoutTime = 0;
     m_recursion = 0;
-    m_debugger = 0;
-    m_execState = 0;
+    m_debugger = nullptr;
+    m_execState = nullptr;
     m_timedOut = false;
-    m_timeoutChecker = 0;
+    m_timeoutChecker = nullptr;
     m_startTimeoutCheckCount = 0;
     m_pauseTimeoutCheckCount = 0;
     m_compatMode = NativeMode;
@@ -292,10 +292,10 @@ Interpreter::~Interpreter()
     s_hook = next;
     if (s_hook == this) {
         // This was the last interpreter
-        s_hook = 0;
+        s_hook = nullptr;
     }
 
-    m_globalObject->setInterpreter(0);
+    m_globalObject->setInterpreter(nullptr);
 }
 
 unsigned char *Interpreter::extendStack(size_t needed)
@@ -341,7 +341,7 @@ unsigned char *Interpreter::extendStack(size_t needed)
 
 void Interpreter::recycleActivation(ActivationImp *act)
 {
-    ASSERT(act->localStorage == 0); // Should not refer to anything by now
+    ASSERT(act->localStorage == nullptr); // Should not refer to anything by now
     if (m_numCachedActivations >= MaxCachedActivations) {
         return;
     }
@@ -508,7 +508,7 @@ Completion Interpreter::checkSyntax(const UString &sourceURL, int startingLineNu
 
     int errLine;
     UString errMsg;
-    RefPtr<ProgramNode> progNode = parser().parseProgram(sourceURL, startingLineNumber, code, codeLength, 0, &errLine, &errMsg);
+    RefPtr<ProgramNode> progNode = parser().parseProgram(sourceURL, startingLineNumber, code, codeLength, nullptr, &errLine, &errMsg);
     if (!progNode) {
         return Completion(Throw, Error::create(&m_globalExec, SyntaxError, errMsg, errLine, 0, sourceURL));
     }
@@ -575,7 +575,7 @@ Completion Interpreter::evaluate(const UString &sourceURL, int startingLineNumbe
         // execute the code
         InterpreterExecState newExec(this, globalObj, thisObj, progNode.get());
 
-        if (m_debugger && !m_debugger->enterContext(&newExec, sourceId, startingLineNumber, 0, List::empty())) {
+        if (m_debugger && !m_debugger->enterContext(&newExec, sourceId, startingLineNumber, nullptr, List::empty())) {
             // debugger requested we stop execution.
             m_debugger->imp()->abort();
             return Completion(Break);
@@ -584,7 +584,7 @@ Completion Interpreter::evaluate(const UString &sourceURL, int startingLineNumbe
         progNode->processDecls(&newExec);
         res = progNode->execute(&newExec);
 
-        if (m_debugger && !m_debugger->exitContext(&newExec, sourceId, startingLineNumber, 0)) {
+        if (m_debugger && !m_debugger->exitContext(&newExec, sourceId, startingLineNumber, nullptr)) {
             // debugger requested we stop execution.
             m_debugger->imp()->abort();
             return Completion(Break);
@@ -608,7 +608,7 @@ bool Interpreter::normalizeCode(const UString &codeIn, UString *codeOut,
                                    0, // line
                                    codeIn.data(),
                                    codeIn.size(),
-                                   0, // &sourceId
+                                   nullptr, // &sourceId
                                    errLine, errMsg);
     if (progNode) {
         *codeOut = progNode->toString();
@@ -1024,7 +1024,7 @@ void Interpreter::markInternedStringsTable()
 }
 
 SavedBuiltins::SavedBuiltins() :
-    _internal(0)
+    _internal(nullptr)
 {
 }
 

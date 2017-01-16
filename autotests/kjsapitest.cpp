@@ -178,7 +178,7 @@ void KJSApiTest::prototypeConstants()
     proto.defineConstant("d0", 44.4);
     proto.defineConstant("s0", QLatin1String("XYZ"));
 
-    KJSObject obj = proto.constructObject(ctx, 0);
+    KJSObject obj = proto.constructObject(ctx, nullptr);
 
     QCOMPARE(obj.property(ctx, "d0").toNumber(ctx), 44.4);
     QCOMPARE(obj.property(ctx, "s0").toString(ctx), QLatin1String("XYZ"));
@@ -271,7 +271,7 @@ void KJSApiTest::globalObject()
     KJSPrototype proto;
     proto.defineConstant("g0", 55.5);
 
-    KJSGlobalObject glob = proto.constructGlobalObject(0);
+    KJSGlobalObject glob = proto.constructGlobalObject(nullptr);
 
     KJSInterpreter ip(glob);
     KJSResult res = ip.evaluate("2 * g0");

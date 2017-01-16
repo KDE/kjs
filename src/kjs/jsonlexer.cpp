@@ -118,7 +118,7 @@ JSValue *JSONParser::tryParse(ExecState *exec)
     if (ret && nextParseIsEOF()) {
         return ret;
     }
-    return 0;
+    return nullptr;
 }
 
 // helper function for adding a value to the object.
@@ -142,13 +142,13 @@ static inline bool addArrayItem(ExecState *exec, std::stack<JSValue *> *arraySta
 JSValue *JSONParser::parse(ExecState *exec, ParserState state)
 {
     if (exec->hadException()) {
-        return 0;
+        return nullptr;
     }
 
     ParserState tState = state;
     TokenType type = m_lexer.next();
 
-    JSObject *object = 0;
+    JSObject *object = nullptr;
     std::stack<JSValue *> arrayObjectStack;
     UString propertyName;
 
@@ -192,7 +192,7 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
                 // we tell the caller we got a syntax error.
 
                 // ASSERT_NOT_REACHED();
-                return 0;
+                return nullptr;
             }
             break;
         case JSONObject: {
@@ -213,18 +213,18 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
             switch (type) {
             case TokString: // PropertyName
                 if (havePropertyName) {
-                    return 0;
+                    return nullptr;
                 }
                 propertyName = m_lexer.currentString();
                 havePropertyName = true;
                 break;
             case TokColon: {
                 if (!havePropertyName) {
-                    return 0;
+                    return nullptr;
                 }
                 JSValue *val = parse(exec, JSONValue);
                 if (!val) {
-                    return 0;
+                    return nullptr;
                 }
 
                 // use putDirect to by-pass __proto__
@@ -236,12 +236,12 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
             }
             case TokRBrace: //Finish Object
                 if (havePropertyName) {
-                    return 0;
+                    return nullptr;
                 }
                 return object;
             case TokComma: // Next Property
                 if (!propAdded) {
-                    return 0;
+                    return nullptr;
                 }
                 propAdded = false;
                 break;
@@ -250,7 +250,7 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
                 // we tell the caller we got a syntax error.
 
                 // ASSERT_NOT_REACHED();
-                return 0;
+                return nullptr;
             }
             break;
         }
@@ -268,7 +268,7 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
             case TokLBrace:
             case TokLBracket:
                 if (propAdded) {
-                    return 0;
+                    return nullptr;
                 }
                 propAdded = true;
                 lastFoundIsTokComma = false;
@@ -281,48 +281,48 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
             case TokRBracket: // Finish array
                 // Check for invalid syntax like "[1,]"
                 if (lastFoundIsTokComma) {
-                    return 0;
+                    return nullptr;
                 }
                 return object;
             case TokNumber:
                 if (!addArrayItem(exec, &arrayObjectStack, jsNumber(m_lexer.currentNumber()), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokString:
                 if (!addArrayItem(exec, &arrayObjectStack, jsString(m_lexer.currentString()), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokNull:
                 if (!addArrayItem(exec, &arrayObjectStack, jsNull(), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokTrue:
                 if (!addArrayItem(exec, &arrayObjectStack, jsBoolean(true), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokFalse:
                 if (!addArrayItem(exec, &arrayObjectStack, jsBoolean(false), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokLBrace:
                 if (!addArrayItem(exec, &arrayObjectStack, parse(exec, JSONObject), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokLBracket:
                 if (!addArrayItem(exec, &arrayObjectStack, parse(exec, JSONArray), object)) {
-                    return 0;
+                    return nullptr;
                 }
                 break;
             case TokComma: // Skip Comma and parse next Array Element
                 // if we found a comma without a leading property, this is invalid syntax
                 if (!propAdded) {
-                    return 0;
+                    return nullptr;
                 }
                 propAdded = false;
                 lastFoundIsTokComma = true;
@@ -332,13 +332,13 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
                 // we tell the caller we got a syntax error.
 
                 // ASSERT_NOT_REACHED();
-                return 0;
+                return nullptr;
             }
             break;
         }
         default:
             ASSERT_NOT_REACHED();
-            return 0;
+            return nullptr;
         }
         type = m_lexer.next();
     }
@@ -347,16 +347,16 @@ JSValue *JSONParser::parse(ExecState *exec, ParserState state)
 #ifdef JSONLEXER_DEBUG_VERBOSE
         fprintf(stderr, "WARNING: JSONParse ending with error!\n");
 #endif
-        return 0;
+        return nullptr;
     }
     if (type == TokEnd) {
 #ifdef JSONLEXER_DEBUG_VERBOSE
         fprintf(stderr, "WARNING: JSONParse ending with unexpected END!\n");
 #endif
-        return 0;
+        return nullptr;
     }
     ASSERT_NOT_REACHED();
-    return 0;
+    return nullptr;
 }
 
 // ------------------------------ JSONLexer --------------------------------

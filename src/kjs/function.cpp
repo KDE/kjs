@@ -54,7 +54,7 @@ namespace KJS
 
 // ----------------------------- FunctionImp ----------------------------------
 
-const ClassInfo FunctionImp::info = {"Function", &InternalFunctionImp::info, 0, 0};
+const ClassInfo FunctionImp::info = {"Function", &InternalFunctionImp::info, nullptr, nullptr};
 
 FunctionImp::FunctionImp(ExecState *exec, const Identifier &n, FunctionBodyNode *b, const ScopeChain &sc)
     : InternalFunctionImp(static_cast<FunctionPrototype *>
@@ -158,7 +158,7 @@ JSValue *FunctionImp::callAsFunction(ExecState *exec, JSObject *thisObj, const L
     }
 
     size_t stackSize              = 0;
-    LocalStorageEntry *stackSpace = 0;
+    LocalStorageEntry *stackSpace = nullptr;
 
     // We always allocate on stack initially, and tearoff only after we're done.
     int regs   = body->numLocalsAndRegisters();
@@ -182,7 +182,7 @@ JSValue *FunctionImp::callAsFunction(ExecState *exec, JSObject *thisObj, const L
         // data pointer, though, since that may become dead.
         // (we also unlink it from the scope chain at this time)
         activation->scopeLink().deref();
-        activation->localStorage = 0;
+        activation->localStorage = nullptr;
         exec->dynamicInterpreter()->recycleActivation(activation);
     }
 
@@ -533,7 +533,7 @@ Identifier &IndexToNameMap::operator[](const Identifier &index)
 
 // ------------------------------ Arguments ---------------------------------
 
-const ClassInfo Arguments::info = {"Arguments", 0, 0, 0};
+const ClassInfo Arguments::info = {"Arguments", nullptr, nullptr, nullptr};
 
 // ECMA 10.1.8
 Arguments::Arguments(ExecState *exec, FunctionImp *func, const List &args, ActivationImp *act)
@@ -663,7 +663,7 @@ bool Arguments::defineOwnProperty(ExecState *exec, const Identifier &propertyNam
 
 // ------------------------------ ActivationImp --------------------------------
 
-const ClassInfo ActivationImp::info = {"Activation", 0, 0, 0};
+const ClassInfo ActivationImp::info = {"Activation", nullptr, nullptr, nullptr};
 
 // ECMA 10.1.6
 void ActivationImp::setup(ExecState *exec, FunctionImp *function,
@@ -1040,7 +1040,7 @@ double parseInt(const UString &s, int radix)
 
     if (number >= mantissaOverflowLowerBound) {
         if (radix == 10) {
-            number = kjs_strtod(s.substr(firstDigitPosition, p - firstDigitPosition).ascii(), 0);
+            number = kjs_strtod(s.substr(firstDigitPosition, p - firstDigitPosition).ascii(), nullptr);
         } else if (radix == 2 || radix == 4 || radix == 8 || radix == 16 || radix == 32) {
             number = parseIntOverflow(s.substr(firstDigitPosition, p - firstDigitPosition).ascii(), p - firstDigitPosition, radix);
         }
@@ -1115,7 +1115,7 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
 
             // no program node means a syntax occurred
             if (!progNode) {
-                return throwError(exec, SyntaxError, errMsg, errLine, sourceId, NULL);
+                return throwError(exec, SyntaxError, errMsg, errLine, sourceId, nullptr);
             }
 
             // If the variable object we're working with is an activation, we better
@@ -1135,7 +1135,7 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
             }
 
             if (dbg) {
-                bool cont = dbg->enterContext(&newExec, sourceId, 0, 0, List::empty());
+                bool cont = dbg->enterContext(&newExec, sourceId, 0, nullptr, List::empty());
                 if (!cont) {
                     dbg->imp()->abort();
                     return jsUndefined();
@@ -1148,7 +1148,7 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
 
             dbg = exec->dynamicInterpreter()->debugger();
             if (dbg) {
-                bool cont = dbg->exitContext(&newExec, sourceId, 0, 0);
+                bool cont = dbg->exitContext(&newExec, sourceId, 0, nullptr);
                 if (!cont) {
                     dbg->imp()->abort();
                     return jsUndefined();

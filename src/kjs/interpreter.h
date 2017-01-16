@@ -151,8 +151,8 @@ public:
      * execution. This should either be jsNull() or an Object.
      * @return A completion object representing the result of the execution.
      */
-    Completion evaluate(const UString &sourceURL, int startingLineNumber, const UChar *code, int codeLength, JSValue *thisV = 0);
-    Completion evaluate(const UString &sourceURL, int startingLineNumber, const UString &code, JSValue *thisV = 0);
+    Completion evaluate(const UString &sourceURL, int startingLineNumber, const UChar *code, int codeLength, JSValue *thisV = nullptr);
+    Completion evaluate(const UString &sourceURL, int startingLineNumber, const UString &code, JSValue *thisV = nullptr);
 
     /**
      * Pretty-prints the supplied ECMAScript code after checking it
@@ -167,7 +167,7 @@ public:
      * otherwise a throw completion with the syntax error as its value.
      */
     static bool normalizeCode(const UString &codeIn, UString *codeOut,
-                              int *errLine = 0, UString *errMsg = 0);
+                              int *errLine = nullptr, UString *errMsg = nullptr);
 
     /**
      * Returns the builtin "Object" object. This is the object that was set
@@ -431,7 +431,7 @@ public:
 
     ActivationImp *getRecycledActivation()
     {
-        ActivationImp *out = 0;
+        ActivationImp *out = nullptr;
         if (m_numCachedActivations) {
             m_numCachedActivations--;
             out = m_cachedActivations[m_numCachedActivations];

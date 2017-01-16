@@ -39,7 +39,7 @@ namespace KJS
 
 struct ArrayEntity {
     ArrayEntity()
-        : value(0),
+        : value(nullptr),
           attributes(0)
     {
     }
@@ -76,7 +76,7 @@ static const unsigned minDensityMultiplier = 8;
 
 static const unsigned mergeSortCutoff = 10000;
 
-const ClassInfo ArrayInstance::info = {"Array", 0, 0, 0};
+const ClassInfo ArrayInstance::info = {"Array", nullptr, nullptr, nullptr};
 
 static inline size_t storageSize(unsigned vectorLength)
 {
@@ -118,7 +118,7 @@ ArrayInstance::ArrayInstance(JSObject *prototype, const List &list)
     ArrayStorage *storage = static_cast<ArrayStorage *>(fastMalloc(storageSize(length)));
 
     storage->m_numValuesInVector = length;
-    storage->m_sparseValueMap = 0;
+    storage->m_sparseValueMap = nullptr;
 
     ListIterator it = list.begin();
     for (unsigned i = 0; i < length; ++i) {
@@ -185,7 +185,7 @@ ALWAYS_INLINE bool ArrayInstance::inlineGetOwnPropertySlot(ExecState *exec, unsi
 ArrayEntity *ArrayInstance::getArrayEntity(unsigned int i) const
 {
     if (i >= m_length) {
-        return 0;
+        return nullptr;
     }
 
     ArrayStorage *storage = m_storage;
@@ -203,7 +203,7 @@ ArrayEntity *ArrayInstance::getArrayEntity(unsigned int i) const
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool ArrayInstance::getOwnPropertySlot(ExecState *exec, const Identifier &propertyName, PropertySlot &slot)
@@ -315,9 +315,9 @@ bool ArrayInstance::deleteProperty(ExecState *exec, unsigned i)
 
             JSValue *&valueSlot = ent->value;
             bool hadValue = valueSlot;
-            valueSlot = 0;
+            valueSlot = nullptr;
             storage->m_numValuesInVector -= hadValue;
-            ent->value = 0;
+            ent->value = nullptr;
             return hadValue;
         }
     }
@@ -636,7 +636,7 @@ void ArrayInstance::putDirect(unsigned i, JSValue *value, int attributes)
     // to see what to remove from it
     if (newNumValuesInVector == storage->m_numValuesInVector + 1) {
         for (unsigned j = vectorLength; j < newVectorLength; ++j) {
-            storage->m_vector[j].value = 0;
+            storage->m_vector[j].value = nullptr;
         }
         if (i > sparseArrayCutoff) {
             map->remove(i);
@@ -644,7 +644,7 @@ void ArrayInstance::putDirect(unsigned i, JSValue *value, int attributes)
     } else {
         // Move over things from the map to the new array portion
         for (unsigned j = vectorLength; j < max(vectorLength, sparseArrayCutoff); ++j) {
-            storage->m_vector[j].value = 0;
+            storage->m_vector[j].value = nullptr;
         }
         for (unsigned j = max(vectorLength, sparseArrayCutoff); j < newVectorLength; ++j) {
             storage->m_vector[j] = map->take(j);
@@ -699,9 +699,9 @@ void ArrayInstance::removeDirect(const Identifier &propertyName)
             if (ent->value) {
                 JSValue *&valueSlot = ent->value;
                 bool hadValue = valueSlot;
-                valueSlot = 0;
+                valueSlot = nullptr;
                 storage->m_numValuesInVector -= hadValue;
-                ent->value = 0;
+                ent->value = nullptr;
                 return;
             }
         }
@@ -733,7 +733,7 @@ void ArrayInstance::increaseVectorLength(unsigned newLength)
     m_vectorLength = newVectorLength;
 
     for (unsigned i = vectorLength; i < newVectorLength; ++i) {
-        storage->m_vector[i].value = 0;
+        storage->m_vector[i].value = nullptr;
     }
 
     m_storage = storage;
@@ -758,8 +758,8 @@ void ArrayInstance::setLength(unsigned newLength)
                     }
                     JSValue *&valueSlot = ent->value;
                     bool hadValue = valueSlot;
-                    valueSlot = 0;
-                    ent->value = 0;
+                    valueSlot = nullptr;
+                    ent->value = nullptr;
                     storage->m_numValuesInVector -= hadValue;
                 }
             }
@@ -784,7 +784,7 @@ void ArrayInstance::setLength(unsigned newLength)
 
             if (map->isEmpty()) {
                 delete map;
-                storage->m_sparseValueMap = 0;
+                storage->m_sparseValueMap = nullptr;
             }
         }
     }
@@ -984,14 +984,14 @@ unsigned ArrayInstance::compactForSorting()
         }
 
         delete map;
-        storage->m_sparseValueMap = 0;
+        storage->m_sparseValueMap = nullptr;
     }
 
     for (unsigned i = numDefined; i < newUsedVectorLength; ++i) {
-        storage->m_vector[i].value = 0;
+        storage->m_vector[i].value = nullptr;
     }
     for (unsigned i = newUsedVectorLength; i < usedVectorLength; ++i) {
-        storage->m_vector[i].value = 0;
+        storage->m_vector[i].value = nullptr;
     }
 
     return numDefined;

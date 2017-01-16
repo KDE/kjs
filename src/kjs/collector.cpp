@@ -264,7 +264,7 @@ static void *allocOversize(size_t s)
     assert(cellsNeeded <= CELLS_PER_BLOCK);
 
     // Look through the blocks, see if one has enough, and where.
-    CollectorBlock *sufficientBlock = 0;
+    CollectorBlock *sufficientBlock = nullptr;
     size_t startOffset = -1;
     for (size_t b = 0; b < heap.oversizeBlocks.used() && !sufficientBlock; ++b) {
         CollectorBlock *candidate = heap.oversizeBlocks[b];
@@ -481,7 +481,7 @@ void Collector::markStackObjectsConservatively(void *start, void *end)
             CollectorBlock *blockAddr = reinterpret_cast<CollectorBlock *>(x - offset);
             for (size_t block = 0; block < usedBlocks; block++) {
                 if ((blocks[block] == blockAddr) && (offset <= lastCellOffset)) {
-                    if (((CollectorCell *)x)->u.freeCell.zeroIfFree != 0) {
+                    if (((CollectorCell *)x)->u.freeCell.zeroIfFree != nullptr) {
                         JSCell *imp = reinterpret_cast<JSCell *>(x);
                         if (!imp->marked()) {
                             imp->mark();
@@ -509,10 +509,10 @@ static inline void *currentThreadStackBase()
     // NOTREACHED
     void *stackBase = 0;
 #elif PLATFORM(UNIX)
-    static void *stackBase = 0;
+    static void *stackBase = nullptr;
     static pthread_t stackThread;
     pthread_t thread = pthread_self();
-    if (stackBase == 0 || thread != stackThread) {
+    if (stackBase == nullptr || thread != stackThread) {
         pthread_attr_t sattr;
 #if HAVE_PTHREAD_NP_H || defined(__NetBSD__)
         // e.g. on FreeBSD 5.4, neundorf@kde.org
@@ -725,7 +725,7 @@ bool Collector::collect()
                 if (!curBlock->marked.get(i) && currentThreadIsMainThread) {
                     // special case for allocated but uninitialized object
                     // (We don't need this check earlier because nothing prior this point assumes the object has a valid vptr.)
-                    if (cell->u.freeCell.zeroIfFree == 0) {
+                    if (cell->u.freeCell.zeroIfFree == nullptr) {
                         continue;
                     }
                     imp->~JSCell();
@@ -733,7 +733,7 @@ bool Collector::collect()
                     --numLiveObjects;
 
                     // put cell on the free list
-                    cell->u.freeCell.zeroIfFree = 0;
+                    cell->u.freeCell.zeroIfFree = nullptr;
                     cell->u.freeCell.next = reinterpret_cast<char *>(freeList) - reinterpret_cast<char *>(cell + 1);
                     freeList = cell;
                 }
@@ -742,7 +742,7 @@ bool Collector::collect()
             size_t minimumCellsToProcess = usedCells;
             for (size_t i = 0; (i < minimumCellsToProcess) & (i < CELLS_PER_BLOCK); i++) {
                 CollectorCell *cell = curBlock->cells + i;
-                if (cell->u.freeCell.zeroIfFree == 0) {
+                if (cell->u.freeCell.zeroIfFree == nullptr) {
                     ++minimumCellsToProcess;
                 } else {
                     JSCell *imp = reinterpret_cast<JSCell *>(cell);
@@ -752,7 +752,7 @@ bool Collector::collect()
                         --numLiveObjects;
 
                         // put cell on the free list
-                        cell->u.freeCell.zeroIfFree = 0;
+                        cell->u.freeCell.zeroIfFree = nullptr;
                         cell->u.freeCell.next = reinterpret_cast<char *>(freeList) - reinterpret_cast<char *>(cell + 1);
                         freeList = cell;
                     }
@@ -798,7 +798,7 @@ bool Collector::collect()
             }
 
             CollectorCell *cell = curBlock->cells + i;
-            if (cell->u.freeCell.zeroIfFree == 0) {
+            if (cell->u.freeCell.zeroIfFree == nullptr) {
                 continue;
             }
 
@@ -819,7 +819,7 @@ bool Collector::collect()
                 --usedCells;
 
                 // Mark the block and the trailers as available
-                cell->u.freeCell.zeroIfFree = 0;
+                cell->u.freeCell.zeroIfFree = nullptr;
                 curBlock->allocd.clear(i);
 
                 ++i; // Go to the potential trailer..
@@ -828,7 +828,7 @@ bool Collector::collect()
                     curBlock->allocd.clear(i);
                     curBlock->trailer.clear(i);
                     curBlock->marked.clear(i);
-                    curBlock->cells[i].u.freeCell.zeroIfFree = 0;
+                    curBlock->cells[i].u.freeCell.zeroIfFree = nullptr;
                     ++i;
                 }
                 --i; // Last item we processed.

@@ -250,7 +250,7 @@ public:
     void deallocateBuffer(T *bufferToDeallocate)
     {
         if (m_buffer == bufferToDeallocate) {
-            m_buffer = 0;
+            m_buffer = nullptr;
         }
         fastFree(bufferToDeallocate);
     }
@@ -278,7 +278,7 @@ public:
 
 protected:
     VectorBufferBase()
-        : m_buffer(0)
+        : m_buffer(nullptr)
         , m_capacity(0)
     {
     }

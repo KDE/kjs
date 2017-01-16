@@ -34,7 +34,7 @@ using namespace KJS;
 
 // ------------------------------ MathObjectImp --------------------------------
 
-const ClassInfo MathObjectImp::info = { "Math", 0, &mathTable, 0 };
+const ClassInfo MathObjectImp::info = { "Math", nullptr, &mathTable, nullptr };
 
 /* Source for math_object.lut.h
 @begin mathTable 21
@@ -119,7 +119,7 @@ JSValue *MathObjectImp::getValueProperty(ExecState *, int token) const
     }
 
     assert(0);
-    return 0;
+    return nullptr;
 }
 
 // ------------------------------ MathObjectImp --------------------------------
@@ -217,7 +217,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         break;
     case MathObjectImp::Random:
         if (!randomSeeded) {
-            srand(static_cast<unsigned>(time(0)));
+            srand(static_cast<unsigned>(time(nullptr)));
             randomSeeded = true;
         }
         result = (double)rand() / RAND_MAX;

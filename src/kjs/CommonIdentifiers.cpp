@@ -25,7 +25,7 @@
 namespace KJS
 {
 
-const char *const nullCString = 0;
+const char *const nullCString = nullptr;
 
 #define INITIALIZE_PROPERTY_NAME(name) , name ( #name )
 

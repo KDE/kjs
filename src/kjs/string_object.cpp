@@ -41,7 +41,7 @@ namespace KJS
 
 // ------------------------------ StringInstance ----------------------------
 
-const ClassInfo StringInstance::info = {"String", 0, 0, 0};
+const ClassInfo StringInstance::info = {"String", nullptr, nullptr, nullptr};
 
 StringInstance::StringInstance(JSObject *proto)
     : JSWrapperObject(proto), m_conversionsCustomized(false)
@@ -162,7 +162,7 @@ JSObject *StringInstance::valueClone(Interpreter *targetCtx) const
 }
 
 // ------------------------------ StringPrototype ---------------------------
-const ClassInfo StringPrototype::info = {"String", &StringInstance::info, &stringTable, 0};
+const ClassInfo StringPrototype::info = {"String", &StringInstance::info, &stringTable, nullptr};
 /* Source for string_object.lut.h
 @begin stringTable 26
   toString              StringProtoFunc::ToString       DontEnum|Function       0
@@ -373,7 +373,7 @@ static inline int localeCompare(const UString &a, const UString &b)
 
 static JSValue *replace(ExecState *exec, const UString &source, JSValue *pattern, JSValue *replacement)
 {
-    JSObject *replacementFunction = 0;
+    JSObject *replacementFunction = nullptr;
     UString replacementString;
 
     if (replacement->isObject() && replacement->toObject(exec)->implementsCall()) {
@@ -392,10 +392,10 @@ static JSValue *replace(ExecState *exec, const UString &source, JSValue *pattern
         int lastIndex = 0;
         int startPosition = 0;
 
-        UString::Range *sourceRanges = 0;
+        UString::Range *sourceRanges = nullptr;
         int sourceRangeCount = 0;
         int sourceRangeCapacity = 0;
-        UString *replacements = 0;
+        UString *replacements = nullptr;
         int replacementCount = 0;
         int replacementCapacity = 0;
 
@@ -500,7 +500,7 @@ void StringProtoFunc::setToUpperFunction(UnicodeSupport::StringConversionFunctio
 // ECMA 15.5.4.2 - 15.5.4.20
 JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const List &args)
 {
-    JSValue *result = NULL;
+    JSValue *result = nullptr;
 
     // toString and valueOf are no generic function.
     if (id == ToString || id == ValueOf) {
@@ -592,8 +592,8 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     case Match:
     case Search: {
         u = s;
-        RegExp *reg, *tmpReg = 0;
-        RegExpImp *imp = 0;
+        RegExp *reg, *tmpReg = nullptr;
+        RegExpImp *imp = nullptr;
         if (a0->isObject() && static_cast<JSObject *>(a0)->inherits(&RegExpImp::info)) {
             reg = static_cast<RegExpImp *>(a0)->regExp();
         } else {
@@ -699,9 +699,9 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
             while (!error && static_cast<uint32_t>(i) != limit && pos < u.size()) {
                 // TODO: back references
                 int mpos;
-                int *ovector = 0L;
+                int *ovector = nullptr;
                 UString mstr = reg->match(ctx, u, &error, pos, &mpos, &ovector);
-                delete [] ovector; ovector = 0L;
+                delete [] ovector; ovector = nullptr;
                 if (mpos < 0) {
                     break;
                 }

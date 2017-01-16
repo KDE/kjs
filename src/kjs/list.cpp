@@ -142,7 +142,7 @@ static inline ListImp *allocateListImp()
         heapList->prevInHeapList = imp;
     }
     imp->nextInHeapList = heapList;
-    imp->prevInHeapList = NULL;
+    imp->prevInHeapList = nullptr;
     heapList = imp;
 
     return imp;
@@ -184,7 +184,7 @@ void List::release()
     if (imp->capacity) {
         delete [] imp->data;
     }
-    imp->data = 0;
+    imp->data = nullptr;
 
     if (imp->state == usedInPool) {
         imp->state = unusedInPool;
@@ -199,7 +199,7 @@ void List::release()
         if (!list->prevInHeapList) {
             heapList = list->nextInHeapList;
             if (heapList) {
-                heapList->prevInHeapList = NULL;
+                heapList->prevInHeapList = nullptr;
             }
         } else {
             list->prevInHeapList->nextInHeapList = list->nextInHeapList;

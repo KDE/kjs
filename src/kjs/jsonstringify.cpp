@@ -67,7 +67,7 @@ JSONStringify::JSONStringify(ExecState *exec, JSValue *replacer, JSValue *spacer
         }
     } else {
         m_replacerType = Invalid;
-        m_replacerObject = 0;
+        m_replacerObject = nullptr;
     }
 
     JSObject *spacerObject = spacer->getObject();
@@ -208,7 +208,7 @@ UString JSONStringify::stringifyObject(KJS::ExecState *exec, KJS::JSValue *objec
     JSObject *jso = object->getObject();
 
     if (jso->hasProperty(exec, exec->propertyNames().toJSON)) {
-        JSObject *toJSONFunc = 0;
+        JSObject *toJSONFunc = nullptr;
         toJSONFunc = jso->get(exec, exec->propertyNames().toJSON)->getObject();
 
         if (toJSONFunc) {

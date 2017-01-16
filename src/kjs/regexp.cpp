@@ -55,7 +55,7 @@ namespace KJS
 
 RegExp::UTF8SupportState RegExp::utf8Support = RegExp::Unknown;
 
-static bool sanitizePatternExtensions(UString &p, WTF::Vector<int> *parenIdx = 0);
+static bool sanitizePatternExtensions(UString &p, WTF::Vector<int> *parenIdx = nullptr);
 
 // JS regexps can contain Unicode escape sequences (\uxxxx) which
 // are rather uncommon elsewhere. As our regexp libs don't understand
@@ -310,7 +310,7 @@ RegExp::RegExp(const UString &p, char flags)
     while (1) {
         RegExpStringContext converted(intern);
 
-        _regex = pcre_compile(converted.buffer(), options, &errorMessage, &errorOffset, NULL);
+        _regex = pcre_compile(converted.buffer(), options, &errorMessage, &errorOffset, nullptr);
 
         if (!_regex) {
 #ifdef PCRE_JAVASCRIPT_COMPAT
@@ -336,7 +336,7 @@ RegExp::RegExp(const UString &p, char flags)
 
 #ifdef PCRE_INFO_CAPTURECOUNT
     // Get number of subpatterns that will be returned.
-    pcre_fullinfo(_regex, NULL, PCRE_INFO_CAPTURECOUNT, &_numSubPatterns);
+    pcre_fullinfo(_regex, nullptr, PCRE_INFO_CAPTURECOUNT, &_numSubPatterns);
 #endif
 
 #else /* HAVE_PCREPOSIX */
@@ -430,7 +430,7 @@ void RegExpStringContext::prepareUtf8(const UString &s)
 
 void RegExpStringContext::prepareASCII(const UString &s)
 {
-    _originalPos = 0;
+    _originalPos = nullptr;
 
     // Best-effort attempt to get something done
     // when we don't have utf 8 available -- use
@@ -457,8 +457,8 @@ RegExpStringContext::RegExpStringContext(const UString &s)
 
 RegExpStringContext::~RegExpStringContext()
 {
-    delete[] _originalPos; _originalPos = 0;
-    delete[] _buffer;      _buffer      = 0;
+    delete[] _originalPos; _originalPos = nullptr;
+    delete[] _buffer;      _buffer      = nullptr;
 }
 
 UString RegExp::match(const RegExpStringContext &ctx, const UString &s, bool *error, int i, int *pos, int **ovector)
@@ -476,7 +476,7 @@ UString RegExp::match(const RegExpStringContext &ctx, const UString &s, bool *er
     }
     *pos = -1;
     if (ovector) {
-        *ovector = 0;
+        *ovector = nullptr;
     }
 
     if (i > s.size() || s.isNull()) {
@@ -546,7 +546,7 @@ UString RegExp::match(const RegExpStringContext &ctx, const UString &s, bool *er
         limits.match_limit_recursion = (availableStackSize / 1300) * 3 / 4;
     }
 
-    const int numMatches = pcre_exec(_regex, stackGlutton ? &limits : 0, ctx.buffer(),
+    const int numMatches = pcre_exec(_regex, stackGlutton ? &limits : nullptr, ctx.buffer(),
                                      ctx.bufferSize(), startPos, baseFlags, offsetVector, offsetVectorSize);
 
     //Now go through and patch up the offsetVector

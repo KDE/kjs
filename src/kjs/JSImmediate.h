@@ -218,7 +218,7 @@ ALWAYS_INLINE JSValue *JSImmediate::from(unsigned short i)
 ALWAYS_INLINE JSValue *JSImmediate::from(int i)
 {
     if ((i < minImmediateInt) || (i > maxImmediateInt)) {
-        return 0;
+        return nullptr;
     }
     return tag(i << 2, NumberType);
 }
@@ -226,7 +226,7 @@ ALWAYS_INLINE JSValue *JSImmediate::from(int i)
 ALWAYS_INLINE JSValue *JSImmediate::from(unsigned i)
 {
     if (i > maxImmediateUInt) {
-        return 0;
+        return nullptr;
     }
     return tag(i << 2, NumberType);
 }
@@ -234,7 +234,7 @@ ALWAYS_INLINE JSValue *JSImmediate::from(unsigned i)
 ALWAYS_INLINE JSValue *JSImmediate::from(long i)
 {
     if ((i < minImmediateInt) || (i > maxImmediateInt)) {
-        return 0;
+        return nullptr;
     }
     return tag(i << 2, NumberType);
 }
@@ -242,7 +242,7 @@ ALWAYS_INLINE JSValue *JSImmediate::from(long i)
 ALWAYS_INLINE JSValue *JSImmediate::from(unsigned long i)
 {
     if (i > maxImmediateUInt) {
-        return 0;
+        return nullptr;
     }
     return tag(i << 2, NumberType);
 }
@@ -250,7 +250,7 @@ ALWAYS_INLINE JSValue *JSImmediate::from(unsigned long i)
 ALWAYS_INLINE JSValue *JSImmediate::from(long long i)
 {
     if ((i < minImmediateInt) || (i > maxImmediateInt)) {
-        return 0;
+        return nullptr;
     }
     return tag(static_cast<uintptr_t>(i) << 2, NumberType);
 }
@@ -258,7 +258,7 @@ ALWAYS_INLINE JSValue *JSImmediate::from(long long i)
 ALWAYS_INLINE JSValue *JSImmediate::from(unsigned long long i)
 {
     if (i > maxImmediateUInt) {
-        return 0;
+        return nullptr;
     }
     return tag(static_cast<uintptr_t>(i) << 2, NumberType);
 }
@@ -269,12 +269,12 @@ ALWAYS_INLINE JSValue *JSImmediate::from(double d)
     const int intVal = static_cast<int>(d);
 
     if ((intVal < minImmediateInt) || (intVal > maxImmediateInt)) {
-        return 0;
+        return nullptr;
     }
 
     // Check for data loss from conversion to int.
     if ((intVal != d) || (!intVal && signbit(d))) {
-        return 0;
+        return nullptr;
     }
 
     return tag(intVal << 2, NumberType);

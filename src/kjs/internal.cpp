@@ -67,7 +67,7 @@ bool GetterSetterImp::getPrimitiveNumber(ExecState *, double &number, JSValue *&
 {
     ASSERT_NOT_REACHED();
     number = 0;
-    value = 0;
+    value = nullptr;
     return true;
 }
 
@@ -206,7 +206,7 @@ JSObject *GetterSetterImp::toObject(ExecState *exec) const
 
 // ------------------------------ InternalFunctionImp --------------------------
 
-const ClassInfo InternalFunctionImp::info = {"Function", 0, 0, 0};
+const ClassInfo InternalFunctionImp::info = {"Function", nullptr, nullptr, nullptr};
 
 InternalFunctionImp::InternalFunctionImp()
 {

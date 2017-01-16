@@ -46,7 +46,7 @@ static const double MIN_SAFE_INTEGER = -9007199254740991.0; //-((2^53)-1)
 
 // ------------------------------ NumberInstance ----------------------------
 
-const ClassInfo NumberInstance::info = {"Number", 0, 0, 0};
+const ClassInfo NumberInstance::info = {"Number", nullptr, nullptr, nullptr};
 
 NumberInstance::NumberInstance(JSObject *proto)
     : JSWrapperObject(proto)
@@ -92,7 +92,7 @@ static UString integer_part_noexp(double d)
 {
     int decimalPoint;
     int sign;
-    char *result = kjs_dtoa(d, 0, 0, &decimalPoint, &sign, NULL);
+    char *result = kjs_dtoa(d, 0, 0, &decimalPoint, &sign, nullptr);
     bool resultIsInfOrNan = (decimalPoint == 9999);
     size_t length = strlen(result);
 
@@ -364,7 +364,7 @@ static JSValue *numberToExponential(ExecState *exec, JSValue *v, const List &arg
 
     int decimalPoint;
     int sign;
-    char *result = kjs_dtoa(x, 0, 0, &decimalPoint, &sign, NULL);
+    char *result = kjs_dtoa(x, 0, 0, &decimalPoint, &sign, nullptr);
     size_t resultLength = strlen(result);
     decimalPoint += decimalAdjust;
 
@@ -485,12 +485,12 @@ JSValue *NumberProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     case ToPrecision:
         return numberToPrecision(exec, v, args);
     }
-    return 0;
+    return nullptr;
 }
 
 // ------------------------------ NumberObjectImp ------------------------------
 
-const ClassInfo NumberObjectImp::info = {"Function", &InternalFunctionImp::info, &numberTable, 0};
+const ClassInfo NumberObjectImp::info = {"Function", &InternalFunctionImp::info, &numberTable, nullptr};
 
 /* Source for number_object.lut.h
 @begin numberTable 5

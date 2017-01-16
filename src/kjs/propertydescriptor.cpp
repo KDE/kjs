@@ -28,9 +28,9 @@ namespace KJS
 PropertyDescriptor::PropertyDescriptor()
     : m_attributes(DontEnum | DontDelete | ReadOnly),
       m_setAttributes(0),
-      m_value(0),
-      m_getter(0),
-      m_setter(0)
+      m_value(nullptr),
+      m_getter(nullptr),
+      m_setter(nullptr)
 {
 }
 
@@ -259,7 +259,7 @@ inline bool compareValue(ExecState *exec, JSValue *a, JSValue *b)
 // different from compareValue, if "own" getter/setter is missing (is 0) we are still the same
 inline bool compareFunction(ExecState *exec, JSValue *a, JSValue *b)
 {
-    return (a == b || (b != 0 && a == 0) || (a && b && sameValue(exec, a, b)));
+    return (a == b || (b != nullptr && a == nullptr) || (a && b && sameValue(exec, a, b)));
 }
 
 bool PropertyDescriptor::equalTo(ExecState *exec, PropertyDescriptor &other) const

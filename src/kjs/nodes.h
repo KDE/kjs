@@ -324,7 +324,7 @@ private:
 class StringNode : public Node
 {
 public:
-    StringNode(const UString *v) : val(*v), interned(0) { }
+    StringNode(const UString *v) : val(*v), interned(nullptr) { }
     ~StringNode(); // in nodes2bytecode.cpp
     UString value() const
     {
@@ -1121,8 +1121,8 @@ private:
 class ContinueNode : public StatementNode
 {
 public:
-    ContinueNode() : target(0) { }
-    ContinueNode(const Identifier &i) : ident(i), target(0) { }
+    ContinueNode() : target(nullptr) { }
+    ContinueNode(const Identifier &i) : ident(i), target(nullptr) { }
 
     virtual void generateExecCode(CompileState *);
     virtual void streamTo(SourceStream &) const;
@@ -1134,8 +1134,8 @@ private:
 class BreakNode : public StatementNode
 {
 public:
-    BreakNode() : target(0) { }
-    BreakNode(const Identifier &i) : ident(i), target(0) { }
+    BreakNode() : target(nullptr) { }
+    BreakNode(const Identifier &i) : ident(i), target(nullptr) { }
 
     virtual void generateExecCode(CompileState *);
     virtual void streamTo(SourceStream &) const;
@@ -1379,7 +1379,7 @@ public:
     }
 
 private:
-    size_t addSymbol(const Identifier &ident, int attr, FuncDeclNode *funcDecl = 0);
+    size_t addSymbol(const Identifier &ident, int attr, FuncDeclNode *funcDecl = nullptr);
     UString m_sourceURL;
     int m_sourceId : 31;
     bool m_tearOffAtEnd : 1;
@@ -1413,8 +1413,8 @@ inline void FunctionBodyNode::compileIfNeeded(CodeType ctype, CompileType compTy
 class FuncExprNode : public Node
 {
 public:
-    FuncExprNode(const Identifier &i, FunctionBodyNode *b, ParameterNode *p = 0)
-        : ident(i), param(p ? p->next.release() : PassRefPtr<ParameterNode>(0)), body(b)
+    FuncExprNode(const Identifier &i, FunctionBodyNode *b, ParameterNode *p = nullptr)
+        : ident(i), param(p ? p->next.release() : PassRefPtr<ParameterNode>(nullptr)), body(b)
     {
         if (p) {
             Parser::removeNodeCycle(param.get());
@@ -1586,7 +1586,7 @@ public:
 class PackageNameNode : public Node
 {
 public:
-    PackageNameNode(const Identifier &i) : names(0), id(i) { }
+    PackageNameNode(const Identifier &i) : names(nullptr), id(i) { }
     PackageNameNode(PackageNameNode *n,
                     const Identifier &i) : names(n), id(i) { }
 

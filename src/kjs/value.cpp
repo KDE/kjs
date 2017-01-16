@@ -173,12 +173,12 @@ UString JSCell::getString() const
 
 JSObject *JSCell::getObject()
 {
-    return isObject() ? static_cast<JSObject *>(this) : 0;
+    return isObject() ? static_cast<JSObject *>(this) : nullptr;
 }
 
 const JSObject *JSCell::getObject() const
 {
-    return isObject() ? static_cast<const JSObject *>(this) : 0;
+    return isObject() ? static_cast<const JSObject *>(this) : nullptr;
 }
 
 bool JSCell::implementsCall() const

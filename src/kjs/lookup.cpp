@@ -44,7 +44,7 @@ static inline const HashEntry *findEntry(const struct HashTable *table, unsigned
 #ifndef NDEBUG
     if (table->type != 2) {
         fprintf(stderr, "KJS: Unknown hash table version.\n");
-        return 0;
+        return nullptr;
     }
 #endif
     ASSERT(table->hashSize != 0);
@@ -55,7 +55,7 @@ static inline const HashEntry *findEntry(const struct HashTable *table, unsigned
 
     // empty bucket ?
     if (!e->s) {
-        return 0;
+        return nullptr;
     }
 
     do {
@@ -67,7 +67,7 @@ static inline const HashEntry *findEntry(const struct HashTable *table, unsigned
         // try next bucket
         e = e->next;
     } while (e);
-    return 0;
+    return nullptr;
 }
 
 const HashEntry *Lookup::findEntry(const struct HashTable *table,

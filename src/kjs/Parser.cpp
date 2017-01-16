@@ -73,7 +73,7 @@ static void clearNewNodes()
             (*it)->breakCycle();
         }
         delete nodeCycles;
-        nodeCycles = 0;
+        nodeCycles = nullptr;
     }
     Node::clearNewNodes();
 }
@@ -98,7 +98,7 @@ void Parser::parse(const UString &sourceURL, int startingLineNumber,
         *errLine = -1;
     }
     if (errMsg) {
-        *errMsg = 0;
+        *errMsg = nullptr;
     }
 
     Lexer &lexer = KJS::lexer();
@@ -127,7 +127,7 @@ void Parser::parse(const UString &sourceURL, int startingLineNumber,
         if (errMsg) {
             *errMsg = "Parse error";
         }
-        m_progNode = 0;
+        m_progNode = nullptr;
         return;
     }
 

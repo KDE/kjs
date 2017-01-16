@@ -53,8 +53,8 @@ class CompileState
 {
 public:
     CompileState(CodeType ctype, CompileType compType, FunctionBodyNode *fbody, Register initialMaxTemp):
-        localScopeVal(0), thisVal(0), globalScopeVal(0), evalResRegister(0),
-        ctype(ctype), compType(compType), locals(initialMaxTemp, 0), initialMaxTemp(initialMaxTemp),
+        localScopeVal(nullptr), thisVal(nullptr), globalScopeVal(nullptr), evalResRegister(nullptr),
+        ctype(ctype), compType(compType), locals(initialMaxTemp, nullptr), initialMaxTemp(initialMaxTemp),
         maxTemp(initialMaxTemp), fbody(fbody), scopeDepth(0), finallyDepth(0), neededClosures(false)
     { }
 
@@ -147,7 +147,7 @@ public:
         ContBreakTarget
     };
 
-    void pushNest(NestType type, Node *node = 0);
+    void pushNest(NestType type, Node *node = nullptr);
     void popNest();
 
     struct NestInfo {

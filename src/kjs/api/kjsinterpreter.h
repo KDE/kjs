@@ -129,12 +129,12 @@ public:
      */
     KJSResult evaluate(const QString &sourceURL, int startingLineNumber,
                        const QString &code,
-                       KJSObject *thisValue = 0);
+                       KJSObject *thisValue = nullptr);
     /**
      *  @overload
      */
     KJSResult evaluate(const QString &code,
-                       KJSObject *thisValue = 0);
+                       KJSObject *thisValue = nullptr);
 
     /**
      * Reformat the given script code to an easy to read format with
@@ -152,7 +152,7 @@ public:
      * on a parse error.
      */
     static bool normalizeCode(const QString &codeIn, QString *codeOut,
-                              int *errLine = 0, QString *errMsg = 0);
+                              int *errLine = nullptr, QString *errMsg = nullptr);
 private:
     KJSInterpreter(KJSInterpreterHandle *h);
     KJSInterpreterHandle *hnd;

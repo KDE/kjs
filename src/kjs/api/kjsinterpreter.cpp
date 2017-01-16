@@ -94,7 +94,7 @@ KJSObject KJSResult::value() const
 }
 
 KJSInterpreter::KJSInterpreter()
-    : globCtx(0)
+    : globCtx(nullptr)
 {
     Interpreter *ip = new Interpreter();
     ip->ref();
@@ -102,7 +102,7 @@ KJSInterpreter::KJSInterpreter()
 }
 
 KJSInterpreter::KJSInterpreter(const KJSGlobalObject &global)
-    : globCtx(0)
+    : globCtx(nullptr)
 {
     JSValue *gv = JSVALUE(&global);
     assert(gv->isObject());
@@ -118,7 +118,7 @@ KJSInterpreter::KJSInterpreter(const KJSGlobalObject &global)
 }
 
 KJSInterpreter::KJSInterpreter(const KJSInterpreter &other)
-    : globCtx(0)
+    : globCtx(nullptr)
 {
     Interpreter *ip = INTERPRETER(&other);
     ip->ref();
@@ -140,7 +140,7 @@ KJSInterpreter &KJSInterpreter::operator=(const KJSInterpreter &other)
 }
 
 KJSInterpreter::KJSInterpreter(KJSInterpreterHandle *h)
-    : hnd(h), globCtx(0)
+    : hnd(h), globCtx(nullptr)
 {
     Interpreter *ip = INTERPRETER(this);
     globCtx.hnd = EXECSTATE_HANDLE(ip->globalExec());
@@ -150,7 +150,7 @@ KJSInterpreter::~KJSInterpreter()
 {
     Interpreter *ip = INTERPRETER(this);
     ip->deref();
-    ip = 0;
+    ip = nullptr;
 }
 
 KJSContext *KJSInterpreter::globalContext()
@@ -175,7 +175,7 @@ KJSResult KJSInterpreter::evaluate(const QString &sourceURL,
 {
     Interpreter *ip = INTERPRETER(this);
 
-    JSValue *tv = thisValue ? JSVALUE(thisValue) : 0;
+    JSValue *tv = thisValue ? JSVALUE(thisValue) : nullptr;
     KJS::Completion c = ip->evaluate(toUString(sourceURL), startingLineNumber,
                                      toUString(code), tv);
 

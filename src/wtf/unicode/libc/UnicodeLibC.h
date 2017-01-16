@@ -36,7 +36,7 @@ namespace Unicode
 
 inline int toLower(uint16_t *str, int strLength, uint16_t *&destIfNeeded)
 {
-    destIfNeeded = 0;
+    destIfNeeded = nullptr;
 
     for (int i = 0; i < strLength; ++i) {
         str[i] = toASCIILower(str[i]);
@@ -47,7 +47,7 @@ inline int toLower(uint16_t *str, int strLength, uint16_t *&destIfNeeded)
 
 inline int toUpper(uint16_t *str, int strLength, uint16_t *&destIfNeeded)
 {
-    destIfNeeded = 0;
+    destIfNeeded = nullptr;
 
     for (int i = 0; i < strLength; ++i) {
         str[i] = toASCIIUpper(str[i]);

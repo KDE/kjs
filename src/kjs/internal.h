@@ -121,7 +121,7 @@ public:
 
     DebuggerImp()
     {
-        interps = 0;
+        interps = nullptr;
         isAborted = false;
     }
 

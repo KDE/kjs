@@ -52,11 +52,11 @@ class Parser : Noncopyable
 public:
     PassRefPtr<ProgramNode> parseProgram(const UString &sourceURL, int startingLineNumber,
                                          const UChar *code, unsigned length,
-                                         int *sourceId = 0, int *errLine = 0, UString *errMsg = 0);
+                                         int *sourceId = nullptr, int *errLine = nullptr, UString *errMsg = nullptr);
 
     PassRefPtr<FunctionBodyNode> parseFunctionBody(const UString &sourceURL, int startingLineNumber,
             const UChar *code, unsigned length,
-            int *sourceId = 0, int *errLine = 0, UString *errMsg = 0);
+            int *sourceId = nullptr, int *errLine = nullptr, UString *errMsg = nullptr);
 
     int sourceId()
     {
@@ -81,7 +81,7 @@ private:
     Parser(); // Use parser() instead.
     void parse(const UString &sourceURL, int startingLineNumber,
                const UChar *code, unsigned length,
-               int *sourceId = 0, int *errLine = 0, UString *errMsg = 0);
+               int *sourceId = nullptr, int *errLine = nullptr, UString *errMsg = nullptr);
 
     int m_sourceId;
     RefPtr<ProgramNode> m_progNode;

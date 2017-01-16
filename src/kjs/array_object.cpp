@@ -63,7 +63,7 @@ private:
 
 // ------------------------------ ArrayPrototype ----------------------------
 
-const ClassInfo ArrayPrototype::info = {"Array", &ArrayInstance::info, &arrayTable, 0};
+const ClassInfo ArrayPrototype::info = {"Array", &ArrayInstance::info, &arrayTable, nullptr};
 
 /* Source for array_object.lut.h
 @begin arrayTable 16
@@ -116,7 +116,7 @@ static JSValue *getProperty(ExecState *exec, JSObject *obj, unsigned index)
 {
     PropertySlot slot;
     if (!obj->getPropertySlot(exec, index, slot)) {
-        return NULL;
+        return nullptr;
     }
     return slot.getValue(exec, obj, index);
 }
@@ -126,7 +126,7 @@ JSValue *ArrayProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, cons
 {
     unsigned length = thisObj->get(exec, exec->propertyNames().length)->toUInt32(exec);
 
-    JSValue *result = 0; // work around gcc 4.0 bug in uninitialized variable warning
+    JSValue *result = nullptr; // work around gcc 4.0 bug in uninitialized variable warning
 
     switch (id) {
     case ToLocaleString:
@@ -349,11 +349,11 @@ JSValue *ArrayProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, cons
             printf("KJS Array::Sort: %d: %s\n", i, thisObj->get(exec, i)->toString(exec).ascii());
         }
 #endif
-        JSObject *sortFunction = NULL;
+        JSObject *sortFunction = nullptr;
         if (!args[0]->isUndefined()) {
             sortFunction = args[0]->toObject(exec);
             if (!sortFunction->implementsCall()) {
-                sortFunction = NULL;
+                sortFunction = nullptr;
             }
         }
 
@@ -699,7 +699,7 @@ JSValue *ArrayProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, cons
 
     default:
         assert(0);
-        result = 0;
+        result = nullptr;
         break;
     }
     return result;

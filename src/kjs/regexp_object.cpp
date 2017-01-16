@@ -42,7 +42,7 @@ using namespace KJS;
 
 // ECMA 15.10.5
 
-const ClassInfo RegExpPrototype::info = {"RegExp", 0, 0, 0};
+const ClassInfo RegExpPrototype::info = {"RegExp", nullptr, nullptr, nullptr};
 
 RegExpPrototype::RegExpPrototype(ExecState *exec,
                                  ObjectPrototype *objProto,
@@ -164,10 +164,10 @@ JSValue *RegExpProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
 
 // ------------------------------ RegExpImp ------------------------------------
 
-const ClassInfo RegExpImp::info = {"RegExp", 0, 0, 0};
+const ClassInfo RegExpImp::info = {"RegExp", nullptr, nullptr, nullptr};
 
 RegExpImp::RegExpImp(RegExpPrototype *regexpProto)
-    : JSObject(regexpProto), reg(0L)
+    : JSObject(regexpProto), reg(nullptr)
 {
 }
 
@@ -198,7 +198,7 @@ JSObject *RegExpImp::valueClone(Interpreter *targetCtx) const
 
 // ------------------------------ RegExpObjectImp ------------------------------
 
-const ClassInfo RegExpObjectImp::info = {"Function", &InternalFunctionImp::info, &RegExpTable, 0};
+const ClassInfo RegExpObjectImp::info = {"Function", &InternalFunctionImp::info, &RegExpTable, nullptr};
 
 /* Source for regexp_object.lut.h
 @begin RegExpTable 20
@@ -450,7 +450,7 @@ RegExp *RegExpObjectImp::makeEngine(ExecState *exec, const UString &p, JSValue *
                 if (reflags & RegExp::Global) {
                     throwError(exec, SyntaxError,
                                "Regular expression flag 'g' given twice", 1, -1, "<regexp>");
-                    return 0;
+                    return nullptr;
                 }
                 reflags |= RegExp::Global;
                 break;
@@ -458,7 +458,7 @@ RegExp *RegExpObjectImp::makeEngine(ExecState *exec, const UString &p, JSValue *
                 if (reflags & RegExp::IgnoreCase) {
                     throwError(exec, SyntaxError,
                                "Regular expression flag 'i' given twice", 1, -1, "<regexp>");
-                    return 0;
+                    return nullptr;
                 }
                 reflags |= RegExp::IgnoreCase;
                 break;
@@ -466,14 +466,14 @@ RegExp *RegExpObjectImp::makeEngine(ExecState *exec, const UString &p, JSValue *
                 if (reflags & RegExp::Multiline) {
                     throwError(exec, SyntaxError,
                                "Regular expression flag 'm' given twice", 1, -1, "<regexp>");
-                    return 0;
+                    return nullptr;
                 }
                 reflags |= RegExp::Multiline;
                 break;
             default: {
                 throwError(exec, SyntaxError,
                            "Invalid regular expression flags", 1, -1, "<regexp>");
-                return 0;
+                return nullptr;
             }
             }
         }
@@ -484,7 +484,7 @@ RegExp *RegExpObjectImp::makeEngine(ExecState *exec, const UString &p, JSValue *
         throwError(exec, SyntaxError,
                    "Invalid regular expression", 1, -1, "<regexp>");
         delete re;
-        return 0;
+        return nullptr;
     }
     return re;
 }

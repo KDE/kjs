@@ -73,7 +73,7 @@ JSType JSObject::type() const
 
 const ClassInfo *JSObject::classInfo() const
 {
-    return 0;
+    return nullptr;
 }
 
 UString JSObject::className() const
@@ -207,7 +207,7 @@ void JSObject::put(ExecState *exec, const Identifier &propertyName, JSValue *val
                 throwError(exec, GeneralError, "cyclic __proto__ value");
                 return;
             }
-            proto = proto->prototype() ? proto->prototype()->getObject() : 0;
+            proto = proto->prototype() ? proto->prototype()->getObject() : nullptr;
         }
 
         setPrototype(value);
@@ -370,7 +370,7 @@ static ALWAYS_INLINE JSValue *tryGetAndCallProperty(ExecState *exec, const JSObj
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 bool JSObject::getPrimitiveNumber(ExecState *exec, double &number, JSValue *&result)
@@ -418,7 +418,7 @@ const HashEntry *JSObject::findPropertyHashEntry(const Identifier &propertyName)
             }
         }
     }
-    return 0;
+    return nullptr;
 }
 
 void JSObject::defineGetter(ExecState *, const Identifier &propertyName, JSObject *getterFunc)
@@ -530,14 +530,14 @@ bool JSObject::defineOwnProperty(ExecState *exec, const Identifier &propertyName
 
                 if (desc.getter()) {
                     if (desc.getter()->isUndefined()) {
-                        gs->setGetter(0);
+                        gs->setGetter(nullptr);
                     } else {
                         gs->setGetter(desc.getter()->toObject(exec));
                     }
                 }
                 if (desc.setter()) {
                     if (desc.setter()->isUndefined()) {
-                        gs->setSetter(0);
+                        gs->setSetter(nullptr);
                     } else {
                         gs->setSetter(desc.setter()->toObject(exec));
                     }
@@ -603,14 +603,14 @@ bool JSObject::defineOwnProperty(ExecState *exec, const Identifier &propertyName
         GetterSetterImp *gs = static_cast<GetterSetterImp *>(jsval);
         if (desc.getter()) {
             if (desc.getter()->isUndefined()) {
-                gs->setGetter(0);
+                gs->setGetter(nullptr);
             } else {
                 gs->setGetter(desc.getter()->toObject(exec));
             }
         }
         if (desc.setter()) {
             if (desc.setter()->isUndefined()) {
-                gs->setSetter(0);
+                gs->setSetter(nullptr);
             } else {
                 gs->setSetter(desc.setter()->toObject(exec));
             }
@@ -645,7 +645,7 @@ bool JSObject::implementsConstruct() const
 JSObject *JSObject::construct(ExecState *, const List & /*args*/)
 {
     assert(false);
-    return NULL;
+    return nullptr;
 }
 
 JSObject *JSObject::construct(ExecState *exec, const List &args, const Identifier & /*functionName*/, const UString & /*sourceURL*/, int /*lineNumber*/)
@@ -655,7 +655,7 @@ JSObject *JSObject::construct(ExecState *exec, const List &args, const Identifie
 
 JSObject *JSObject::valueClone(Interpreter * /*targetCtx*/) const
 {
-    return 0;
+    return nullptr;
 }
 
 bool JSObject::isFunctionType() const
@@ -666,7 +666,7 @@ bool JSObject::isFunctionType() const
 JSValue *JSObject::callAsFunction(ExecState * /*exec*/, JSObject * /*thisObj*/, const List &/*args*/)
 {
     assert(false);
-    return NULL;
+    return nullptr;
 }
 
 bool JSObject::implementsHasInstance() const
@@ -880,26 +880,26 @@ JSObject *Error::create(ExecState *exec, ErrorType errtype, const UString &messa
 
 JSObject *Error::create(ExecState *exec, ErrorType type, const char *message)
 {
-    return create(exec, type, message, -1, -1, NULL);
+    return create(exec, type, message, -1, -1, nullptr);
 }
 
 JSObject *throwError(ExecState *exec, ErrorType type)
 {
-    JSObject *error = Error::create(exec, type, UString(), -1, -1, NULL);
+    JSObject *error = Error::create(exec, type, UString(), -1, -1, nullptr);
     exec->setException(error);
     return error;
 }
 
 JSObject *throwError(ExecState *exec, ErrorType type, const UString &message)
 {
-    JSObject *error = Error::create(exec, type, message, -1, -1, NULL);
+    JSObject *error = Error::create(exec, type, message, -1, -1, nullptr);
     exec->setException(error);
     return error;
 }
 
 JSObject *throwError(ExecState *exec, ErrorType type, const char *message)
 {
-    JSObject *error = Error::create(exec, type, message, -1, -1, NULL);
+    JSObject *error = Error::create(exec, type, message, -1, -1, nullptr);
     exec->setException(error);
     return error;
 }

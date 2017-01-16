@@ -58,7 +58,7 @@ inline void gcUnprotectNullTolerant(JSValue *val)
 template <class T> class ProtectedPtr
 {
 public:
-    ProtectedPtr() : m_ptr(NULL) { }
+    ProtectedPtr() : m_ptr(nullptr) { }
     ProtectedPtr(T *ptr);
     ProtectedPtr(const ProtectedPtr &);
     ~ProtectedPtr();

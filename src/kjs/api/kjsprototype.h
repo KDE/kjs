@@ -82,7 +82,7 @@ public:
     void defineProperty(KJSContext *ctx,
                         const QString &name,
                         PropertyGetter getter,
-                        PropertySetter setter = 0);
+                        PropertySetter setter = nullptr);
 
     /**
      * Signature for function call callback function. The
@@ -115,13 +115,13 @@ public:
      *
      * @todo Provide a better type than void*
      */
-    KJSObject constructObject(KJSContext *ctx, void *internalValue = 0);
+    KJSObject constructObject(KJSContext *ctx, void *internalValue = nullptr);
 
     /**
      * Similar to constructObject() but specialized on the
      * construction of global objects.
      */
-    KJSGlobalObject constructGlobalObject(void *internalValue = 0);
+    KJSGlobalObject constructGlobalObject(void *internalValue = nullptr);
 
 private:
     KJSPrototype(const KJSPrototype &); // undefined

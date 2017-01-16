@@ -831,7 +831,7 @@ pow5mult
         FREE_DTOA_LOCK(1);
 #else
         p5 = p5s = i2b(625);
-        p5->next = 0;
+        p5->next = nullptr;
 #endif
     }
     for (;;) {
@@ -853,7 +853,7 @@ pow5mult
             FREE_DTOA_LOCK(1);
 #else
             p51 = p5->next = mult(p5, p5);
-            p51->next = 0;
+            p51->next = nullptr;
 #endif
         }
         p5 = p51;
@@ -1456,7 +1456,7 @@ strtod
     U aadj2, rv, rv0;
     Long L;
     ULong y, z;
-    Bigint *bb = NULL, *bb1 = NULL, *bd = NULL, *bd0 = NULL, *bs = NULL, *delta = NULL;
+    Bigint *bb = nullptr, *bb1 = nullptr, *bd = nullptr, *bd0 = nullptr, *bs = nullptr, *delta = nullptr;
 #ifdef SET_INEXACT
     int inexact, oldinexact;
 #endif
@@ -1660,7 +1660,7 @@ dig_done:
 #endif
         dval(rv) = tens[k - 9] * dval(rv) + z;
     }
-    bd0 = 0;
+    bd0 = nullptr;
     if (nd <= DBL_DIG
 #ifndef RND_PRODQUOT
 #ifndef Honor_FLT_ROUNDS
@@ -2556,7 +2556,7 @@ freedtoa(char *s)
     Bfree(b);
 #ifndef MULTIPLE_THREADS
     if (s == dtoa_result) {
-        dtoa_result = 0;
+        dtoa_result = nullptr;
     }
 #endif
 }
@@ -2641,7 +2641,7 @@ dtoa
     int denorm;
     ULong x;
 #endif
-    Bigint *b, *b1, *delta, *mlo = NULL, *mhi, *S;
+    Bigint *b, *b1, *delta, *mlo = nullptr, *mhi, *S;
     U d, d2, eps;
     double ds;
     char *s, *s0;
@@ -2655,7 +2655,7 @@ dtoa
 #ifndef MULTIPLE_THREADS
     if (dtoa_result) {
         freedtoa(dtoa_result);
-        dtoa_result = 0;
+        dtoa_result = nullptr;
     }
 #endif
 
@@ -2888,7 +2888,7 @@ if (ilim >= 0 && ilim <= Quick_max && try_quick) {
     dval(eps) = ieps * dval(d) + 7.;
     word0(eps) -= (P - 1) * Exp_msk1;
     if (ilim == 0) {
-        S = mhi = 0;
+        S = mhi = nullptr;
         dval(d) -= 5.;
         if (dval(d) > dval(eps)) {
             goto one_digit;
@@ -2958,7 +2958,7 @@ if (be >= 0 && k <= Int_max) {
     /* Yes. */
     ds = tens[k];
     if (ndigits < 0 && ilim <= 0) {
-        S = mhi = 0;
+        S = mhi = nullptr;
         if (ilim < 0 || dval(d) <= 5 * ds) {
             goto no_digits;
         }
@@ -3008,7 +3008,7 @@ if (be >= 0 && k <= Int_max) {
 
 m2 = b2;
 m5 = b5;
-mhi = mlo = 0;
+mhi = mlo = nullptr;
 if (leftright) {
     i =
 #ifndef Sudden_Underflow

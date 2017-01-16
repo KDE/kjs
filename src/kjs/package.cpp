@@ -23,11 +23,11 @@
 
 using namespace KJS;
 
-const ClassInfo PackageObject::info = { "Package", 0, 0, 0 };
+const ClassInfo PackageObject::info = { "Package", nullptr, nullptr, nullptr };
 
 Package *Package::loadSubPackage(const Identifier &, UString * /*err*/)
 {
-    return 0;
+    return nullptr;
 }
 
 void Package::loadSymbol(ExecState *, JSObject *, const Identifier &)
@@ -39,7 +39,7 @@ void Package::loadAllSymbols(ExecState *, JSObject *)
 }
 
 StandardGlobalPackage::StandardGlobalPackage()
-    : Package(0, 0)
+    : Package(nullptr, nullptr)
 {
 }
 

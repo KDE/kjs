@@ -72,7 +72,7 @@ FunctionProtoFunc::FunctionProtoFunc(ExecState *exec, FunctionPrototype *funcPro
 
 JSValue *FunctionProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const List &args)
 {
-    JSValue *result = NULL;
+    JSValue *result = nullptr;
 
     switch (id) {
     case ToString:
@@ -155,7 +155,7 @@ JSValue *FunctionProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, c
             newArgs.append(args[i]);
         }
 
-        JSObject *boundThis = 0;
+        JSObject *boundThis = nullptr;
 
         // As call does not accept JSValue(undefined/null),
         // do it like in call and use the global object

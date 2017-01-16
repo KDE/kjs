@@ -37,7 +37,7 @@ enum HashTableDeletedValueType { HashTableDeletedValue };
 template <typename T> class RefPtr
 {
 public:
-    RefPtr() : m_ptr(0) { }
+    RefPtr() : m_ptr(nullptr) { }
     RefPtr(T *ptr) : m_ptr(ptr)
     {
         if (ptr) {
@@ -91,7 +91,7 @@ public:
     PassRefPtr<T> release()
     {
         PassRefPtr<T> tmp = adoptRef(m_ptr);
-        m_ptr = 0;
+        m_ptr = nullptr;
         return tmp;
     }
 
@@ -113,7 +113,7 @@ public:
     typedef T *RefPtr::*UnspecifiedBoolType;
     operator UnspecifiedBoolType() const
     {
-        return m_ptr ? &RefPtr::m_ptr : 0;
+        return m_ptr ? &RefPtr::m_ptr : nullptr;
     }
 
     RefPtr &operator=(const RefPtr &);

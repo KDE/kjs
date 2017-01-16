@@ -156,7 +156,7 @@ void Node::clearNewNodes()
 #endif
     deleteAllValues(*newNodes);
     delete newNodes;
-    newNodes = 0;
+    newNodes = nullptr;
 }
 
 static void substitute(UString &string, const UString &substring)
@@ -216,7 +216,7 @@ public:
         //Do not recurse inside function bodies, or things that
         // syntactically can't contain declarations
         if (!node->scanForDeclarations()) {
-            return 0;
+            return nullptr;
         }
 
         return NodeVisitor::visit(node);
@@ -236,7 +236,7 @@ public:
         node->processFuncDecl(m_exec);
 
         if (!node->scanForDeclarations()) {
-            return 0;
+            return nullptr;
         }
 
         return NodeVisitor::visit(node);
@@ -262,7 +262,7 @@ void Node::processFuncDecl(ExecState *)
 Node *NodeVisitor::visit(Node *node)
 {
     node->recurseVisit(this);
-    return 0;
+    return nullptr;
 }
 
 // ------------------------------ StatementNode --------------------------------
@@ -305,7 +305,7 @@ void GroupNode::recurseVisit(NodeVisitor *visitor)
 
 void ElementNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void ElementNode::recurseVisit(NodeVisitor *visitor)
@@ -332,7 +332,7 @@ void ObjectLiteralNode::recurseVisit(NodeVisitor *visitor)
 
 void PropertyListNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void PropertyListNode::recurseVisit(NodeVisitor *visitor)
@@ -367,7 +367,7 @@ void DotAccessorNode::recurseVisit(NodeVisitor *visitor)
 
 void ArgumentListNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void ArgumentListNode::recurseVisit(NodeVisitor *visitor)
@@ -630,7 +630,7 @@ void VarDeclNode::recurseVisit(NodeVisitor *visitor)
 
 void VarDeclListNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void VarDeclListNode::recurseVisit(NodeVisitor *visitor)
@@ -655,7 +655,7 @@ BlockNode::BlockNode(SourceElementsNode *s)
         Parser::removeNodeCycle(source.get());
         setLoc(s->firstLine(), s->lastLine());
     } else {
-        source = 0;
+        source = nullptr;
     }
 }
 
@@ -709,7 +709,7 @@ void ForNode::recurseVisit(NodeVisitor *visitor)
 // ------------------------------ ForInNode ------------------------------------
 
 ForInNode::ForInNode(Node *l, Node *e, StatementNode *s)
-    : init(0L), lexpr(l), expr(e), varDecl(0L), statement(s)
+    : init(nullptr), lexpr(l), expr(e), varDecl(nullptr), statement(s)
 {
 }
 
@@ -757,7 +757,7 @@ void CaseClauseNode::recurseVisit(NodeVisitor *visitor)
 
 void ClauseListNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void ClauseListNode::recurseVisit(NodeVisitor *visitor)
@@ -775,7 +775,7 @@ CaseBlockNode::CaseBlockNode(ClauseListNode *l1, CaseClauseNode *d,
         list1 = l1->next.release();
         Parser::removeNodeCycle(list1.get());
     } else {
-        list1 = 0;
+        list1 = nullptr;
     }
 
     def = d;
@@ -784,7 +784,7 @@ CaseBlockNode::CaseBlockNode(ClauseListNode *l1, CaseClauseNode *d,
         list2 = l2->next.release();
         Parser::removeNodeCycle(list2.get());
     } else {
-        list2 = 0;
+        list2 = nullptr;
     }
 }
 
@@ -830,7 +830,7 @@ void TryNode::recurseVisit(NodeVisitor *visitor)
 
 void ParameterNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void ParameterNode::recurseVisit(NodeVisitor *visitor)
@@ -874,7 +874,7 @@ void FunctionBodyNode::addFunDecl(const Identifier &ident, int attr, FuncDeclNod
 void FunctionBodyNode::reserveSlot(size_t id, bool shouldMark)
 {
     ASSERT(id == m_symbolList.size());
-    m_symbolList.append(SymbolInfo(shouldMark ? 0 : DontMark, 0));
+    m_symbolList.append(SymbolInfo(shouldMark ? 0 : DontMark, nullptr));
 }
 
 size_t FunctionBodyNode::addSymbol(const Identifier &ident, int flags, FuncDeclNode *funcDecl)
@@ -915,7 +915,7 @@ void FunctionBodyNode::addSymbolOverwriteID(size_t id, const Identifier &ident, 
 
     // Add a new one
     m_symbolTable.set(ident.ustring().rep(), id);
-    m_symbolList.append(SymbolInfo(flags, 0));
+    m_symbolList.append(SymbolInfo(flags, nullptr));
 }
 
 void FunctionBodyNode::addParam(const Identifier &ident)
@@ -952,7 +952,7 @@ Completion FunctionBodyNode::execute(ExecState *exec)
         result = Completion(Normal, val);
     }
 
-    exec->initLocalStorage(0, 0);
+    exec->initLocalStorage(nullptr, 0);
     delete store;
     exec->clearException();
 
@@ -1006,7 +1006,7 @@ void FuncDeclNode::processFuncDecl(ExecState *exec)
 
 void FuncDeclNode::addParams()
 {
-    for (ParameterNode *p = param.get(); p != 0L; p = p->nextParam()) {
+    for (ParameterNode *p = param.get(); p != nullptr; p = p->nextParam()) {
         body->addParam(p->ident());
     }
 }
@@ -1036,7 +1036,7 @@ void FuncDeclNode::recurseVisit(NodeVisitor *visitor)
 
 void FuncExprNode::addParams()
 {
-    for (ParameterNode *p = param.get(); p != 0L; p = p->nextParam()) {
+    for (ParameterNode *p = param.get(); p != nullptr; p = p->nextParam()) {
         body->addParam(p->ident());
     }
 }
@@ -1065,7 +1065,7 @@ SourceElementsNode::SourceElementsNode(SourceElementsNode *s1, StatementNode *s2
 
 void SourceElementsNode::breakCycle()
 {
-    next = 0;
+    next = nullptr;
 }
 
 void SourceElementsNode::recurseVisit(NodeVisitor *visitor)
@@ -1092,7 +1092,7 @@ Completion PackageNameNode::loadSymbol(ExecState *exec, bool wildcard)
     JSObject *baseObject;
     if (names) {
         PackageObject *pobj = names->resolvePackage(exec);
-        if (pobj == 0) {
+        if (pobj == nullptr) {
             return Completion(Normal);
         }
         basePackage = pobj->package();
@@ -1126,8 +1126,8 @@ PackageObject *PackageNameNode::resolvePackage(ExecState *exec)
     Package *basePackage;
     if (names) {
         PackageObject *basePackageObject = names->resolvePackage(exec);
-        if (basePackageObject == 0) {
-            return 0;
+        if (basePackageObject == nullptr) {
+            return nullptr;
         }
         baseObject = basePackageObject;
         basePackage = basePackageObject->package();
@@ -1145,7 +1145,7 @@ PackageObject *PackageNameNode::resolvePackage(ExecState *exec,
         JSObject *baseObject,
         Package *basePackage)
 {
-    PackageObject *res = 0;
+    PackageObject *res = nullptr;
 
     // Let's see whether the package was already resolved previously.
     JSValue *v = baseObject->get(exec, id);
@@ -1153,19 +1153,19 @@ PackageObject *PackageNameNode::resolvePackage(ExecState *exec,
         if (!v->isObject()) {
             // Symbol conflict
             throwError(exec, GeneralError, "Invalid type of package %s", id);
-            return 0;
+            return nullptr;
         }
         res = static_cast<PackageObject *>(v);
     } else {
         UString err;
         Package *newBase = basePackage->loadSubPackage(id, &err);
-        if (newBase == 0) {
+        if (newBase == nullptr) {
             if (err.isEmpty()) {
                 throwError(exec, GeneralError, "Package not found");
             } else {
                 throwError(exec, GeneralError, err);
             }
-            return 0;
+            return nullptr;
         }
         res = new PackageObject(newBase);
         baseObject->put(exec, id, res);

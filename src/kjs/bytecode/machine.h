@@ -35,7 +35,7 @@ namespace KJS
 class Machine
 {
 public:
-    static JSValue *runBlock(ExecState *exec, const CodeBlock &block, ExecState *parentExec = 0);
+    static JSValue *runBlock(ExecState *exec, const CodeBlock &block, ExecState *parentExec = nullptr);
 };
 
 }

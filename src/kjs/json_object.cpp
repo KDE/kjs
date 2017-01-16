@@ -32,7 +32,7 @@ using namespace KJS;
 
 // ------------------------------ JSONObjectImp --------------------------------
 
-const ClassInfo JSONObjectImp::info = { "JSON", 0, &jsonTable, 0 };
+const ClassInfo JSONObjectImp::info = { "JSON", nullptr, &jsonTable, nullptr };
 
 /* Source for json_object.lut.h
 @begin jsonTable 2

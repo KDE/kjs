@@ -92,7 +92,7 @@ void StopWatch::start()
 #if ! HAVE_GETTIMEOFDAY
     m_startTime = timeGetTime();
 #else
-    gettimeofday(&m_startTime, 0);
+    gettimeofday(&m_startTime, nullptr);
 #endif
 }
 
@@ -101,7 +101,7 @@ void StopWatch::stop()
 #if ! HAVE_GETTIMEOFDAY
     m_stopTime = timeGetTime();
 #else
-    gettimeofday(&m_stopTime, 0);
+    gettimeofday(&m_stopTime, nullptr);
 #endif
 }
 
@@ -187,7 +187,7 @@ JSValue *TestFunctionImp::callAsFunction(ExecState *exec, JSObject *, const List
     default:
         abort();
     }
-    return 0;
+    return nullptr;
 }
 
 #if PLATFORM(WIN_OS) && defined(HAVE_CRTDBG_H) && !defined(__MINGW32__)
@@ -370,7 +370,7 @@ static char *createStringWithContentsOfFile(const char *fileName)
     FILE *f = fopen(fileName, "r");
     if (!f) {
         fprintf(stderr, "Could not open file: %s\n", fileName);
-        return 0;
+        return nullptr;
     }
 
     while (!feof(f) && !ferror(f)) {

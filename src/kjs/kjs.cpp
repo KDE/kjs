@@ -196,7 +196,7 @@ static char *readLine(const char *prompt)
     const int bsize = 2 << 10;
     char *buffer = static_cast<char *>(malloc(bsize));
     char *s = fgets(buffer, bsize, stdin);
-    if (s == 0) {
+    if (s == nullptr) {
         // EOF
         fprintf(stdout, "\n");
         free(buffer);
@@ -207,10 +207,10 @@ static char *readLine(const char *prompt)
 static ExitCode evaluateInteractive(Interpreter *interp)
 {
     char *line;
-    while ((line = readLine("JS> ")) != 0) {
+    while ((line = readLine("JS> ")) != nullptr) {
         UString code(line);
         free(line);
-        evaluateString(interp, 0, code, true);
+        evaluateString(interp, nullptr, code, true);
     }
 
     return ErrorNone;
@@ -240,7 +240,7 @@ static ExitCode parseArgs(int argc, char **argv)
     StandardGlobalPackage package;
     interp->setGlobalPackage(&package);
 
-    const char *script = 0, *command = 0;
+    const char *script = nullptr, *command = nullptr;
     int ai = 1;
     bool ranOtherScript = false;
     for (ai = 1; ai < argc; ++ai) {

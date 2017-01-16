@@ -249,7 +249,7 @@ JSObject *ObjectObjectImp::construct(ExecState *exec, const List &args)
         return new JSObject(exec->lexicalInterpreter()->builtinObjectPrototype());
     default:
         //### ASSERT_NOT_REACHED();
-        return 0;
+        return nullptr;
     }
 }
 

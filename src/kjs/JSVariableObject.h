@@ -96,7 +96,7 @@ public:
         return localStorage[ScopeLink].val.scopeVal;
     }
 protected:
-    JSVariableObject(): localStorage(0), symbolTable(0) { }
+    JSVariableObject(): localStorage(nullptr), symbolTable(nullptr) { }
     ~JSVariableObject();
 
     bool symbolTableGet(const Identifier &, PropertySlot &);
@@ -185,8 +185,8 @@ inline void ScopeChain::pushVariableObject(JSVariableObject *act)
 class KJS_EXPORT JSGlobalObject :  public JSObject // ### TODO: should inherit off JSVariableObject
 {
 public:
-    JSGlobalObject(): m_interpreter(0) {}
-    JSGlobalObject(JSValue *proto): JSObject(proto), m_interpreter(0) {}
+    JSGlobalObject(): m_interpreter(nullptr) {}
+    JSGlobalObject(JSValue *proto): JSObject(proto), m_interpreter(nullptr) {}
     virtual bool isGlobalObject() const
     {
         return true;

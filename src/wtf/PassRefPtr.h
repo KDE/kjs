@@ -76,7 +76,7 @@ public:
     T *releaseRef() const
     {
         T *tmp = m_ptr;
-        m_ptr = 0;
+        m_ptr = nullptr;
         return tmp;
     }
 
@@ -98,7 +98,7 @@ public:
     typedef T *PassRefPtr::*UnspecifiedBoolType;
     operator UnspecifiedBoolType() const
     {
-        return m_ptr ? &PassRefPtr::m_ptr : 0;
+        return m_ptr ? &PassRefPtr::m_ptr : nullptr;
     }
 
     PassRefPtr &operator=(T *);

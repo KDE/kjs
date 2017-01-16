@@ -103,7 +103,7 @@ public:
     // If resources are exhaused during a match, exec parameter will have an exception
     // set, and endOffset will be -1
     UString performMatch(RegExp *, ExecState *, const RegExpStringContext &, const UString &,
-                         int startOffset = 0, int *endOffset = 0, int **ovector = 0);
+                         int startOffset = 0, int *endOffset = nullptr, int **ovector = nullptr);
     JSObject *arrayOfMatches(ExecState *exec, const UString &result) const;
 
     static void throwRegExpError(ExecState *);

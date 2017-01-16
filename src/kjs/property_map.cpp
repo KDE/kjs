@@ -145,7 +145,7 @@ void PropertyMap::clear()
         UString::Rep *key = m_singleEntryKey;
         if (key) {
             key->deref();
-            m_singleEntryKey = 0;
+            m_singleEntryKey = nullptr;
         }
 #endif
         return;
@@ -157,8 +157,8 @@ void PropertyMap::clear()
         UString::Rep *key = entries[i].key;
         if (isValid(key)) {
             key->deref();
-            entries[i].key = 0;
-            entries[i].value = 0;
+            entries[i].key = nullptr;
+            entries[i].value = nullptr;
         }
     }
     m_u.table->keyCount = 0;
@@ -188,7 +188,7 @@ JSValue *PropertyMap::get(const Identifier &name, unsigned &attributes) const
             return m_u.singleEntryValue;
         }
 #endif
-        return 0;
+        return nullptr;
     }
 
     unsigned h = rep->hash();
@@ -213,7 +213,7 @@ JSValue *PropertyMap::get(const Identifier &name, unsigned &attributes) const
         ++numRehashes;
 #endif
     }
-    return 0;
+    return nullptr;
 }
 
 JSValue *PropertyMap::get(const Identifier &name) const
@@ -229,7 +229,7 @@ JSValue *PropertyMap::get(const Identifier &name) const
             return m_u.singleEntryValue;
         }
 #endif
-        return 0;
+        return nullptr;
     }
 
     unsigned h = rep->hash();
@@ -253,7 +253,7 @@ JSValue *PropertyMap::get(const Identifier &name) const
         ++numRehashes;
 #endif
     }
-    return 0;
+    return nullptr;
 }
 
 JSValue **PropertyMap::getLocation(const Identifier &name)
@@ -269,7 +269,7 @@ JSValue **PropertyMap::getLocation(const Identifier &name)
             return &m_u.singleEntryValue;
         }
 #endif
-        return 0;
+        return nullptr;
     }
 
     unsigned h = rep->hash();
@@ -293,7 +293,7 @@ JSValue **PropertyMap::getLocation(const Identifier &name)
         ++numRehashes;
 #endif
     }
-    return 0;
+    return nullptr;
 }
 
 JSValue **PropertyMap::getWriteLocation(const Identifier &name)
@@ -307,7 +307,7 @@ JSValue **PropertyMap::getWriteLocation(const Identifier &name)
         if (rep == key && !(m_singleEntryAttributes & (ReadOnly | GetterSetter))) {
             return &m_u.singleEntryValue;
         }
-        return 0;
+        return nullptr;
     }
 
     unsigned h = rep->hash();
@@ -322,7 +322,7 @@ JSValue **PropertyMap::getWriteLocation(const Identifier &name)
     while (UString::Rep *key = entries[i].key) {
         if (rep == key) {
             if (entries[i].attributes & (ReadOnly | GetterSetter)) {
-                return 0;
+                return nullptr;
             } else {
                 return &entries[i].value;
             }
@@ -335,7 +335,7 @@ JSValue **PropertyMap::getWriteLocation(const Identifier &name)
         ++numRehashes;
 #endif
     }
-    return 0;
+    return nullptr;
 }
 
 #if DEBUG_PROPERTIES
@@ -366,7 +366,7 @@ static void printAttributes(int attributes)
 void PropertyMap::put(const Identifier &name, JSValue *value, int attributes, bool roCheck)
 {
     assert(!name.isNull());
-    assert(value != 0);
+    assert(value != nullptr);
 
     checkConsistency();
 
@@ -521,7 +521,7 @@ void PropertyMap::createTable()
     UString::Rep *key = m_singleEntryKey;
     if (key) {
         insert(key, oldSingleEntryValue, m_singleEntryAttributes, 0);
-        m_singleEntryKey = 0;
+        m_singleEntryKey = nullptr;
         m_u.table->keyCount = 1;
     }
 #endif
@@ -578,7 +578,7 @@ void PropertyMap::remove(const Identifier &name)
         key = m_singleEntryKey;
         if (rep == key) {
             key->deref();
-            m_singleEntryKey = 0;
+            m_singleEntryKey = nullptr;
             checkConsistency();
         }
 #endif
@@ -617,7 +617,7 @@ void PropertyMap::remove(const Identifier &name)
     key->deref();
     key = deletedSentinel();
     entries[i].key = key;
-    entries[i].value = 0;
+    entries[i].value = nullptr;
     entries[i].attributes = DontEnum;
     assert(m_u.table->keyCount >= 1);
     --m_u.table->keyCount;

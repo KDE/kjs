@@ -417,12 +417,12 @@ inline UString JSValue::getString() const
 
 inline JSObject *JSValue::getObject()
 {
-    return JSImmediate::isImmediate(this) ? 0 : asCell()->getObject();
+    return JSImmediate::isImmediate(this) ? nullptr : asCell()->getObject();
 }
 
 inline const JSObject *JSValue::getObject() const
 {
-    return JSImmediate::isImmediate(this) ? 0 : asCell()->getObject();
+    return JSImmediate::isImmediate(this) ? nullptr : asCell()->getObject();
 }
 
 ALWAYS_INLINE bool JSValue::getUInt32(uint32_t &v) const

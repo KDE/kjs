@@ -201,7 +201,7 @@ void Parser::parseType()
         {"immediate", Type_HaveImm},
         {"register",  Type_HaveReg},
         {"align8",    Type_Align8},
-        {0, 0}
+        {nullptr, 0}
     };
 
     unsigned flags = matchFlags(typeFlags);
@@ -225,7 +225,7 @@ void Parser::parseConversion()
     const Flag conversionFlags[] = {
         {"checked",  Conv_Checked},
         {"mayThrow", Conv_MayThrow},
-        {0, 0}
+        {nullptr, 0}
     };
 
     unsigned flags = 0;
@@ -271,7 +271,7 @@ void Parser::parseOperation()
     const Flag opFlags[] = {
         {"endsBB", Op_EndsBB},
         {"hint",   Op_Hint},
-        {0, 0}
+        {nullptr, 0}
     };
 
     std::string name = matchIdentifier();
@@ -311,7 +311,7 @@ void Parser::parseImpl()
         {"noimm", Param_NoImm},
         {"noreg", Param_NoReg},
         {"exact", Param_Exact},
-        {0, 0}
+        {nullptr, 0}
     };
 
     // Parse parameter types and names, if any..

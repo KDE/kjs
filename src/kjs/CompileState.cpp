@@ -52,7 +52,7 @@ void CompileState::requestTemporary(OpType type, OpValue *value, OpValue *refere
     reference->type      = OpType_reg;
     reference->immediate = true;
 
-    RegDescriptor *temp = 0;
+    RegDescriptor *temp = nullptr;
 
     bool markable = (type == OpType_value);
 
@@ -113,12 +113,12 @@ void CompileState::flushLocal(CodeBlock & /*block*/, Register regNum)
         OpValue out, outReg;
         requestTemporary(OpType_value, &out, &outReg);
 
-        CodeGen::emitOp(this, Op_RegPutValue, 0, &outReg, &localVal);
+        CodeGen::emitOp(this, Op_RegPutValue, nullptr, &outReg, &localVal);
 
         // Now, patch up the descriptor to point to the same place as the temporary, and to
         // take ownership of it, and remove it from local descriptors list.
         locals[regNum]->adopt(out.ownedReg.get());
-        locals[regNum] = 0;
+        locals[regNum] = nullptr;
     }
 }
 
@@ -168,7 +168,7 @@ Node *CompileState::resolveBreakLabel(Identifier label)
 {
     if (label.isEmpty()) {
         if (defaultBreakTargets.isEmpty()) {
-            return 0;
+            return nullptr;
         } else {
             return defaultBreakTargets.last();
         }
@@ -181,7 +181,7 @@ Node *CompileState::resolveContinueLabel(Identifier label)
 {
     if (label.isEmpty()) {
         if (defaultContinueTargets.isEmpty()) {
-            return 0;
+            return nullptr;
         } else {
             return defaultContinueTargets.last();
         }

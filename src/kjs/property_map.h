@@ -68,7 +68,7 @@ private:
 * A hashtable entry for the @ref PropertyMap.
 */
 struct PropertyMapHashTableEntry {
-    PropertyMapHashTableEntry() : key(0) { }
+    PropertyMapHashTableEntry() : key(nullptr) { }
     UString::Rep *key;
     JSValue *value;
     int attributes;
@@ -170,7 +170,7 @@ private:
 };
 
 inline PropertyMap::PropertyMap() :
-    m_singleEntryKey(0),
+    m_singleEntryKey(nullptr),
     m_getterSetterFlag(false),
     m_usingTable(false),
     m_extensible(true),

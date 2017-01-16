@@ -85,10 +85,10 @@ public:
 };
 
 template<>
-const ClassInfo CustomObject<JSObject>::info = { "CustomObject", 0, 0, 0 };
+const ClassInfo CustomObject<JSObject>::info = { "CustomObject", nullptr, nullptr, nullptr };
 
 template<>
-const ClassInfo CustomObject<JSGlobalObject>::info = { "CustomGlobalObject", 0, 0, 0 };
+const ClassInfo CustomObject<JSGlobalObject>::info = { "CustomGlobalObject", nullptr, nullptr, nullptr };
 
 class KJSCustomFunction : public JSObject
 {
@@ -192,7 +192,7 @@ public:
             return JSObject::getOwnPropertySlot(exec, id, sl);
         }
 
-        sl.setCustomValue(0, *it, getPropertyValue);
+        sl.setCustomValue(nullptr, *it, getPropertyValue);
 
         return true;
     }

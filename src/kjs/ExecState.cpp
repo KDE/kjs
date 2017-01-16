@@ -97,14 +97,14 @@ void ExecState::mark()
 ExecState::ExecState(Interpreter *intp, ExecState *save) :
     m_interpreter(intp),
     m_propertyNames(CommonIdentifiers::shared()),
-    m_callingExec(0),
+    m_callingExec(nullptr),
     m_savedExec(save),
-    m_currentBody(0),
-    m_function(0),
-    m_localStore(0),
-    m_pcBase(0),
-    m_pc(0),
-    m_machineLocalStore(0)
+    m_currentBody(nullptr),
+    m_function(nullptr),
+    m_localStore(nullptr),
+    m_pcBase(nullptr),
+    m_pc(nullptr),
+    m_machineLocalStore(nullptr)
 {
     /**
      The reason we need m_savedExec and can't just be content with m_callingExec is two-fold.
@@ -149,7 +149,7 @@ JSValue *ExecState::reactivateCompletion(bool insideTryFinally)
     // if not, we execute them directly
     if (comp.complType() == Normal) {
         // We just straight fell into 'finally'. Nothing fancy to do.
-        return 0;
+        return nullptr;
     }
 
     if (comp.complType() == Throw || insideTryFinally) {
@@ -163,7 +163,7 @@ JSValue *ExecState::reactivateCompletion(bool insideTryFinally)
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void ExecState::setException(JSValue *e)
@@ -242,7 +242,7 @@ void ExecState::quietUnwind(int depth)
     }
 }
 
-GlobalExecState::GlobalExecState(Interpreter *intp, JSGlobalObject *glob): ExecState(intp, 0 /* nothing else constructed yet*/)
+GlobalExecState::GlobalExecState(Interpreter *intp, JSGlobalObject *glob): ExecState(intp, nullptr /* nothing else constructed yet*/)
 {
     scope.push(glob);
     m_codeType  = GlobalCode;

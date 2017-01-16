@@ -38,7 +38,7 @@ void ScopeChain::print()
         JSObject *o = *scopeIter;
         PropertyNameArray propertyNames;
         // FIXME: should pass ExecState here!
-        o->getPropertyNames(0, propertyNames);
+        o->getPropertyNames(nullptr, propertyNames);
         PropertyNameArrayIterator propEnd = propertyNames.end();
 
         fprintf(stderr, "----- [scope %p] -----\n", (void *)o);
