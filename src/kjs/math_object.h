@@ -43,7 +43,7 @@ public:
            Abs, ACos, ASin, ATan, ATan2, Ceil, Cos, Pow,
            Exp, Floor, Log, Max, Min, Random, Round, Sin, Sqrt, Tan,
            //ES6 (draft 08.11.2013)
-           ACosH, ASinH, ATanH, Cbrt, CosH, Exmp1,
+           ACosH, ASinH, ATanH, Cbrt, CosH, Expm1,
            Log1p, Log10, Log2, Sign, SinH, TanH, Trunc,
            Hypot, Imul, FRound, Clz32
          };

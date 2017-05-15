@@ -65,11 +65,11 @@ const ClassInfo MathObjectImp::info = { "Math", nullptr, &mathTable, nullptr };
   sqrt          MathObjectImp::Sqrt     DontEnum|Function 1
   tan           MathObjectImp::Tan      DontEnum|Function 1
   acosh         MathObjectImp::ACosH    DontEnum|Function 1
-  acosh         MathObjectImp::ASinH    DontEnum|Function 1
+  asinh         MathObjectImp::ASinH    DontEnum|Function 1
   atanh         MathObjectImp::ATanH    DontEnum|Function 1
   cbrt          MathObjectImp::Cbrt     DontEnum|Function 1
   cosh          MathObjectImp::CosH     DontEnum|Function 1
-  exmp1         MathObjectImp::Exmp1    DontEnum|Function 1
+  expm1         MathObjectImp::Expm1    DontEnum|Function 1
   log1p         MathObjectImp::Log1p    DontEnum|Function 1
   log10         MathObjectImp::Log10    DontEnum|Function 1
   log2          MathObjectImp::Log2     DontEnum|Function 1
@@ -77,7 +77,7 @@ const ClassInfo MathObjectImp::info = { "Math", nullptr, &mathTable, nullptr };
   sinh          MathObjectImp::SinH     DontEnum|Function 1
   tanh          MathObjectImp::TanH     DontEnum|Function 1
   trunc         MathObjectImp::Trunc    DontEnum|Function 1
-  hypot         MathObjectImp::Hypot    DontEnum|Function 0
+  hypot         MathObjectImp::Hypot    DontEnum|Function 2
   imul          MathObjectImp::Imul     DontEnum|Function 2
   fround        MathObjectImp::FRound   DontEnum|Function 1
   clz32         MathObjectImp::Clz32    DontEnum|Function 1
@@ -109,7 +109,7 @@ JSValue *MathObjectImp::getValueProperty(ExecState *, int token) const
     case Log2E:
         return jsNumber(1.0 / log(2.0));
     case Log10E:
-        return jsNumber(1.0 / log(10.0));
+        return jsNumber(0.4342944819032518);
     case Pi:
         return jsNumber(piDouble);
     case Sqrt1_2:
@@ -142,7 +142,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
 
     switch (id) {
     case MathObjectImp::Abs:
-        result = (arg < 0 || arg == -0) ? (-arg) : arg;
+        result = (arg < 0.0 || (arg == 0.0 && signbit(arg))) ? (-arg) : arg;
         break;
     case MathObjectImp::ACos:
         result = ::acos(arg);
@@ -223,11 +223,8 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         result = (double)rand() / RAND_MAX;
         break;
     case MathObjectImp::Round:
-        if (signbit(arg) && arg >= -0.5) {
-            result = -0.0;
-        } else {
-            result = ::floor(arg + 0.5);
-        }
+        double ceil = ::ceil(arg);
+        result = ceil - (ceil - 0.5 > arg ? 1 : 0);
         break;
     case MathObjectImp::Sin:
         result = ::sin(arg);
@@ -255,7 +252,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
     case MathObjectImp::CosH:
         result = ::cosh(arg);
         break;
-    case MathObjectImp::Exmp1:
+    case MathObjectImp::Expm1:
         result = ::expm1(arg);
         break;
     case MathObjectImp::Log1p:
@@ -305,6 +302,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         }
 
         double sum = 0.0;
+        double max = 0.0;
         bool foundNaN = false;
         for (int i = 0; i < args.size(); ++i)
         {
@@ -318,20 +316,28 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
                 foundNaN = true;
                 continue;
             }
-
-            sum += ::pow(num, 2);
+            double abs = num > 0.0 ? num : 0.0 - num;
+            if (abs != 0.0)
+            {
+                if (abs > max)
+                {
+                    sum *= (max / abs) * (max / abs);
+                    max = abs;
+                }
+                sum += (abs / max) * (abs / max);
+            }
         }
 
         if (foundNaN)
             return jsNumber(KJS::NaN);
 
-        result = ::sqrt(sum);
+        result = max * ::sqrt(sum);
         break;
     }
     case MathObjectImp::Imul:
     {
         if (args.size() < 2)
-            return jsUndefined();
+            return jsNumber(0.0);
         int32_t a = args[0]->toInt32(exec);
         if (exec->hadException())
             return jsNumber(a);
