@@ -51,12 +51,14 @@ option(KJS_FORCE_DISABLE_PCRE "Force building of KJS without PCRE. Doing this wi
 # TODO: Remove these
 remove_definitions(-DQT_NO_CAST_FROM_ASCII)
 
-find_package(KF5DocTools ${KF5_DEP_VERSION} REQUIRED)
+find_package(KF5DocTools ${KF5_DEP_VERSION})
 
 add_subdirectory(src)
 add_subdirectory(autotests)
 add_subdirectory(tests)
-add_subdirectory(docs)
+if(KF5DocTools_FOUND)
+    add_subdirectory(docs)
+endif()
 
 # create a Config.cmake and a ConfigVersion.cmake file and install them
 set(CMAKECONFIG_INSTALL_DIR "${KDE_INSTALL_CMAKEPACKAGEDIR}/KF5JS")
@@ -77,6 +79,8 @@ install(EXPORT KF5JSTargets DESTINATION "${CMAKECONFIG_INSTALL_DIR}" FILE KF5JST
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/kjs_version.h DESTINATION ${KDE_INSTALL_INCLUDEDIR_KF5} COMPONENT Devel )
 
-kdoctools_install(po)
+if(KF5DocTools_FOUND)
+    kdoctools_install(po)
+endif()
 
 feature_summary(WHAT ALL FATAL_ON_MISSING_REQUIRED_PACKAGES)
