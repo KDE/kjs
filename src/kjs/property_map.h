@@ -135,7 +135,7 @@ public:
 
     // This /computes/ whether the table has getters or setters, while the above is
     // used to cache the result. In other words, one usually does
-    // setHasGetterSetterProperties(containsGettersOrSetters()) whenver
+    // setHasGetterSetterProperties(containsGettersOrSetters()) whenever
     // there is a reason to believe that the result has changed
     bool containsGettersOrSetters() const;
 private:

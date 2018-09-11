@@ -1,5 +1,5 @@
 /*
- *  A utilitity for building various tables and specializations for the
+ *  A utility for building various tables and specializations for the
  *  KJS Frostbyte bytecode
  *
  *  Copyright (C) 2007, 2008 Maks Orlovich (maksim@kde.org)
@@ -93,7 +93,7 @@ private:
 
     StringList          operationNames;
     unsigned            operationFlags;
-    map<string, string> operationRetTypes; // uglily enough specified on the impl. I suck.
+    map<string, string> operationRetTypes; // ugly enough specified on the impl. I suck.
     vector<Operation>   operations;
     map<string, Operation> implementations;
 

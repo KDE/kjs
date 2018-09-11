@@ -585,10 +585,10 @@ void ArrayInstance::putDirect(unsigned i, JSValue *value, int attributes)
         return;
     }
 
-    // note: an invariant here is that indeces < sparseArrayCutoff
+    // note: an invariant here is that indices < sparseArrayCutoff
     // are always inside the vector portion.
 
-    // lowish indeces or high density -> we have decided that we'll put the new item into the vector.
+    // lowish indices or high density -> we have decided that we'll put the new item into the vector.
     // Fast case is when there is no sparse map, so we can increase the vector size without moving values from the sparse map.
     if (!map || map->isEmpty()) {
         increaseVectorLength(i + 1);

@@ -12,7 +12,7 @@
 #ifndef ECMATEST_H
 #define ECMATEST_H
 
-#include <QtCore/QObject>
+#include <QObject>
 
 class ECMAscriptTest : public QObject
 {

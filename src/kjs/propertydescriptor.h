@@ -79,14 +79,14 @@ public:
     // PropertyDescriptor. New Attributes are set depending if Descriptor has
     // enumerable/writeable/configurableSet, if absent default is used.
     // NOTE: As interval have enumerable/writable/configurable always set and
-    // javascript object dont, the order matters here.
+    // javascript object don't, the order matters here.
     // In this case the correct order is: current.attributesWithOverride(new)
     // where new is the javascript object that might not have all attributes set.
     unsigned int attributesWithOverride(PropertyDescriptor &other) const;
 
 private:
     // Check if PropertyDescriptor really is the same. This is private for
-    // internal use only, so that it will not easily be confussed with equalTo.
+    // internal use only, so that it will not easily be confused with equalTo.
     // This function does compared set Attributes.
     bool operator==(PropertyDescriptor &other) const;
 

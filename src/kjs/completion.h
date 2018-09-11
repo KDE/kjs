@@ -29,7 +29,7 @@
 namespace KJS
 {
 
-typedef unsigned Addr; // ### should there be some separare types h?
+typedef unsigned Addr; // ### should there be some separate types h?
 
 class Node;
 class JSValue;

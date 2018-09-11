@@ -232,7 +232,7 @@ public:
     // w/o generateRefBegin
     virtual OpValue generateRefDelete(CompileState *) = 0;
 
-    // For function calls, we also do a specialized lookup, getting both the valie and the
+    // For function calls, we also do a specialized lookup, getting both the value and the
     // scope/this, also making sure it's not an activation.
     virtual void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut) = 0;
 };

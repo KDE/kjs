@@ -195,7 +195,7 @@ public:
                               JSObject *function, const List &args);
 
     /**
-     * Called when the inteprreter exits an execution context. This always
+     * Called when the interpreter exits an execution context. This always
      * corresponds to a previous call to enterContext()
      *
      * The default implementation does nothing. Override this method if

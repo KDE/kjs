@@ -100,7 +100,7 @@ public:
     virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
     JSValue *getValueProperty(ExecState *, int token) const;
 
-    // If resources are exhaused during a match, exec parameter will have an exception
+    // If resources are exhausted during a match, exec parameter will have an exception
     // set, and endOffset will be -1
     UString performMatch(RegExp *, ExecState *, const RegExpStringContext &, const UString &,
                          int startOffset = 0, int *endOffset = nullptr, int **ovector = nullptr);

@@ -19,6 +19,9 @@
  *
  */
 
+#ifndef NODES2BYTECODE_H
+#define NODES2BYTECODE_H
+
 #include "nodes.h"
 #include "CompileState.h"
 
@@ -34,3 +37,4 @@ struct CompileReference {
 
 }
 
+#endif

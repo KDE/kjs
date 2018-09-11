@@ -75,7 +75,7 @@ public:
     template<typename T, typename HashTranslator> const_iterator find(const T &) const;
     template<typename T, typename HashTranslator> bool contains(const T &) const;
 
-    // The return value is a pair of an interator to the new value's location,
+    // The return value is a pair of an iterator to the new value's location,
     // and a bool that is true if an new entry was added.
     pair<iterator, bool> add(const ValueType &);
 

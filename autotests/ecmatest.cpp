@@ -18,8 +18,8 @@
 #include "JSVariableObject.h"
 #include "Parser.h"
 
-#include <QtCore/QMap>
-#include <QtCore/QDebug>
+#include <QMap>
+#include <QDebug>
 
 // Let the interpreter create its own global Object instead of using our selfcreated
 #define USE_KJS_GLOBAL 1

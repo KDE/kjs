@@ -324,7 +324,7 @@ public:
      *
      * @param exec The current execution state
      * @param hint The desired primitive type to convert to
-     * @return A primitive value converted from the objetc. Note that the
+     * @return A primitive value converted from the object. Note that the
      * type of primitive value returned may not be the same as the requested
      * hint.
      */

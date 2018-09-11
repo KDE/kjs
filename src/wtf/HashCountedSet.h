@@ -57,7 +57,7 @@ public:
     unsigned count(const ValueType &value) const;
 
     // increases the count if an equal value is already present
-    // the return value is a pair of an interator to the new value's location,
+    // the return value is a pair of an iterator to the new value's location,
     // and a bool that is true if an new entry was added
     std::pair<iterator, bool> add(const ValueType &value);
 

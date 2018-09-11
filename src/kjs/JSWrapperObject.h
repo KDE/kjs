@@ -40,7 +40,7 @@ public:
 
     /**
      * Returns the internal value of the object. This is used for objects such
-     * as String and Boolean which are wrappers for native types. The interal
+     * as String and Boolean which are wrappers for native types. The internal
      * value is the actual value represented by the wrapper objects.
      *
      * @see ECMA 8.6.2

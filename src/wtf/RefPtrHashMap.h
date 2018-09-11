@@ -18,6 +18,9 @@
  *
  */
 
+#ifndef REFPTRHASHMAP_H
+#define REFPTRHASHMAP_H
+
 namespace WTF
 {
 
@@ -347,3 +350,5 @@ HashMap<RefPtr<T>, U, V, W, MappedTraits>::take(RawKeyType key)
 }
 
 } // namespace WTF
+
+#endif

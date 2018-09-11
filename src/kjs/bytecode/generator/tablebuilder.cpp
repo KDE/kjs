@@ -1,5 +1,5 @@
 /*
- *  A utilitity for building various tables and specializations for the
+ *  A utility for building various tables and specializations for the
  *  KJS Frostbyte bytecode
  *
  *  Copyright (C) 2007, 2008 Maks Orlovich (maksim@kde.org)

@@ -45,7 +45,7 @@ extern "C" { // bug with some libc5 distributions
 namespace KJS
 {
 
-// Represents a strign re-encoded to whatever PCRE can handle
+// Represents a string re-encoded to whatever PCRE can handle
 class RegExpStringContext
 {
 public:

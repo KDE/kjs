@@ -192,7 +192,7 @@ JSValue *TestFunctionImp::callAsFunction(ExecState *exec, JSObject *, const List
 
 #if PLATFORM(WIN_OS) && defined(HAVE_CRTDBG_H) && !defined(__MINGW32__)
 // Use SEH for Release builds only to get rid of the crash report dialog
-// (luckyly the same tests fail in Release and Debug builds so far). Need to
+// (luckily the same tests fail in Release and Debug builds so far). Need to
 // be in a separate main function because the kjsmain function requires object
 // unwinding.
 
