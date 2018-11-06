@@ -23,7 +23,7 @@
 #define KJSOBJECT_H
 
 #include "kjsapi_export.h"
-#include <QtCore/QString>
+#include <QString>
 
 class QDateTime;
 class KJSContext;
