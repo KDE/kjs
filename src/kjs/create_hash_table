@@ -237,7 +237,7 @@ sub output() {
   if ($hashsize eq 0) {
     # To make the hash table lookup code fast, we don't allow tables of size 0.
     # That way it can do a modulo by the size without a special case to avoid division by 0.
-    print "   \{ 0, 0, 0, 0, 0 \}\n";
+    print "   \{ nullptr, 0, 0, 0, nullptr \}\n";
     $hashsize = 1;
     $size = 1;
   } else {
@@ -256,11 +256,11 @@ sub output() {
         if (defined($links[$i])) {
           print "&" . $nameEntries . "[" . $links[$i] . "]" . " \}";
         } else {
-          print "0 \}"
+          print "nullptr \}"
         }
         print "/* " . $hashes[$entry] . " */ ";
       } else {
-        print "   \{ 0, 0, 0, 0, 0 \}";
+        print "   \{ nullptr, 0, 0, 0, nullptr \}";
       }
       print "," unless ($i == $size - 1);
       print "\n";

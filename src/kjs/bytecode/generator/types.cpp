@@ -112,7 +112,7 @@ void TypeTable::generateCode()
         out(OpCpp) << "    case Conv_" << inf.name << ":\n";
         out(OpCpp) << "        out.type = OpType_" << inf.to.name << ";\n";
         out(OpCpp) << "        out.value." << inf.to.field() << " = "
-                   << "convert" << inf.name << "(0, "
+                   << "convert" << inf.name << "(nullptr, "
                    << "original->value." << inf.from.field() << ");\n";
 
         out(OpCpp) << "        break;\n";

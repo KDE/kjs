@@ -192,16 +192,16 @@ void CodeGen::emitRegStore(CompileState* comp, OpValue* regNum, OpValue* val)
 
     switch (val->type) {
     case OpType_bool:
-        emitOp(comp, Op_RegPutBool, 0, regNum, val);
+        emitOp(comp, Op_RegPutBool, nullptr, regNum, val);
         break;
     case OpType_int32:
-        emitOp(comp, Op_RegPutInt32, 0, regNum, val);
+        emitOp(comp, Op_RegPutInt32, nullptr, regNum, val);
         break;
     case OpType_value:
-        emitOp(comp, Op_RegPutValue, 0, regNum, val);
+        emitOp(comp, Op_RegPutValue, nullptr, regNum, val);
         break;
     case OpType_number:
-        emitOp(comp, Op_RegPutNumber, 0, regNum, val);
+        emitOp(comp, Op_RegPutNumber, nullptr, regNum, val);
         break;
     default:
         fprintf(stderr, "Don't know how to store type to register:%s\n", OpTypeVals[val->type]);
@@ -219,7 +219,7 @@ Addr CodeGen::emitOp(CompileState* comp, OpName baseInstr,
     CodeBlock& block = comp->codeBlock();
     const Op* const* cands = opSpecializations[baseInstr];
 
-    const Op* cheapest = 0;
+    const Op* cheapest = nullptr;
     int    cheapestCost = 0;
     ConvOp cheapestConvOps[4] = {Conv_NoConversion, Conv_NoConversion, Conv_NoConversion};
 
@@ -383,7 +383,7 @@ static void dumpParam(CodeBlock& block, size_t offset, OpType type, bool wasImm)
         break;
     case OpType_value:
         // Immediate value -- should go through JSImmediate stuff..
-        std::fprintf(stderr, "<ival:%s>", reinterpret_cast<WideArg*>(block.data() + offset)->valueVal->toString(0).ascii());
+        std::fprintf(stderr, "<ival:%s>", reinterpret_cast<WideArg*>(block.data() + offset)->valueVal->toString(nullptr).ascii());
         break;
     case OpType_ident:
         std::fprintf(stderr, "%s", reinterpret_cast<WideArg*>(block.data() + offset)->identVal->ustring().ascii());

@@ -429,7 +429,7 @@ operation Throw {
 
 operation ContBreakInTryFinally {
     impl void (addr dest) [[
-        exec->setAbruptCompletion(Completion(Continue /*or break, doesn't matter*/, 0, dest));
+        exec->setAbruptCompletion(Completion(Continue /*or break, doesn't matter*/, nullptr, dest));
     ]]
 }
 
@@ -1259,7 +1259,7 @@ operation CtorCall {
 operation EvalFuncExpr {
     impl value(ident ident, node body) [[
         bool named = !ident->isNull();
-        JSObject *functionScopeObject = 0;
+        JSObject *functionScopeObject = nullptr;
 
         if (named) {
             // named FunctionExpressions can recursively call themselves,

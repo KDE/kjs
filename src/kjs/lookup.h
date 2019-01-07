@@ -379,8 +379,8 @@ inline KJS::JSObject *cacheGlobalObject(KJS::ExecState *exec, const KJS::Identif
     };
 
 #define KJS_IMPLEMENT_PROTOTYPE_IMP(ClassName,ClassProto,ClassFunc,ClassProtoProto) \
-    const KJS::ClassInfo ClassProto::info = { ClassName, 0, &ClassProto##Table, 0 }; \
-    KJS::Identifier* ClassProto::s_name = 0; \
+    const KJS::ClassInfo ClassProto::info = { ClassName, nullptr, &ClassProto##Table, nullptr }; \
+    KJS::Identifier* ClassProto::s_name = nullptr; \
     KJS::JSObject *ClassProto::self(KJS::ExecState *exec) \
     { \
         return KJS_CACHEGLOBALOBJECT_NS cacheGlobalObject<ClassProto>(exec, *name()); \

@@ -99,7 +99,7 @@ void TableBuilder::generateCode()
         for (unsigned v = 0; v < variants.size(); ++v) {
             out(OpCpp) << "&opsForOpCodes[OpByteCode_" << variants[v] << "], ";
         }
-        out(OpCpp) << "0};\n";
+        out(OpCpp) << "nullptr};\n";
     }
     out(OpCpp) << "\n";
 

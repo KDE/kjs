@@ -507,7 +507,7 @@ static inline void *currentThreadStackBase()
     thr_stksegment(&s);
     return s.ss_sp;
     // NOTREACHED
-    void *stackBase = 0;
+    void *stackBase = nullptr;
 #elif PLATFORM(UNIX)
     static void *stackBase = nullptr;
     static pthread_t stackThread;

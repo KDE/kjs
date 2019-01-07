@@ -182,7 +182,7 @@ NEVER_INLINE void changeDebugContext(Dir d, ExecState* exec, Node* n) {
     FunctionBodyNode* body = static_cast<FunctionBodyNode*>(n);
     Debugger* dbg = exec->dynamicInterpreter()->debugger();
     List args;
-    FunctionImp* fn = 0;
+    FunctionImp* fn = nullptr;
 
     // Find the activation that contains arguments, fn
     const ScopeChain& chain = exec->scopeChain();
