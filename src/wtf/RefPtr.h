@@ -86,7 +86,7 @@ public:
     {
         if (T *ptr = m_ptr) {
             ptr->deref();
-        } m_ptr = 0;
+        } m_ptr = nullptr;
     }
     PassRefPtr<T> release()
     {

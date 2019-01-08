@@ -29,7 +29,7 @@ namespace WTF
 template <class T> class SharedPtr
 {
 public:
-    SharedPtr() : m_ptr(0) {}
+    SharedPtr() : m_ptr(nullptr) {}
     SharedPtr(T *ptr) : m_ptr(ptr)
     {
         if (ptr) {
@@ -59,11 +59,11 @@ public:
     // FIXME: Deprecate in favor of operators below, then remove?
     bool isNull() const
     {
-        return m_ptr == 0;
+        return m_ptr == nullptr;
     }
     bool notNull() const
     {
-        return m_ptr != 0;
+        return m_ptr != nullptr;
     }
 
     // FIXME: Deprecate in favor of operator=, then remove?
@@ -71,7 +71,7 @@ public:
     {
         if (T *ptr = m_ptr) {
             ptr->deref();
-        } m_ptr = 0;
+        } m_ptr = nullptr;
     }
     void reset(T *o)
     {
@@ -98,11 +98,11 @@ public:
 
     bool operator!() const
     {
-        return m_ptr == 0;
+        return m_ptr == nullptr;
     }
     operator bool() const
     {
-        return m_ptr != 0;
+        return m_ptr != nullptr;
     }
 
     SharedPtr &operator=(const SharedPtr &);

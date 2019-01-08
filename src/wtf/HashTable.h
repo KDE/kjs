@@ -1193,9 +1193,9 @@ void HashTable<Key, Value, Extractor, HashFunctions, Traits, KeyTraits>::invalid
     const_iterator *next;
     for (const_iterator *p = m_iterators; p; p = next) {
         next = p->m_next;
-        p->m_table = 0;
-        p->m_next = 0;
-        p->m_previous = 0;
+        p->m_table = nullptr;
+        p->m_next = nullptr;
+        p->m_previous = nullptr;
     }
     m_iterators = 0;
 }
@@ -1205,11 +1205,11 @@ void addIterator(const HashTable<Key, Value, Extractor, HashFunctions, Traits, K
                  HashTableConstIterator<Key, Value, Extractor, HashFunctions, Traits, KeyTraits> *it)
 {
     it->m_table = table;
-    it->m_previous = 0;
+    it->m_previous = nullptr;
 
     // Insert iterator at head of doubly-linked list of iterators.
     if (!table) {
-        it->m_next = 0;
+        it->m_next = nullptr;
     } else {
         ASSERT(table->m_iterators != it);
         it->m_next = table->m_iterators;
@@ -1246,9 +1246,9 @@ void removeIterator(HashTableConstIterator<Key, Value, Extractor, HashFunctions,
         }
     }
 
-    it->m_table = 0;
-    it->m_next = 0;
-    it->m_previous = 0;
+    it->m_table = nullptr;
+    it->m_next = nullptr;
+    it->m_previous = nullptr;
 }
 
 #endif // CHECK_HASHTABLE_ITERATORS

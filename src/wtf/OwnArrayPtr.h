@@ -44,7 +44,7 @@ public:
     T *release()
     {
         T *ptr = m_ptr;
-        m_ptr = 0;
+        m_ptr = nullptr;
         return ptr;
     }
 

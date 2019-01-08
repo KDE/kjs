@@ -33,7 +33,7 @@ template <typename T> PassRefPtr<T> adoptRef(T *);
 template<typename T> class PassRefPtr
 {
 public:
-    PassRefPtr() : m_ptr(0) {}
+    PassRefPtr() : m_ptr(nullptr) {}
     PassRefPtr(T *ptr) : m_ptr(ptr)
     {
         if (ptr) {
@@ -71,7 +71,7 @@ public:
     {
         if (T *ptr = m_ptr) {
             ptr->deref();
-        } m_ptr = 0;
+        } m_ptr = nullptr;
     }
     T *releaseRef() const
     {

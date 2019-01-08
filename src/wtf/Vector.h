@@ -271,7 +271,7 @@ public:
     T *releaseBuffer()
     {
         T *buffer = m_buffer;
-        m_buffer = 0;
+        m_buffer = nullptr;
         m_capacity = 0;
         return buffer;
     }
@@ -382,7 +382,7 @@ public:
     T *releaseBuffer()
     {
         if (buffer() == inlineBuffer()) {
-            return 0;
+            return nullptr;
         }
         return Base::releaseBuffer();
     }
