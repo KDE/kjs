@@ -85,6 +85,11 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/opcodes.h ${CMAKE_CURRENT_
           ${CMAKE_CURRENT_SOURCE_DIR}/bytecode/opcodes.h.in
           ${CMAKE_CURRENT_SOURCE_DIR}/bytecode/machine.cpp.in
 )
+set_source_files_properties(
+   ${CMAKE_CURRENT_BINARY_DIR}/opcodes.cpp
+   ${CMAKE_CURRENT_BINARY_DIR}/machine.cpp
+   PROPERTIES SKIP_AUTOMOC TRUE
+)
 
 ########### next target ###############
 
@@ -98,10 +103,14 @@ set(CREATE_HASH_TABLE ${CMAKE_CURRENT_SOURCE_DIR}/create_hash_table )
 
 macro(CREATE_LUT _srcs_LIST _in_FILE _out_FILE _dep_FILE)
 
-   add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${_out_FILE}
-      COMMAND ${PERL_EXECUTABLE} ${CREATE_HASH_TABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${_in_FILE} -i > ${CMAKE_CURRENT_BINARY_DIR}/${_out_FILE}
+   set(_out_FILE "${CMAKE_CURRENT_BINARY_DIR}/${_out_FILE}")
+   add_custom_command(OUTPUT ${_out_FILE}
+      COMMAND ${PERL_EXECUTABLE} ${CREATE_HASH_TABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${_in_FILE} -i > ${_out_FILE}
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_in_FILE} )
-   set( ${_srcs_LIST}  ${${_srcs_LIST}} ${CMAKE_CURRENT_BINARY_DIR}/${_out_FILE})
+
+   set_source_files_properties(${_out_FILE} PROPERTIES SKIP_AUTOMOC TRUE)
+
+   set( ${_srcs_LIST}  ${${_srcs_LIST}} ${_out_FILE})
 endmacro(CREATE_LUT)
 
 create_lut(kjs_LIB_SRCS date_object.cpp date_object.lut.h date_object.cpp)
