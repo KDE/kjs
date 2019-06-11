@@ -88,6 +88,7 @@ inline bool signbit(double num)
 }
 #endif
 
+#if _MSC_VER < 1920
 #ifndef BUILDING_KDE__
 // FIXME: where to get std::numeric_limits from?
 // Work around a bug in Win, where atan2(+-infinity, +-infinity) yields NaN instead of specific values.
@@ -127,7 +128,7 @@ inline double wtf_fmod(double x, double y)
 #define fmod(x, y) wtf_fmod(x, y)
 
 #define atan2(x, y) wtf_atan2(x, y)
-
+#endif // _MSC_VER < 1920
 #endif // #if COMPILER(MSVC)
 
 inline double deg2rad(double d)
