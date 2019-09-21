@@ -642,7 +642,7 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
         JSValue *tv = thisObj->toPrimitive(exec, NumberType);
         if (tv->isNumber()) {
             double ms = tv->toNumber(exec);
-            if (isNaN(ms)) {
+            if (isNaNorInf(ms)) {
                 return jsNull();
             }
         }
@@ -659,7 +659,9 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
     }
 
     if (!thisObj->inherits(&DateInstance::info)) {
-        return throwError(exec, TypeError);
+	if (id == ToString)
+	    return jsString("Invalid Date");
+        return throwError(exec, TypeError, "Incompatible object");
     }
 
     DateInstance *thisDateObj = static_cast<DateInstance *>(thisObj);
