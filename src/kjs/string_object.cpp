@@ -170,6 +170,8 @@ const ClassInfo StringPrototype::info = {"String", &StringInstance::info, &strin
   charAt                StringProtoFunc::CharAt         DontEnum|Function       1
   charCodeAt            StringProtoFunc::CharCodeAt     DontEnum|Function       1
   concat                StringProtoFunc::Concat         DontEnum|Function       1
+  endsWith		StringProtoFunc::EndsWith	DontEnum|Function	1
+  includes		StringProtoFunc::Includes	DontEnum|Function	1
   indexOf               StringProtoFunc::IndexOf        DontEnum|Function       1
   lastIndexOf           StringProtoFunc::LastIndexOf    DontEnum|Function       1
   match                 StringProtoFunc::Match          DontEnum|Function       1
@@ -177,6 +179,7 @@ const ClassInfo StringPrototype::info = {"String", &StringInstance::info, &strin
   search                StringProtoFunc::Search         DontEnum|Function       1
   slice                 StringProtoFunc::Slice          DontEnum|Function       2
   split                 StringProtoFunc::Split          DontEnum|Function       2
+  startsWith		StringProtoFunc::StartsWith	DontEnum|Function	1
   substr                StringProtoFunc::Substr         DontEnum|Function       2
   substring             StringProtoFunc::Substring      DontEnum|Function       2
   toLowerCase           StringProtoFunc::ToLowerCase    DontEnum|Function       0
@@ -556,6 +559,27 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         result = jsString(s);
         break;
     }
+    case EndsWith:
+	if (a0->isObject() && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
+	    return throwError(exec, TypeError, "RegExp reserved for future");
+	}
+	u2 = a0->toString(exec);
+	if (a1->isUndefined())
+	    i = s.size();
+	else
+	    i = minInt(s.size(), a1->toInteger(exec));
+	pos = i - u2.size();
+	result = jsBoolean(pos >= 0 && s.substr(pos, u2.size()) == u2);
+	break;
+    case Includes:
+	if (a0->isObject() && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
+	    return throwError(exec, TypeError, "RegExp reserved for future");
+	}
+	u2 = a0->toString(exec);
+	pos = a1->toInteger(exec);
+	i = s.find(u2, pos);
+	result = jsBoolean(i >= 0);
+	break;
     case IndexOf:
         u2 = a0->toString(exec);
         if (a1->isUndefined()) {
@@ -744,6 +768,14 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         res->put(exec, exec->propertyNames().length, jsNumber(i));
     }
     break;
+    case StartsWith:
+	if (a0->isObject() && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
+	    return throwError(exec, TypeError, "RegExp reserved for future");
+	}
+	u2 = a0->toString(exec);
+	pos = maxInt(0, a1->toInteger(exec));
+	result = jsBoolean(s.substr(pos, u2.size()) == u2);
+	break;
     case Substr: { //B.2.3
         // Note: NaN is effectively handled as 0 here for both length
         // and start, hence toInteger does fine, and removes worries

@@ -109,6 +109,7 @@ public:
            Match, Replace, Search, Slice, Split,
            Substr, Substring, FromCharCode, ToLowerCase, ToUpperCase,
            ToLocaleLowerCase, ToLocaleUpperCase, Trim, LocaleCompare,
+           StartsWith, EndsWith, Includes,
            // ES6 (Draft 08.11.2013
            Repeat
 #ifndef KJS_PURE_ECMA
