@@ -880,7 +880,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         if (exec->hadException())
             return jsUndefined();
         if (n < 0 || KJS::isPosInf(n))
-            return throwError(exec, RangeError);
+            return throwError(exec, RangeError, "Invalid repeat count");
 
         UString ret;
         for (int i = 0; i < n; ++i)
