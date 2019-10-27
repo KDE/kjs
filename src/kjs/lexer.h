@@ -68,6 +68,7 @@ public:
                  InNum0,
                  InHex,
                  InOctal,
+                 InLegacyOctal,
                  InDecimal,
                  InExponentIndicator,
                  InExponent,

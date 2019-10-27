@@ -2,12 +2,20 @@ var x = 0;
 eval("\u0009 \u000B \u000C \u00A0x = 1;");
 shouldBe("x", "1");
 
-// hex (non-normative)
+// hex
 shouldBe("0x0", "0");
 shouldBe("0xF", "15");
 shouldBe("0xFF", "255");
 
-// octal (non-normative)
+// octal
+shouldBe("0o1", "1");
+shouldBe("0o10", "8");
+shouldBe("0O1", "1");
+shouldBe("0O10", "8");
+shouldThrow("0o9");
+shouldThrow("0o19");
+
+// legacy octal (not available in strict mode)
 shouldBe("01", "1");
 shouldBe("010", "8");
 shouldBe("09", "9");

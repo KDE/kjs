@@ -369,6 +369,8 @@ int Lexer::lex()
             if (current == 'x' || current == 'X') {
                 record8(current);
                 state = InHex;
+            } else if (current == 'o' || current == 'O') {
+                state = InOctal;
             } else if (current == '.') {
                 record8(current);
                 state = InDecimal;
@@ -377,7 +379,7 @@ int Lexer::lex()
                 state = InExponentIndicator;
             } else if (isOctalDigit(current)) {
                 record8(current);
-                state = InOctal;
+                state = InLegacyOctal;
             } else if (isDecimalDigit(current)) {
                 record8(current);
                 state = InDecimal;
@@ -393,6 +395,15 @@ int Lexer::lex()
             }
             break;
         case InOctal:
+          if (isOctalDigit(current)) {
+            record8(current);
+          } else if (isDecimalDigit(current)) {
+            setDone(Bad);
+          } else {
+            setDone(Octal);
+          }
+          break;
+        case InLegacyOctal:
             if (isOctalDigit(current)) {
                 record8(current);
             } else if (isDecimalDigit(current)) {
