@@ -1,0 +1,95 @@
+<script>
+var rowsLogged = 0;
+
+function doLog(msg) {
+    var table = document.getElementById("output");
+    var col   = table.tBodies[0].rows[rowsLogged].cells[0];
+    col.innerHTML = msg;
+    rowsLogged++;
+}
+
+function doIt()
+{
+    var r = RegExp("foo","g");
+    doLog(r.compile.length);
+
+
+    doLog(r);
+
+    r.compile("bar");
+    doLog(r);
+
+    //Check flags?
+    r.compile("baz", "g");
+    doLog(r);
+
+    //Test compiling a broken regexp -- exception raised, object unchanged.
+    var exc = false;
+    try {
+        r.compile("(");
+    } catch (e) {
+        doLog("exception!");
+        exc = true;
+    }
+
+    if (!exc) doLog("OK?");
+    doLog(r);
+
+    //Check broken flags?
+    exc = false;
+    try {
+        r.compile("glarch", "x");
+    } catch (e) {
+        doLog("exception!");
+        exc = true;
+    }
+
+    if (!exc) doLog("OK?");
+    doLog(r);
+
+}
+
+</script>
+
+<body onload="doIt()">
+<table id="output" border="1">
+    <thead>
+        <th>Actual</th>
+        <th>Expected</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td></td>
+            <td>1 <!-- 2 in IE, actually --></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>/foo/g</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>/bar/</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>/baz/g</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>exception!</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>/baz/g</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>exception!</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>/baz/g</td>
+        </tr>
+
+    </tbody>
+</table>

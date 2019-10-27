@@ -1,0 +1,172 @@
+<script>
+var pasteMode = false;
+
+function openTag(name) {
+  if (pasteMode)
+    return "&lt;" + name + "&gt;";
+  else
+    return "<" + name + ">";
+}
+
+function closeTag(name) {
+  return openTag("/" + name) + (pasteMode ? "&lt;br&gt;" : "");
+}
+
+function isReserved(name) {
+  
+  worksFor = "";
+  try {
+    eval("var " + name + " = 42;");
+    worksFor += "var ";
+  }
+  catch (e) {}
+
+  try {
+    eval("o = new Object; o." + name + " = 42;");
+    worksFor += "fld ";
+  }
+  catch (e) {}
+
+  try {
+    eval("function " + name + "() {}");
+    worksFor += "fn ";
+  }
+  catch (e) {}
+
+  if (worksFor == "")
+    worksFor = openTag("font color='red'") + "Nothing" + closeTag("font");
+  else
+    worksFor = openTag("font color='blue'") + worksFor + closeTag("font");
+
+  return worksFor;
+}
+
+function doLog(msg) {
+  document.getElementById("log").innerHTML += msg + "<br>";
+}
+
+function testKW(name) {
+  doLog(name + " works for:" + isReserved(name));
+}
+
+function doIt() {
+  testKW("sanityCheck");
+  testKW("function");
+  //
+  testKW("abstract");
+  testKW("boolean");
+  testKW("byte");
+  testKW("char");
+  testKW("class");
+  testKW("const");
+  testKW("debugger");
+  testKW("double");
+  testKW("enum");
+  testKW("export");
+  testKW("extends");
+  testKW("final");
+  testKW("float");
+  testKW("goto");
+  testKW("implements");
+  testKW("import");
+  testKW("int");
+  testKW("interface");
+  testKW("long");
+  testKW("native");
+  testKW("package");
+  testKW("private");
+  testKW("protected");
+  testKW("public");
+  testKW("short");
+  testKW("static");
+  testKW("super");
+  testKW("synchronized");
+  testKW("throws");
+  testKW("transient");
+  testKW("volatile");
+  document.close();
+}
+</script>
+<body onload="doIt()">
+<table>
+  <tr>
+    <th>Current</th>
+    <th>Mozilla</th>
+    <th>IE</th>
+  <tr>
+    <td>
+      <div id="log">
+    </td>
+    <td>
+sanityCheck works for:<font color='blue'>var fld fn </font><br>
+function works for:<font color='red'>Nothing</font><br>
+abstract works for:<font color='blue'>var fld fn </font><br>
+boolean works for:<font color='blue'>var fld fn </font><br>
+byte works for:<font color='blue'>var fld fn </font><br>
+char works for:<font color='blue'>var fld fn </font><br>
+class works for:<font color='blue'>var fld fn </font><br>
+const works for:<font color='red'>Nothing</font><br>
+debugger works for:<font color='red'>Nothing</font><br>
+double works for:<font color='blue'>var fld fn </font><br>
+enum works for:<font color='blue'>var fld fn </font><br>
+export works for:<font color='red'>Nothing</font><br>
+extends works for:<font color='blue'>var fld fn </font><br>
+final works for:<font color='blue'>var fld fn </font><br>
+float works for:<font color='blue'>var fld fn </font><br>
+goto works for:<font color='blue'>var fld fn </font><br>
+implements works for:<font color='blue'>var fld fn </font><br>
+import works for:<font color='red'>Nothing</font><br>
+int works for:<font color='blue'>var fld fn </font><br>
+interface works for:<font color='blue'>var fld fn </font><br>
+long works for:<font color='blue'>var fld fn </font><br>
+native works for:<font color='blue'>var fld fn </font><br>
+package works for:<font color='blue'>var fld fn </font><br>
+private works for:<font color='blue'>var fld fn </font><br>
+protected works for:<font color='blue'>var fld fn </font><br>
+public works for:<font color='blue'>var fld fn </font><br>
+short works for:<font color='blue'>var fld fn </font><br>
+static works for:<font color='blue'>var fld fn </font><br>
+super works for:<font color='blue'>var fld fn </font><br>
+synchronized works for:<font color='blue'>var fld fn </font><br>
+throws works for:<font color='blue'>var fld fn </font><br>
+transient works for:<font color='blue'>var fld fn </font><br>
+volatile works for:<font color='blue'>var fld fn </font><br>
+    </td>
+    <td>
+sanityCheck works for:<font color='blue'>var fld fn </font><br>
+function works for:<font color='red'>Nothing</font><br>
+abstract works for:<font color='blue'>var fld fn </font><br>
+boolean works for:<font color='blue'>var fld fn </font><br>
+byte works for:<font color='blue'>var fld fn </font><br>
+char works for:<font color='blue'>var fld fn </font><br>
+class works for:<font color='red'>Nothing</font><br>
+const works for:<font color='red'>Nothing</font><br>
+debugger works for:<font color='red'>Nothing</font><br>
+double works for:<font color='blue'>var fld fn </font><br>
+enum works for:<font color='red'>Nothing</font><br>
+export works for:<font color='red'>Nothing</font><br>
+extends works for:<font color='red'>Nothing</font><br>
+final works for:<font color='blue'>var fld fn </font><br>
+float works for:<font color='blue'>var fld fn </font><br>
+goto works for:<font color='blue'>var fld fn </font><br>
+implements works for:<font color='blue'>var fld fn </font><br>
+import works for:<font color='red'>Nothing</font><br>
+int works for:<font color='blue'>var fld fn </font><br>
+interface works for:<font color='blue'>var fld fn </font><br>
+long works for:<font color='blue'>var fld fn </font><br>
+native works for:<font color='blue'>var fld fn </font><br>
+package works for:<font color='blue'>var fld fn </font><br>
+private works for:<font color='blue'>var fld fn </font><br>
+protected works for:<font color='blue'>var fld fn </font><br>
+public works for:<font color='blue'>var fld fn </font><br>
+short works for:<font color='blue'>var fld fn </font><br>
+static works for:<font color='blue'>var fld fn </font><br>
+super works for:<font color='red'>Nothing</font><br>
+synchronized works for:<font color='blue'>var fld fn </font><br>
+throws works for:<font color='blue'>var fld fn </font><br>
+transient works for:<font color='blue'>var fld fn </font><br>
+volatile works for:<font color='blue'>var fld fn </font><br>
+    </td>
+  <tr>
+  
+  
