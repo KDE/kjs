@@ -1,6 +1,6 @@
 /*
  *  This file is part of the KDE libraries
- *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
+ *  Copyright (C) 1999-2019 Harri Porten (porten@kde.org)
  *  Copyright (C) 2007 Apple Inc.
  *
  *  This library is free software; you can redistribute it and/or
@@ -69,11 +69,13 @@ public:
                  InHex,
                  InOctal,
                  InLegacyOctal,
+                 InBinary,
                  InDecimal,
                  InExponentIndicator,
                  InExponent,
                  Hex,
                  Octal,
+                 Binary,
                  Number,
                  String,
                  Eof,
@@ -101,6 +103,7 @@ public:
     static bool isIdentStart(int);
     static bool isIdentPart(int);
     static bool isHexDigit(int);
+    static bool isBinaryDigit(int);
 
     bool sawError() const
     {

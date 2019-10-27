@@ -21,6 +21,17 @@ shouldThrow("0x");
 shouldThrow("0xZ");
 shouldThrow("0xFZ");
 
+// binary
+shouldBe("0b0", "0");
+shouldBe("0B0", "0");
+shouldBe("0b1", "1");
+shouldBe("0b10", "2");
+shouldBe("0b11111111", "255");
+shouldThrow("0b");
+shouldThrow("0b2");
+shouldThrow("0b12");
+shouldThrow("0b1in");
+
 // octal
 shouldBe("0o1", "1");
 shouldBe("0o10", "8");

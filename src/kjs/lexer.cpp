@@ -369,6 +369,9 @@ int Lexer::lex()
             if (current == 'x' || current == 'X') {
                 record8(current);
                 state = InHex;
+            } else if (current == 'b' || current == 'B') {
+                m_buffer8.clear();
+                state = InBinary;
             } else if (current == 'o' || current == 'O') {
                 state = InOctal;
             } else if (current == '.') {
@@ -411,6 +414,15 @@ int Lexer::lex()
                 state = InDecimal;
             } else {
                 setDone(Octal);
+            }
+            break;
+        case InBinary:
+            if (isBinaryDigit(current)) {
+                record8(current);
+            } else if (isDecimalDigit(current)) {
+                setDone(Bad);
+            } else {
+                setDone(Binary);
             }
             break;
         case InNum:
@@ -511,7 +523,8 @@ int Lexer::lex()
     }
 
     // no identifiers allowed directly after numeric literal, e.g. "3in" is bad
-    if ((state == Number || state == Octal || state == Hex) && isIdentStart(current)) {
+    if ((state == Number || state == Octal || state == Hex || state == Binary) &&
+	isIdentStart(current)) {
         state = Bad;
     }
 
@@ -557,6 +570,21 @@ int Lexer::lex()
             state = Number;
         } else {
             // no octal digits after 0o
+            state = Bad;
+        }
+    } else if (state == Binary) { // scan binary numbers
+        // buffer contains the binary digits after "0b". E.g. "1010\0"
+        if (m_buffer8.size () > 1) {
+            const char *p = m_buffer8.data();
+            while (char c = *p++) {
+                dval *= 2;
+                dval += convertHex(c);
+            }
+            if (dval >= mantissaOverflowLowerBound) {
+                dval = parseIntOverflow(m_buffer8.data() + 2, p - (m_buffer8.data() + 3), 2);
+            }
+            state = Number;
+        } else {
             state = Bad;
         }
     }
@@ -718,6 +746,11 @@ bool Lexer::isHexDigit(int c)
     return ((c >= '0' && c <= '9') ||
             (c >= 'a' && c <= 'f') ||
             (c >= 'A' && c <= 'F'));
+}
+
+bool Lexer::isBinaryDigit(int c)
+{
+    return c == '0' || c == '1';
 }
 
 bool Lexer::isOctalDigit(int c)
