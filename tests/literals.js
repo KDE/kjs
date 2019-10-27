@@ -2,13 +2,15 @@ var x = 0;
 eval("\u0009 \u000B \u000C \u00A0x = 1;");
 shouldBe("x", "1");
 
-// decimal
+// integer
 shouldBe("0", "0");
 shouldBe("1", "1");
 shouldBe("123", "123");
 shouldBe("-123", "-123");
+shouldBe("String(9007199254740992)", "'9007199254740992'");
+shouldBe("String(144115188075855870)", "'144115188075855870'");
 
-// exponential
+// scientific
 shouldBe("12E02", "1200");
 shouldBe("2E-02", "0.02");
 
@@ -17,6 +19,8 @@ shouldBe("0x0", "0");
 shouldBe("0xF", "15");
 shouldBe("0XF", "15");
 shouldBe("0xFF", "255");
+shouldBe("0x20000000000000", "9007199254740992");
+shouldBe("0x200000000000000", "144115188075855870");
 shouldThrow("0x");
 shouldThrow("0xZ");
 shouldThrow("0xFZ");
@@ -37,6 +41,9 @@ shouldBe("0o1", "1");
 shouldBe("0o10", "8");
 shouldBe("0O1", "1");
 shouldBe("0O10", "8");
+shouldBe("0o400000000000000000", "9007199254740992");
+shouldBe("0o10000000000000000000", "144115188075855870");
+
 shouldThrow("0o");
 shouldThrow("0o9");
 shouldThrow("0o19");

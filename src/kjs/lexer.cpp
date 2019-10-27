@@ -367,12 +367,13 @@ int Lexer::lex()
             break;
         case InNum0:
             if (current == 'x' || current == 'X') {
-                record8(current);
+                m_buffer8.clear();
                 state = InHex;
             } else if (current == 'b' || current == 'B') {
                 m_buffer8.clear();
                 state = InBinary;
             } else if (current == 'o' || current == 'O') {
+                m_buffer8.clear();
                 state = InOctal;
             } else if (current == '.') {
                 record8(current);
@@ -398,14 +399,14 @@ int Lexer::lex()
             }
             break;
         case InOctal:
-          if (isOctalDigit(current)) {
-            record8(current);
-          } else if (isDecimalDigit(current)) {
-            setDone(Bad);
-          } else {
-            setDone(Octal);
-          }
-          break;
+            if (isOctalDigit(current)) {
+                record8(current);
+            } else if (isDecimalDigit(current)) {
+                setDone(Bad);
+            } else {
+                setDone(Octal);
+            }
+            break;
         case InLegacyOctal:
             if (isOctalDigit(current)) {
                 record8(current);
@@ -541,15 +542,15 @@ int Lexer::lex()
     if (state == Number) {
         dval = kjs_strtod(m_buffer8.data(), nullptr);
     } else if (state == Hex) { // scan hex numbers
-        // buffer contains "0x...\0"
-        if (m_buffer8.size() > 3) {
-            const char *p = m_buffer8.data() + 2;
+        // buffer contains "...\0" found after 0x
+        if (m_buffer8.size() > 1) {
+            const char *p = m_buffer8.data();
             while (char c = *p++) {
                 dval *= 16;
                 dval += convertHex(c);
             }
             if (dval >= mantissaOverflowLowerBound) {
-                dval = parseIntOverflow(m_buffer8.data() + 2, p - (m_buffer8.data() + 3), 16);
+                dval = parseIntOverflow(m_buffer8.data(), m_buffer8.size() - 1, 16);
             }
             state = Number;
         } else {
@@ -557,16 +558,16 @@ int Lexer::lex()
             state = Bad;
         }
     } else if (state == Octal) {   // scan octal number
-        // buffer contains "o...\0"
-        if (m_buffer8.size() > 2) {
-            const char *p = m_buffer8.data() + 1;
+        // buffer contains "...\0" found after 0o
+        if (m_buffer8.size() > 1) {
+            const char *p = m_buffer8.data();
             while (char c = *p++) {
                 dval *= 8;
                 dval += c - '0';
             }
             if (dval >= mantissaOverflowLowerBound) {
-                dval = parseIntOverflow(m_buffer8.data() + 1, p - (m_buffer8.data() + 2), 8);
-        }
+                dval = parseIntOverflow(m_buffer8.data(), m_buffer8.size() - 1, 8);
+            }
             state = Number;
         } else {
             // no octal digits after 0o
