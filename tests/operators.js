@@ -223,7 +223,7 @@ shouldBe("NaN >= 0", "false");
 
 // strict comparison ===
 shouldBe("0 === false", "false");
-//shouldBe("undefined === undefined", "true"); // aborts in IE5 (undefined is not defined ;)
+shouldBe("undefined === undefined", "true");
 shouldBe("null === null", "true");
 shouldBe("NaN === NaN", "false");
 shouldBe("0.0 === 0", "true");
@@ -298,5 +298,16 @@ shouldBe("0 == false", "true");
 shouldBe("0 == true", "false");
 shouldBe("1 == true", "true");
 
+shouldBe("var i = 1; i += 1", "2");
+shouldBe("var i = 1; i -= 1", "0");
+shouldBe("var i = 2; i *= 3", "6");
+shouldBe("var i = 3; i /= 2", "1.5");
+shouldBe("var i = 7; i %= 3", "1");
+shouldBe("var i = 7; i <<= 1", "14");
+shouldBe("var i = 8; i >>= 1", "4");
+shouldBe("var i = -8; i >>>= 24", "255");
+shouldBe("var i = 3; i &= 5", "1");
+shouldBe("var i = 3; i |= 5", "7");
+shouldBe("var i = 3; i ^= 5", "6");
 
 debug("Done.");
