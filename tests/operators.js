@@ -1,3 +1,8 @@
+function isNegativeZero(n)
+{
+  return n == 0 && 1 / n < 0;
+}
+
 // operator !
 shouldBeTrue("!undefined");
 shouldBeTrue("!null");
@@ -93,10 +98,17 @@ shouldBe("null-true", "-1");
 shouldBe("2 * 3", "6");
 shouldBe("true * 3", "3");
 shouldBe("2 * '3'", "6");
+shouldBeTrue("isNaN(NaN * 2)");
+shouldBeTrue("isNaN(2 * NaN)");
+shouldBeTrue("isNaN(NaN * NaN)");
+shouldBeTrue("isNaN(Infinity * 0)");
+shouldBe("Infinity * Infinity", "Infinity");
+shouldBe("Infinity * 1", "Infinity");
+shouldBe("Infinity * -1", "-Infinity");
 
 // division
 shouldBe("6 / 4", "1.5");
-//shouldBe("true / false", "Inf");
+shouldBe("true / false", "Infinity");
 shouldBe("'6' / '2'", "3");
 shouldBeTrue("isNaN('x' / 1)");
 shouldBeTrue("isNaN(1 / NaN)");
@@ -106,16 +118,28 @@ shouldBe("-Infinity / 0", "-Infinity");
 shouldBe("Infinity / 1", "Infinity");
 shouldBe("-Infinity / 1", "-Infinity");
 shouldBeTrue("1 / Infinity == +0");
-shouldBeTrue("1 / -Infinity == -0"); // how to check ?
+shouldBeTrue("isNegativeZero(1 / -Infinity)");
 shouldBeTrue("isNaN(0/0)");
 shouldBeTrue("0 / 1 === 0");
-shouldBeTrue("0 / -1 === -0"); // how to check ?
+shouldBeTrue("isNegativeZero(0 / -1)");
 shouldBe("1 / 0", "Infinity");
 shouldBe("-1 / 0", "-Infinity");
 
 // modulo
 shouldBe("6 % 4", "2");
 shouldBe("'-6' % 4", "-2");
+shouldBe("6 % -4", "2");
+shouldBe("6 % 1.5", "0");
+shouldBe("6.5 % 4", "2.5");
+shouldBeTrue("isNaN(6 % NaN)");
+shouldBeTrue("isNaN(NaN % 2)");
+shouldBeTrue("isNaN(NaN % NaN)");
+shouldBeTrue("isNaN(Infinity % 2)");
+shouldBeTrue("isNaN(6 % 0)");
+shouldBeTrue("isNaN(Infinity % 0)");
+shouldBe("6 % Infinity", "6");
+shouldBe("0 % 1", "0");
+shouldBeTrue("isNegativeZero(-0 % 1)");
 
 shouldBe("2==2", "true");
 shouldBe("1==2", "false");
