@@ -5,6 +5,11 @@ function isNegativeZero(n)
   return n == 0 && 1 / n < 0;
 }
 
+function isPositiveZero(n)
+{
+  return n == 0 && 1 / n > 0;
+}
+
 // self tests
 shouldBeTrue("isNegativeZero(negativeZero)");
 shouldBeFalse("isNegativeZero(0)");
@@ -30,6 +35,12 @@ shouldBe("Math.acos(1)", "0");
 shouldBe("Math.ceil(1.1)", "2");
 shouldBe("String()+Math.sqrt(2)", "String()+Math.SQRT2");
 shouldBe("Math.ceil(1.6)", "2");
+shouldBe("Math.round(Math.exp(3))", "20");
+shouldBeTrue("isNaN(Math.exp(NaN))");
+shouldBe("Math.exp(+0)", "1");
+shouldBe("Math.exp(-0)", "1");
+shouldBeFalse("isFinite(Math.exp(Infinity))");
+shouldBeTrue("isPositiveZero(Math.exp(-Infinity))");
 shouldBe("Math.round(0)", "0");
 shouldBeFalse("isNegativeZero(Math.round(0))");
 shouldBeTrue("isNegativeZero(Math.round(negativeZero))");
