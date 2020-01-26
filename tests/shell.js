@@ -1,5 +1,6 @@
 // Utility functions for JS test suite
 // (c) 2001 Harri Porten <porten@kde.org>
+// (c) 2020 froglogic GmbH <contact@froglogic.com>
 
 function testPassed(msg)
 {
@@ -88,4 +89,23 @@ function shouldThrow(_a, _e)
     testFailed(_a + " should throw exception " + _e + ". Was undefined.");
   else
     testFailed(_a + " should throw exception " + _e + ". Was " + _av + ".");
+}
+
+function shouldExcept(error, func, msg)
+{
+    var exception;
+    try {
+        func();
+    } catch (e) {
+        exception = e;
+    }
+    if (exception) {
+        if (exception instanceof error) {
+            test.pass(msg + ": got expected exception " + error.name);
+        } else {
+            test.fail(msg + ": got wrong exception. Name: " + error.name);
+        }
+    } else {
+        test.fail(msg + ": function did not throw an exception");
+    }
 }
