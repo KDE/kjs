@@ -253,6 +253,9 @@ bool doIt(int argc, char **argv)
     global->put(interp->globalExec(), "version", new TestFunctionImp(TestFunctionImp::Version, 1));
     global->put(interp->globalExec(), "run", new TestFunctionImp(TestFunctionImp::Run, 1));
 
+    // abort evaluation of single script file after 5 seconds
+    interp->setTimeoutTime(5000);
+
     Interpreter::setShouldPrintExceptions(true);
 
     for (int i = 1; i < argc; i++) {
@@ -288,7 +291,9 @@ bool doIt(int argc, char **argv)
         } else
 #endif
         {
+            interp->startTimeoutCheck();
             Completion completion = interp->evaluate(fileName, 0, script);
+            interp->stopTimeoutCheck();
             success = success && completion.complType() != Throw;
         }
         free(script);
