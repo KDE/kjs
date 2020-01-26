@@ -797,7 +797,7 @@ inline void Vector<T, inlineCapacity>::append(const U &val)
         }
     }
 
-#if COMPILER(MSVC7)
+#if defined(WTF_COMPILER_MSVC7)
     // FIXME: MSVC7 generates compilation errors when trying to assign
     // a pointer to a Vector of its base class (i.e. can't downcast). So far
     // I've been unable to determine any logical reason for this, so I can

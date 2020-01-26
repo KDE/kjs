@@ -276,9 +276,9 @@ inline void lookupPut(ExecState *exec, const Identifier &propertyName,
 }
 } // namespace
 
-#if COMPILER(GCC)
+#if defined(WTF_COMPILER_GCC)
 // Work around a bug in GCC 4.1. The original code was
-//  #if !COMPILER(GCC)
+//  #if !defined(WTF_COMPILER_GCC)
 //  #define KJS_GCC_ROOT_NS_HACK ::
 //  #else
 //  #define KJS_GCC_ROOT_NS_HACK
@@ -289,7 +289,7 @@ inline void lookupPut(ExecState *exec, const Identifier &propertyName,
 #define KJS_CACHEGLOBALOBJECT_NS
 #define KJS_CACHEGLOBALOBJECT_NS_USE ::
 #else
-#if COMPILER(SUNPRO)
+#if defined(WTF_COMPILER_SUNPRO)
 // SunPro puts the whole thing in namespace KJS::, no linking problems.
 #define KJS_OBJECTCACHE_IN_KJS (1)
 #define KJS_CACHEGLOBALOBJECT_NS KJS::

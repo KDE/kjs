@@ -62,11 +62,11 @@
 
 #if PLATFORM(WIN_OS)
 #include <windows.h>
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #define copysign(x, y) _copysign(x, y)
 #define snprintf _snprintf
 #endif 
-#if !COMPILER(GCC)
+#if !defined(WTF_COMPILER_GCC)
 #ifndef strncasecmp
 #define strncasecmp(x, y, z) strnicmp(x, y, z)
 #endif
@@ -851,7 +851,7 @@ bool DateObjectImp::implementsConstruct() const
 static double getCurrentUTCTime()
 {
 #if PLATFORM(WIN_OS)
-#if COMPILER(BORLAND)
+#if defined(WTF_COMPILER_BORLAND)
     struct timeb timebuffer;
     ftime(&timebuffer);
 #else
@@ -1023,7 +1023,7 @@ static double makeTime(tm *t, double ms, bool utc)
 #if PLATFORM(WIN_OS)
         // FIXME: not thread safe
         (void)localtime(&zero);
-#if COMPILER(BORLAND) || COMPILER(CYGWIN) || COMPILER(MSVC)
+#if defined(WTF_COMPILER_BORLAND) || defined(WTF_COMPILER_CYGWIN) || defined(WTF_COMPILER_MSVC)
         utcOffset = - _timezone;
 #else
         utcOffset = - timezone;

@@ -131,12 +131,12 @@ template<typename T> struct FloatHash {
 template<typename T> struct PtrHash {
     static unsigned hash(T key)
     {
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4244) // work around what seems to be a bug in MSVC's conversion warnings
 #endif
         return IntHash<uintptr_t>::hash(reinterpret_cast<uintptr_t>(key));
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #pragma warning(pop)
 #endif
     }
@@ -211,7 +211,7 @@ template<> struct DefaultHash<unsigned long long> {
     typedef IntHash<unsigned long long> Hash;
 };
 
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 template<> struct DefaultHash<wchar_t> {
     typedef IntHash<wchar_t> Hash;
 };

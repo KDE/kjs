@@ -21,9 +21,9 @@
 #include <wtf/Platform.h>
 
 #ifndef ALWAYS_INLINE
-#if COMPILER(GCC) && defined(NDEBUG) &&  __GNUC__ > 3
+#if defined(WTF_COMPILER_GCC) && defined(NDEBUG) &&  __GNUC__ > 3
 #define ALWAYS_INLINE inline __attribute__ ((__always_inline__))
-#elif COMPILER(MSVC) && defined(NDEBUG)
+#elif defined(WTF_COMPILER_MSVC) && defined(NDEBUG)
 #define ALWAYS_INLINE __forceinline
 #else
 #define ALWAYS_INLINE inline
@@ -31,7 +31,7 @@
 #endif
 
 #ifndef ALWAYS_INLINE_INTO
-#if COMPILER(GCC) && defined(NDEBUG) &&  ((__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || __GNUC__ > 4)
+#if defined(WTF_COMPILER_GCC) && defined(NDEBUG) &&  ((__GNUC__ == 4 && __GNUC_MINOR__ >= 1) || __GNUC__ > 4)
 #define ALWAYS_INLINE_INTO __attribute__ ((__flatten__))
 #else
 #define ALWAYS_INLINE_INTO
@@ -39,7 +39,7 @@
 #endif
 
 #ifndef NEVER_INLINE
-#if COMPILER(GCC) &&  __GNUC__ > 3
+#if defined(WTF_COMPILER_GCC) &&  __GNUC__ > 3
 #define NEVER_INLINE __attribute__ ((__noinline__))
 #else
 #define NEVER_INLINE

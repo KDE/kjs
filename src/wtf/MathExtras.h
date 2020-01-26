@@ -55,7 +55,7 @@ const double piOverFourDouble = M_PI_4;
 const float piOverFourFloat = static_cast<float>(M_PI_4);
 #endif     // !BUILDING_KDE__
 
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 
 #ifndef BUILDING_KDE__
 inline bool isinf(double num)
@@ -129,7 +129,7 @@ inline double wtf_fmod(double x, double y)
 
 #define atan2(x, y) wtf_atan2(x, y)
 #endif // _MSC_VER < 1920
-#endif // #if COMPILER(MSVC)
+#endif // #if defined(WTF_COMPILER_MSVC)
 
 inline double deg2rad(double d)
 {

@@ -31,11 +31,11 @@
 #include <typeinfo>
 
 #define NOINLINE
-#if COMPILER(CWP)
+#if defined(WTF_COMPILER_CWP)
 #pragma auto_inline off
-#elif COMPILER(MSVC)
+#elif defined(WTF_COMPILER_MSVC)
 #pragma auto_inline(off)
-#elif COMPILER(GCC)
+#elif defined(WTF_COMPILER_GCC)
 // #undef  NOINLINE
 // #define NOINLINE    __attribute__ (noinline)
 #endif

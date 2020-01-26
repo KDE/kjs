@@ -49,7 +49,7 @@
 namespace KJS
 {
 
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #define copysign _copysign
 #endif
 

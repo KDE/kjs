@@ -53,7 +53,7 @@ inline bool isASCIIAlpha(unsigned short c)
 {
     return (c | 0x20) >= 'a' && (c | 0x20) <= 'z';
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIIAlpha(wchar_t c)
 {
     return (c | 0x20) >= 'a' && (c | 0x20) <= 'z';
@@ -72,7 +72,7 @@ inline bool isASCIIAlphanumeric(unsigned short c)
 {
     return (c >= '0' && c <= '9') || ((c | 0x20) >= 'a' && (c | 0x20) <= 'z');
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIIAlphanumeric(wchar_t c)
 {
     return (c >= '0' && c <= '9') || ((c | 0x20) >= 'a' && (c | 0x20) <= 'z');
@@ -91,7 +91,7 @@ inline bool isASCIIDigit(unsigned short c)
 {
     return (c >= '0') & (c <= '9');
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIIDigit(wchar_t c)
 {
     return (c >= '0') & (c <= '9');
@@ -110,7 +110,7 @@ inline bool isASCIIHexDigit(unsigned short c)
 {
     return (c >= '0' && c <= '9') || ((c | 0x20) >= 'a' && (c | 0x20) <= 'f');
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIIHexDigit(wchar_t c)
 {
     return (c >= '0' && c <= '9') || ((c | 0x20) >= 'a' && (c | 0x20) <= 'f');
@@ -129,7 +129,7 @@ inline bool isASCIILower(unsigned short c)
 {
     return c >= 'a' && c <= 'z';
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIILower(wchar_t c)
 {
     return c >= 'a' && c <= 'z';
@@ -148,7 +148,7 @@ inline bool isASCIIUpper(unsigned short c)
 {
     return c >= 'A' && c <= 'Z';
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIIUpper(wchar_t c)
 {
     return c >= 'A' && c <= 'Z';
@@ -180,7 +180,7 @@ inline bool isASCIISpace(unsigned short c)
 {
     return c <= ' ' && (c == ' ' || (c <= 0xD && c >= 0x9));
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline bool isASCIISpace(wchar_t c)
 {
     return c <= ' ' && (c == ' ' || (c <= 0xD && c >= 0x9));
@@ -199,7 +199,7 @@ inline unsigned short toASCIILower(unsigned short c)
 {
     return c | ((c >= 'A' && c <= 'Z') << 5);
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline wchar_t toASCIILower(wchar_t c)
 {
     return c | ((c >= 'A' && c <= 'Z') << 5);
@@ -218,7 +218,7 @@ inline unsigned short toASCIIUpper(unsigned short c)
 {
     return static_cast<unsigned short>(c & ~((c >= 'a' && c <= 'z') << 5));
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline wchar_t toASCIIUpper(wchar_t c)
 {
     return static_cast<wchar_t>(c & ~((c >= 'a' && c <= 'z') << 5));
@@ -239,7 +239,7 @@ inline int toASCIIHexValue(unsigned short c)
     ASSERT(isASCIIHexDigit(c));
     return c < 'A' ? c - '0' : (c - 'A' + 10) & 0xF;
 }
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 inline int toASCIIHexValue(wchar_t c)
 {
     ASSERT(isASCIIHexDigit(c));

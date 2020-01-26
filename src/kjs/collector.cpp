@@ -41,7 +41,7 @@
 #include <mach/thread_act.h>
 #include <mach/vm_map.h>
 
-#elif PLATFORM(WIN_OS) || COMPILER(CYGWIN)
+#elif PLATFORM(WIN_OS) || defined(WTF_COMPILER_CYGWIN)
 
 #include <windows.h>
 #include <winnt.h>
@@ -183,7 +183,7 @@ static CollectorBlock *allocateBlock()
 #if PLATFORM(DARWIN)
     vm_address_t address = 0;
     vm_map(current_task(), &address, BLOCK_SIZE, BLOCK_OFFSET_MASK, VM_FLAGS_ANYWHERE, MEMORY_OBJECT_NULL, 0, FALSE, VM_PROT_DEFAULT, VM_PROT_DEFAULT, VM_INHERIT_DEFAULT);
-#elif PLATFORM(WIN_OS) || COMPILER(CYGWIN)
+#elif PLATFORM(WIN_OS) || defined(WTF_COMPILER_CYGWIN)
     // windows virtual address granularity is naturally 64k
     LPVOID address = VirtualAlloc(NULL, BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #elif HAVE_FUNC_POSIX_MEMALIGN
@@ -229,7 +229,7 @@ static void freeBlock(CollectorBlock *block)
 
 #if PLATFORM(DARWIN)
     vm_deallocate(current_task(), reinterpret_cast<vm_address_t>(block), BLOCK_SIZE);
-#elif PLATFORM(WIN_OS) || COMPILER(CYGWIN)
+#elif PLATFORM(WIN_OS) || defined(WTF_COMPILER_CYGWIN)
     VirtualFree(block, BLOCK_SIZE, MEM_RELEASE);
 #elif HAVE_FUNC_POSIX_MEMALIGN
     free(block);
@@ -498,7 +498,7 @@ static inline void *currentThreadStackBase()
 #if PLATFORM(DARWIN)
     pthread_t thread = pthread_self();
     void *stackBase = pthread_get_stackaddr_np(thread);
-#elif (PLATFORM(WIN_OS) || COMPILER(CYGWIN))
+#elif (PLATFORM(WIN_OS) || defined(WTF_COMPILER_CYGWIN))
     // tested with mingw32, mingw64, msvc2008, cygwin
     NT_TIB *pTib = (NT_TIB *)NtCurrentTeb();
     void *stackBase = (void *)pTib->StackBase;
@@ -543,12 +543,12 @@ void Collector::markCurrentThreadConservatively()
 {
     // setjmp forces volatile registers onto the stack
     jmp_buf registers;
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4611)
 #endif
     setjmp(registers);
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #pragma warning(pop)
 #endif
 

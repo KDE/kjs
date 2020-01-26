@@ -34,7 +34,6 @@
 /* PLATFORM handles OS, operating environment, graphics API, and CPU */
 #ifndef _MSC_VER
 #define PLATFORM(WTF_FEATURE) (defined(WTF_PLATFORM_##WTF_FEATURE) && WTF_PLATFORM_##WTF_FEATURE)
-#define COMPILER(WTF_FEATURE) (defined(WTF_COMPILER_##WTF_FEATURE) && WTF_COMPILER_##WTF_FEATURE)
 #define HAVE(WTF_FEATURE) (defined(HAVE_##WTF_FEATURE) && HAVE_##WTF_FEATURE)
 #define USE(WTF_FEATURE) (defined(WTF_USE_##WTF_FEATURE) && WTF_USE_##WTF_FEATURE)
 #define ENABLE(WTF_FEATURE) (defined(ENABLE_##WTF_FEATURE) && ENABLE_##WTF_FEATURE)
@@ -42,7 +41,6 @@
 /* MSVC does not handle defined() inside macro expansion, just fall back to
  * #if WTF_... and ignore the not defined warnings */
 #define PLATFORM(WTF_FEATURE) WTF_PLATFORM_##WTF_FEATURE
-#define COMPILER(WTF_FEATURE) WTF_COMPILER_##WTF_FEATURE
 #define HAVE(WTF_FEATURE) HAVE_##WTF_FEATURE
 #define USE(WTF_FEATURE) WTF_USE_##WTF_FEATURE
 #define ENABLE(WTF_FEATURE) ENABLE_##WTF_FEATURE
@@ -158,33 +156,33 @@
 
 /* Compiler */
 
-/* COMPILER(CWP) */
+/* CWP */
 #if defined(__MWERKS__)
 #define WTF_COMPILER_CWP 1
 #endif
 
-/* COMPILER(MSVC) */
+/* MSVC */
 #if defined(_MSC_VER)
 #define WTF_COMPILER_MSVC 1
 #endif
 
-/* COMPILER(GCC) */
+/* GCC */
 #if defined(__GNUC__)
 #define WTF_COMPILER_GCC 1
 #endif
 
-/* COMPILER(SUNPRO) */
+/* SUNPRO */
 #if defined(__SUNPRO_CC)
 #define WTF_COMPILER_SUNPRO 1
 #endif
 
-/* COMPILER(BORLAND) */
+/* BORLAND */
 /* not really fully supported - is this relevant any more? */
 #if defined(__BORLANDC__)
 #define WTF_COMPILER_BORLAND 1
 #endif
 
-/* COMPILER(CYGWIN) */
+/* CYGWIN */
 /* not really fully supported - is this relevant any more? */
 #if defined(__CYGWIN__)
 #define WTF_COMPILER_CYGWIN 1

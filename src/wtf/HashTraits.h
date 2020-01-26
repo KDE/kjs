@@ -72,7 +72,7 @@ template<> struct IsInteger<unsigned long long> {
     static const bool value = true;
 };
 
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 template<> struct IsInteger<wchar_t>            {
     static const bool value = true;
 };
@@ -91,7 +91,7 @@ COMPILE_ASSERT(IsInteger<unsigned long>::value, WTF_IsInteger_unsigned_long_true
 COMPILE_ASSERT(IsInteger<long long>::value, WTF_IsInteger_long_long_true)
 COMPILE_ASSERT(IsInteger<unsigned long long>::value, WTF_IsInteger_unsigned_long_long_true)
 
-#if !COMPILER(MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
+#if !defined(WTF_COMPILER_MSVC) || defined(_NATIVE_WCHAR_T_DEFINED)
 COMPILE_ASSERT(IsInteger<wchar_t>::value, WTF_IsInteger_wchar_t_true)
 #endif
 

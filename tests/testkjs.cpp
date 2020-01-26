@@ -40,7 +40,7 @@
 
 #include "protect.h"
 
-#if COMPILER(MSVC)
+#if defined(WTF_COMPILER_MSVC)
 #include <windows.h>
 #include <timeapi.h>
 #if HAVE_CRTDBG_H
@@ -48,7 +48,7 @@
 #endif
 #endif
 
-#if PLATFORM(WIN_OS) && ! COMPILER(MSVC)
+#if PLATFORM(WIN_OS) && ! defined(WTF_COMPILER_MSVC)
 #ifndef timersub
 # define timersub(a, b, result)                                               \
   do {                                                                        \
