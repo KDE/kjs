@@ -34,6 +34,7 @@
 /* PLATFORM handles OS, operating environment, graphics API, and CPU */
 #ifndef _MSC_VER
 #define PLATFORM(WTF_FEATURE) (defined(WTF_PLATFORM_##WTF_FEATURE) && WTF_PLATFORM_##WTF_FEATURE)
+#define COMPILER(WTF_FEATURE) (defined(WTF_COMPILER_##WTF_FEATURE) && WTF_COMPILER_##WTF_FEATURE)
 #define HAVE(WTF_FEATURE) (defined(HAVE_##WTF_FEATURE) && HAVE_##WTF_FEATURE)
 #define USE(WTF_FEATURE) (defined(WTF_USE_##WTF_FEATURE) && WTF_USE_##WTF_FEATURE)
 #define ENABLE(WTF_FEATURE) (defined(ENABLE_##WTF_FEATURE) && ENABLE_##WTF_FEATURE)
@@ -41,6 +42,7 @@
 /* MSVC does not handle defined() inside macro expansion, just fall back to
  * #if WTF_... and ignore the not defined warnings */
 #define PLATFORM(WTF_FEATURE) WTF_PLATFORM_##WTF_FEATURE
+#define COMPILER(WTF_FEATURE) WTF_COMPILER_##WTF_FEATURE
 #define HAVE(WTF_FEATURE) HAVE_##WTF_FEATURE
 #define USE(WTF_FEATURE) WTF_USE_##WTF_FEATURE
 #define ENABLE(WTF_FEATURE) ENABLE_##WTF_FEATURE
