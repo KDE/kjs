@@ -817,6 +817,9 @@ int Lexer::matchPunctuator(int c1, int c2, int c3, int c4)
     } else if (c1 == '/' && c2 == '=') {
         shift(2);
         return DIVEQUAL;
+    } else if (c1 == '*' && c2 == '*' && c3 == '=') {
+        shift(3);
+        return EXPEQUAL;
     } else if (c1 == '&' && c2 == '=') {
         shift(2);
         return ANDEQUAL;
@@ -841,6 +844,9 @@ int Lexer::matchPunctuator(int c1, int c2, int c3, int c4)
     } else if (c1 == '|' && c2 == '|') {
         shift(2);
         return OR;
+    } else if (c1 == '*' && c2 == '*') {
+	shift(2);
+	return T_EXP;
     }
 
     switch (c1) {

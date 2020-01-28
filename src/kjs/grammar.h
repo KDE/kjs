@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_KJSYY_GRAMMAR_TAB_H_INCLUDED
-# define YY_KJSYY_GRAMMAR_TAB_H_INCLUDED
+#ifndef YY_KJSYY_GRAMMAR_H_INCLUDED
+# define YY_KJSYY_GRAMMAR_H_INCLUDED
 /* Enabling traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -92,29 +92,31 @@ enum yytokentype {
     LSHIFT = 301,
     RSHIFT = 302,
     URSHIFT = 303,
-    PLUSEQUAL = 304,
-    MINUSEQUAL = 305,
-    MULTEQUAL = 306,
-    DIVEQUAL = 307,
-    LSHIFTEQUAL = 308,
-    RSHIFTEQUAL = 309,
-    URSHIFTEQUAL = 310,
-    ANDEQUAL = 311,
-    MODEQUAL = 312,
-    XOREQUAL = 313,
-    OREQUAL = 314,
-    NUMBER = 315,
-    STRING = 316,
-    IDENT = 317,
-    AUTOPLUSPLUS = 318,
-    AUTOMINUSMINUS = 319
+    T_EXP = 304,
+    PLUSEQUAL = 305,
+    MINUSEQUAL = 306,
+    MULTEQUAL = 307,
+    DIVEQUAL = 308,
+    EXPEQUAL = 309,
+    LSHIFTEQUAL = 310,
+    RSHIFTEQUAL = 311,
+    URSHIFTEQUAL = 312,
+    ANDEQUAL = 313,
+    MODEQUAL = 314,
+    XOREQUAL = 315,
+    OREQUAL = 316,
+    NUMBER = 317,
+    STRING = 318,
+    IDENT = 319,
+    AUTOPLUSPLUS = 320,
+    AUTOMINUSMINUS = 321
 };
 #endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE {
     /* Line 2058 of yacc.c  */
-#line 64 "grammar.y"
+#line 63 "grammar.y"
 
     int                 ival;
     double              dval;
@@ -144,7 +146,7 @@ typedef union YYSTYPE {
     PackageNameNode     *pkgn;
 
     /* Line 2058 of yacc.c  */
-#line 151 "grammar.tab.h"
+#line 153 "grammar.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -179,4 +181,4 @@ int kjsyyparse();
 #endif
 #endif /* ! YYPARSE_PARAM */
 
-#endif /* !YY_KJSYY_GRAMMAR_TAB_H_INCLUDED  */
+#endif /* !YY_KJSYY_GRAMMAR_H_INCLUDED  */

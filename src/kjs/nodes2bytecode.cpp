@@ -811,6 +811,10 @@ OpValue BinaryOperatorNode::generateEvalCode(CompileState *comp)
         // operator %
         codeOp = Op_Mod;
         break;
+    case OpExp:
+        // operator **
+        codeOp = Op_Exp;
+        break;
     case OpPlus:
         // operator +
         codeOp = Op_Add;
@@ -1040,6 +1044,9 @@ OpValue AssignNode::generateEvalCode(CompileState *comp)
             break;
         case OpModEq:
             codeOp = Op_Mod;
+            break;
+        case OpExpEq:
+            codeOp = Op_Exp;
             break;
         case OpPlusEq:
             codeOp = Op_Add;

@@ -170,9 +170,11 @@ static Node *makeMultNode(Node *n1, Node *n2, Operator op)
                 res = d1 * d2;
             } else if (op == OpDiv) {
                 res = d1 / d2;
-            } else { // OpMod
+            } else if (op == OpMod) {
                 res = fmod(d1, d2);
-            }
+            } else { // OpExp
+		res = exponentiation(d1, d2);
+	    }
             number1->setValue(res);
             return number1;
         }

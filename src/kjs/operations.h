@@ -51,6 +51,7 @@ enum Operator { OpEqual,
                 OpMult,
                 OpDiv,
                 OpMod,
+                OpExp,
                 OpNotEq,
                 OpStrEq,
                 OpStrNEq,
@@ -58,6 +59,7 @@ enum Operator { OpEqual,
                 OpMinusEq,
                 OpMultEq,
                 OpDivEq,
+                OpExpEq,
                 OpPlusPlus,
                 OpMinusMinus,
                 OpLess,
@@ -205,6 +207,10 @@ int relation(ExecState *exec, JSValue *v1, JSValue *v2, bool leftFirst = true);
 int relation(ExecState *exec, JSValue *v1, double n2);
 int maxInt(int d1, int d2);
 int minInt(int d1, int d2);
+
+// differs from standard C libraries pow() functions in a couple of
+// aspects
+double exponentiation(double base, double exponent);
 
 }
 

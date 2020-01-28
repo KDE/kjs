@@ -4,6 +4,7 @@
  *  This file is part of the KDE libraries
  *  Copyright (C) 1999-2000 Harri Porten (porten@kde.org)
  *  Copyright (C) 2006, 2007 Apple Inc. All rights reserved.
+ *  Copyright (C) 2019 froglogic GmbH (contact@froglogic.com)
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -113,8 +114,10 @@ using namespace KJS;
 %token PLUSPLUS MINUSMINUS         /* ++ and --  */
 %token LSHIFT                      /* << */
 %token RSHIFT URSHIFT              /* >> and >>> */
+%token T_EXP                       /* ** */
 %token PLUSEQUAL MINUSEQUAL        /* += and -= */
 %token MULTEQUAL DIVEQUAL          /* *= and /= */
+%token EXPEQUAL                    /* **= */
 %token LSHIFTEQUAL                 /* <<= */
 %token RSHIFTEQUAL URSHIFTEQUAL    /* >>= and >>>= */
 %token ANDEQUAL MODEQUAL           /* &= and %= */
@@ -136,8 +139,9 @@ using namespace KJS;
 %type <node>  NewExpr NewExprNoBF
 %type <node>  CallExpr CallExprNoBF
 %type <node>  LeftHandSideExpr LeftHandSideExprNoBF
-%type <node>  PostfixExpr PostfixExprNoBF
+%type <node>  UpdateExpr UpdateExprNoBF UpdateExprCommon
 %type <node>  UnaryExpr UnaryExprNoBF UnaryExprCommon
+%type <node>  ExponentiationExpr ExponentiationExprNoBF
 %type <node>  MultiplicativeExpr MultiplicativeExprNoBF
 %type <node>  AdditiveExpr AdditiveExprNoBF
 %type <node>  ShiftExpr ShiftExprNoBF
@@ -366,55 +370,70 @@ LeftHandSideExprNoBF:
   | CallExprNoBF
 ;
 
-PostfixExpr:
+UpdateExprCommon:
+    PLUSPLUS UnaryExpr                  { $$ = makePrefixNode($2, OpPlusPlus); }
+  | AUTOPLUSPLUS UnaryExpr              { $$ = makePrefixNode($2, OpPlusPlus); }
+  | MINUSMINUS UnaryExpr                { $$ = makePrefixNode($2, OpMinusMinus); }
+  | AUTOMINUSMINUS UnaryExpr            { $$ = makePrefixNode($2, OpMinusMinus); }
+;
+
+UpdateExpr:
     LeftHandSideExpr
   | LeftHandSideExpr PLUSPLUS           { $$ = makePostfixNode($1, OpPlusPlus); }
   | LeftHandSideExpr MINUSMINUS         { $$ = makePostfixNode($1, OpMinusMinus); }
+  | UpdateExprCommon
 ;
 
-PostfixExprNoBF:
+UpdateExprNoBF:
     LeftHandSideExprNoBF
   | LeftHandSideExprNoBF PLUSPLUS       { $$ = makePostfixNode($1, OpPlusPlus); }
   | LeftHandSideExprNoBF MINUSMINUS     { $$ = makePostfixNode($1, OpMinusMinus); }
+  | UpdateExprCommon
 ;
 
 UnaryExprCommon:
     DELETETOKEN UnaryExpr               { $$ = makeDeleteNode($2); }
   | VOIDTOKEN UnaryExpr                 { $$ = new VoidNode($2); }
   | TYPEOF UnaryExpr                    { $$ = makeTypeOfNode($2); }
-  | PLUSPLUS UnaryExpr                  { $$ = makePrefixNode($2, OpPlusPlus); }
-  | AUTOPLUSPLUS UnaryExpr              { $$ = makePrefixNode($2, OpPlusPlus); }
-  | MINUSMINUS UnaryExpr                { $$ = makePrefixNode($2, OpMinusMinus); }
-  | AUTOMINUSMINUS UnaryExpr            { $$ = makePrefixNode($2, OpMinusMinus); }
   | '+' UnaryExpr                       { $$ = makeUnaryPlusNode($2); }
   | '-' UnaryExpr                       { $$ = makeNegateNode($2); }
   | '~' UnaryExpr                       { $$ = makeBitwiseNotNode($2); }
   | '!' UnaryExpr                       { $$ = makeLogicalNotNode($2); }
 
 UnaryExpr:
-    PostfixExpr
+    UpdateExpr
   | UnaryExprCommon
 ;
 
 UnaryExprNoBF:
-    PostfixExprNoBF
+    UpdateExprNoBF
   | UnaryExprCommon
 ;
 
-MultiplicativeExpr:
+ExponentiationExpr:
     UnaryExpr
-  | MultiplicativeExpr '*' UnaryExpr    { $$ = makeMultNode($1, $3, OpMult); }
-  | MultiplicativeExpr '/' UnaryExpr    { $$ = makeMultNode($1, $3, OpDiv); }
-  | MultiplicativeExpr '%' UnaryExpr    { $$ = makeMultNode($1, $3, OpMod); }
+  | UpdateExpr T_EXP ExponentiationExpr       { $$ = makeMultNode($1, $3, OpExp); }
+;
+
+ExponentiationExprNoBF:
+    UnaryExprNoBF
+  | UpdateExprNoBF T_EXP ExponentiationExpr   { $$ = makeMultNode($1, $3, OpExp); }
+;
+
+MultiplicativeExpr:
+    ExponentiationExpr
+  | MultiplicativeExpr '*' ExponentiationExpr  { $$ = makeMultNode($1, $3, OpMult); }
+  | MultiplicativeExpr '/' ExponentiationExpr  { $$ = makeMultNode($1, $3, OpDiv); }
+  | MultiplicativeExpr '%' ExponentiationExpr  { $$ = makeMultNode($1, $3, OpMod); }
 ;
 
 MultiplicativeExprNoBF:
-    UnaryExprNoBF
-  | MultiplicativeExprNoBF '*' UnaryExpr
+    ExponentiationExprNoBF
+  | MultiplicativeExprNoBF '*' ExponentiationExpr
                                         { $$ = makeMultNode($1, $3, OpMult); }
-  | MultiplicativeExprNoBF '/' UnaryExpr
+  | MultiplicativeExprNoBF '/' ExponentiationExpr
                                         { $$ = makeMultNode($1, $3, OpDiv); }
-  | MultiplicativeExprNoBF '%' UnaryExpr
+  | MultiplicativeExprNoBF '%' ExponentiationExpr
                                         { $$ = makeMultNode($1, $3, OpMod); }
 ;
 
@@ -633,6 +652,7 @@ AssignmentOperator:
   | MINUSEQUAL                          { $$ = OpMinusEq; }
   | MULTEQUAL                           { $$ = OpMultEq; }
   | DIVEQUAL                            { $$ = OpDivEq; }
+  | EXPEQUAL                            { $$ = OpExpEq; }
   | LSHIFTEQUAL                         { $$ = OpLShift; }
   | RSHIFTEQUAL                         { $$ = OpRShift; }
   | URSHIFTEQUAL                        { $$ = OpURShift; }

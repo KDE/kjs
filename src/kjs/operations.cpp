@@ -233,4 +233,13 @@ int minInt(int d1, int d2)
     return (d1 < d2) ? d1 : d2;
 }
 
+double exponentiation(double base, double exponent)
+{
+    if (isNaN(exponent))
+	return NaN;
+    if (abs(base) == 1 && isInf(exponent))
+	return NaN;
+    return pow(base, exponent);
+}
+
 }
