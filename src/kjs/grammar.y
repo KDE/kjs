@@ -254,7 +254,7 @@ PropertyName:
 Property:
     PropertyName ':' AssignmentExpr     { $$ = new PropertyNode($1, $3, PropertyNode::Constant); }
   | IDENT IdentifierName '(' ')' {inFuncExpr();} FunctionBody  {
-          if (!makeGetterOrSetterPropertyNode($$, *$1, *$2, 0, $6))
+          if (!makeGetterOrSetterPropertyNode($$, *$1, *$2, nullptr, $6))
             YYABORT;
         }
   | IDENT IdentifierName '(' FormalParameterList ')' {inFuncExpr();} FunctionBody {
@@ -298,7 +298,7 @@ ElementList:
 ;
 
 ElisionOpt:
-    /* nothing */                       { $$ = 0; }
+    /* nothing */                       { $$ = nullptr; }
   | Elision
 ;
 
@@ -678,7 +678,7 @@ Statement:
 ;
 
 Block:
-    '{' '}'                             { $$ = new BlockNode(0); DBG($$, @2, @2); }
+    '{' '}'                             { $$ = new BlockNode(nullptr); DBG($$, @2, @2); }
   | '{' SourceElements '}'              { $$ = new BlockNode($2); DBG($$, @3, @3); }
 ;
 
@@ -700,12 +700,12 @@ VariableDeclarationListNoIn:
 ;
 
 VariableDeclaration:
-    IDENT                               { $$ = new VarDeclNode(*$1, 0, VarDeclNode::Variable); }
+    IDENT                               { $$ = new VarDeclNode(*$1, nullptr, VarDeclNode::Variable); }
   | IDENT Initializer                   { $$ = new VarDeclNode(*$1, $2, VarDeclNode::Variable); }
 ;
 
 VariableDeclarationNoIn:
-    IDENT                               { $$ = new VarDeclNode(*$1, 0, VarDeclNode::Variable); }
+    IDENT                               { $$ = new VarDeclNode(*$1, nullptr, VarDeclNode::Variable); }
   | IDENT InitializerNoIn               { $$ = new VarDeclNode(*$1, $2, VarDeclNode::Variable); }
 ;
 
@@ -745,7 +745,7 @@ ExprStatement:
 
 IfStatement:
     IF '(' Expr ')' Statement %prec IF_WITHOUT_ELSE
-                                        { $$ = makeIfNode($3, $5, 0); DBG($$, @1, @4); }
+                                        { $$ = makeIfNode($3, $5, nullptr); DBG($$, @1, @4); }
   | IF '(' Expr ')' Statement ELSE Statement
                                         { $$ = makeIfNode($3, $5, $7); DBG($$, @1, @4); }
 ;
@@ -767,18 +767,18 @@ IterationStatement:
                                             DBG($$, @1, @6);
                                         }
   | FOR '(' VAR IDENT INTOKEN Expr ')' Statement
-                                        { $$ = new ForInNode(*$4, 0, $6, $8); DBG($$, @1, @7); }
+                                        { $$ = new ForInNode(*$4, nullptr, $6, $8); DBG($$, @1, @7); }
   | FOR '(' VAR IDENT InitializerNoIn INTOKEN Expr ')' Statement
                                         { $$ = new ForInNode(*$4, $5, $7, $9); DBG($$, @1, @8); }
 ;
 
 ExprOpt:
-    /* nothing */                       { $$ = 0; }
+    /* nothing */                       { $$ = nullptr; }
   | Expr
 ;
 
 ExprNoInOpt:
-    /* nothing */                       { $$ = 0; }
+    /* nothing */                       { $$ = nullptr; }
   | ExprNoIn
 ;
 
@@ -797,8 +797,8 @@ BreakStatement:
 ;
 
 ReturnStatement:
-    RETURN ';'                          { $$ = new ReturnNode(0); DBG($$, @1, @2); }
-  | RETURN error                        { $$ = new ReturnNode(0); DBG($$, @1, @1); AUTO_SEMICOLON; }
+    RETURN ';'                          { $$ = new ReturnNode(nullptr); DBG($$, @1, @2); }
+  | RETURN error                        { $$ = new ReturnNode(nullptr); DBG($$, @1, @1); AUTO_SEMICOLON; }
   | RETURN Expr ';'                     { $$ = new ReturnNode($2); DBG($$, @1, @3); }
   | RETURN Expr error                   { $$ = new ReturnNode($2); DBG($$, @1, @2); AUTO_SEMICOLON; }
 ;
@@ -812,13 +812,13 @@ SwitchStatement:
 ;
 
 CaseBlock:
-    '{' CaseClausesOpt '}'              { $$ = new CaseBlockNode($2, 0, 0); }
+    '{' CaseClausesOpt '}'              { $$ = new CaseBlockNode($2, nullptr, nullptr); }
   | '{' CaseClausesOpt DefaultClause CaseClausesOpt '}'
                                         { $$ = new CaseBlockNode($2, $3, $4); }
 ;
 
 CaseClausesOpt:
-    /* nothing */                       { $$ = 0; }
+    /* nothing */                       { $$ = nullptr; }
   | CaseClauses
 ;
 
@@ -833,8 +833,8 @@ CaseClause:
 ;
 
 DefaultClause:
-    DEFAULT ':'                         { $$ = new CaseClauseNode(0); }
-  | DEFAULT ':' SourceElements          { $$ = new CaseClauseNode(0, $3); }
+    DEFAULT ':'                         { $$ = new CaseClauseNode(nullptr); }
+  | DEFAULT ':' SourceElements          { $$ = new CaseClauseNode(nullptr, $3); }
 ;
 
 LabelledStatement:
@@ -848,7 +848,7 @@ ThrowStatement:
 
 TryStatement:
     TRY Block FINALLY Block             { $$ = new TryNode($2, CommonIdentifiers::shared()->nullIdentifier, 0, $4); DBG($$, @1, @2); }
-  | TRY Block CATCH '(' IDENT ')' Block { $$ = new TryNode($2, *$5, $7, 0); DBG($$, @1, @2); }
+  | TRY Block CATCH '(' IDENT ')' Block { $$ = new TryNode($2, *$5, $7, nullptr); DBG($$, @1, @2); }
   | TRY Block CATCH '(' IDENT ')' Block FINALLY Block
                                         { $$ = new TryNode($2, *$5, $7, $9); DBG($$, @1, @2); }
 ;
@@ -864,13 +864,13 @@ PackageName:
 ;
 
 ImportStatement:
-    IMPORT PackageName '.' '*' ';'      { $$ = makeImportNode($2, true, 0);
+    IMPORT PackageName '.' '*' ';'      { $$ = makeImportNode($2, true, nullptr);
                                           DBG($$, @1, @5); }
-  | IMPORT PackageName '.' '*' error    { $$ = makeImportNode($2, true, 0);
+  | IMPORT PackageName '.' '*' error    { $$ = makeImportNode($2, true, nullptr);
                                           DBG($$, @1, @5); AUTO_SEMICOLON; }
-  | IMPORT PackageName ';'              { $$ = makeImportNode($2, false, 0);
+  | IMPORT PackageName ';'              { $$ = makeImportNode($2, false, nullptr);
                                           DBG($$, @1, @3); }
-  | IMPORT PackageName error            { $$ = makeImportNode($2, false, 0);
+  | IMPORT PackageName error            { $$ = makeImportNode($2, false, nullptr);
                                           DBG($$, @1, @3); AUTO_SEMICOLON; }
   | IMPORT IDENT '=' PackageName ';'    { $$ = makeImportNode($4, false, *$2);
                                           DBG($$, @1, @5); }
@@ -903,12 +903,12 @@ FormalParameterList:
 ;
 
 FunctionBody:
-    '{' '}' /* not in spec */           { $$ = new FunctionBodyNode(0); DBG($$, @1, @2); }
+    '{' '}' /* not in spec */           { $$ = new FunctionBodyNode(nullptr); DBG($$, @1, @2); }
   | '{' SourceElements '}'              { $$ = new FunctionBodyNode($2); DBG($$, @1, @3); }
 ;
 
 Program:
-    /* not in spec */                   { parser().didFinishParsing(new ProgramNode(0)); }
+    /* not in spec */                   { parser().didFinishParsing(new ProgramNode(nullptr)); }
   | SourceElements                      { parser().didFinishParsing(new ProgramNode($1)); }
 ;
 
