@@ -103,7 +103,7 @@ typedef Vector<unsigned char> CodeBlock;
 class CodeGen {
 public:
     // All of these emit the instruction of given type, and return its base.
-    // If retVal isn't 0, the return value will be placed there
+    // If retOut isn't null, the return value will be placed there
     static Addr emitOp(CompileState* comp, OpName baseInstr,
                        OpValue* retOut = nullptr, OpValue* a0 = nullptr, OpValue* a1 = nullptr,
                                             OpValue* a2 = nullptr, OpValue* a3 = nullptr);
