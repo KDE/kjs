@@ -246,6 +246,15 @@ Machine::runBlock(ExecState* exec, const CodeBlock& codeBlock, ExecState* parent
     JSObject* globalObject = exec->dynamicInterpreter()->globalObject();
 
     while (true) {
+	// did a alarm handler get called in the meantime?
+	// ### TODO Can we avoid doing this check in the loop? Ideally
+	// the alarm handler in interpreter.cpp changes 'pc' to an
+	// exit opcode. But that's unsafe in a signal handler that can
+	// interrupt the machine execution at any time??
+	if (exec->dynamicInterpreter()->checkTimeout()) {
+	    throwError(exec,  GeneralError, "Execution timeout. Aborting.");
+	    return jsUndefined();
+	}
 #ifdef COUNT_INSTRS
         OpByteCode opCodeLog = *reinterpret_cast<const OpByteCode*>(pc);
         ++instrCounts[opCodeLog];

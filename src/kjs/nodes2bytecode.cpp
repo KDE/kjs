@@ -1261,8 +1261,6 @@ void ForNode::generateExecCode(CompileState *comp)
     // We're about to generate the increment... The continues should go here..
     comp->resolvePendingContinues(this, CodeGen::nextPC(comp));
 
-    // ### there is a CheckTimeout hook here in nodes.cpp...
-
     // Generate increment...
     if (expr3) {
         expr3->generateEvalCode(comp);
