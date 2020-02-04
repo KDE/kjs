@@ -137,6 +137,34 @@ public:
                        KJSObject *thisValue = nullptr);
 
     /**
+     * Call this function in preparation of startTimeoutCheck() to set
+     * the number of milliseconds that a script evaluation is allowed
+     * to take at most. This will protect the user from slow and
+     * long-running scripts or even infinite loops.
+     *
+     * A 0 msecs value (the default setting) means no timeout at all.
+     *
+     * @param mSecs The number of milliseconds
+     */
+    void setTimeoutTime(unsigned mSecs);
+    /**
+     * Start measuring executing time until the timeout value
+     * specified via setTimeoutTime().
+     *
+     * In case the timeout expires a script error with the message
+     * "Execution timeout. Aborting." will be thrown upon evaluation
+     * of the next script expression or statement.
+     */
+    void startTimeoutCheck();
+    /**
+     * Stops measurement of execution time after the initial
+     * startTimeoutCheck() call. Call this function after a evaluate()
+     * or if the check should temporarily be disabled. When showing a
+     * message box to the user for example.
+     */
+    void stopTimeoutCheck();
+
+    /**
      * Reformat the given script code to an easy to read format with
      * only one statement per line. This can be useful when debugging
      * a script that was e.g. condensed into a single line to a single

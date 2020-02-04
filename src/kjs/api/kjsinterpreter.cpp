@@ -210,6 +210,24 @@ KJSResult KJSInterpreter::evaluate(const QString &code,
     return evaluate(QLatin1String("<string>"), 0, code, thisValue);
 }
 
+void KJSInterpreter::setTimeoutTime(unsigned mSecs)
+{
+  Interpreter *ip = INTERPRETER(this);
+  ip->setTimeoutTime(mSecs);
+}
+
+void KJSInterpreter::startTimeoutCheck()
+{
+  Interpreter *ip = INTERPRETER(this);
+  ip->startTimeoutCheck();
+}
+
+void KJSInterpreter::stopTimeoutCheck()
+{
+  Interpreter *ip = INTERPRETER(this);
+  ip->stopTimeoutCheck();
+}
+
 bool KJSInterpreter::normalizeCode(const QString &code, QString *normalized,
                                    int *errLine, QString *errMsg)
 {
