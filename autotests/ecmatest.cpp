@@ -190,7 +190,7 @@ void ECMAscriptTest::initTestCase()
             QWARN(errmsg.constData());
         } else {
             expectedBroken = QString::fromLatin1(brokenF.readAll().constData()).split(QLatin1Char('\n'))
-                             .filter(QRegExp("^[^#].*"));
+                             .filter(QRegularExpression(QStringLiteral("^[^#].*")));
         }
     }
 

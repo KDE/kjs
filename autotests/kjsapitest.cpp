@@ -26,6 +26,8 @@
 
 #include "qtest.h"
 
+#include <QRegularExpression>
+
 class KJSApiTest : public QObject
 {
     Q_OBJECT
@@ -123,8 +125,8 @@ void KJSApiTest::interpreterNormalizeCode()
     QVERIFY(!norm.isEmpty());
     QStringList lines = norm.split('\n');
     QVERIFY(lines.size() >= 2); // ### imprecise
-    int fooLine = lines.indexOf(QRegExp(" *foo\\(\\);"));
-    int barLine = lines.indexOf(QRegExp(" *bar\\(\\);"));
+    int fooLine = lines.indexOf(QRegularExpression(QStringLiteral(" *foo\\(\\);")));
+    int barLine = lines.indexOf(QRegularExpression(QStringLiteral(" *bar\\(\\);")));
     QVERIFY(fooLine >= 0);
     QVERIFY(barLine > fooLine);
 }
