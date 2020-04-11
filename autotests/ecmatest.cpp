@@ -29,7 +29,7 @@ KJS::UString::UString(const QString &d)
 {
     unsigned int len = d.length();
     KJS::UChar *dat = static_cast<KJS::UChar *>(fastMalloc(sizeof(KJS::UChar) * len));
-    memcpy(dat, d.unicode(), len * sizeof(KJS::UChar));
+    memcpy(dat, reinterpret_cast<const void*>(d.unicode()), len * sizeof(KJS::UChar));
     m_rep = KJS::UString::Rep::create(dat, len);
 }
 
