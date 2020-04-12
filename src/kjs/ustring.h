@@ -261,6 +261,7 @@ public:
      * Copy constructor. Makes a shallow copy only.
      */
     UString(const UString &s) : m_rep(s.m_rep) {}
+    UString &operator=(const UString &s) { m_rep = s.m_rep; return *this; }
 
     UString(const Vector<UChar> &buffer);
 
