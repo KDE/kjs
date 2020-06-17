@@ -143,6 +143,7 @@ KJSInterpreter::KJSInterpreter(KJSInterpreterHandle *h)
     : hnd(h), globCtx(nullptr)
 {
     Interpreter *ip = INTERPRETER(this);
+    ip->ref();
     globCtx.hnd = EXECSTATE_HANDLE(ip->globalExec());
 }
 
