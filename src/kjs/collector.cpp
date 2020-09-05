@@ -512,6 +512,11 @@ static inline void *currentThreadStackBase()
     static pthread_t stackThread;
     pthread_t thread = pthread_self();
     if (stackBase == nullptr || thread != stackThread) {
+#if defined(__OpenBSD__)
+        stack_t sinfo;
+        pthread_stackseg_np(thread, &sinfo);
+        stackBase = sinfo.ss_sp;
+#else
         pthread_attr_t sattr;
 #if HAVE_PTHREAD_NP_H || defined(__NetBSD__)
         // e.g. on FreeBSD 5.4, neundorf@kde.org
@@ -529,6 +534,7 @@ static inline void *currentThreadStackBase()
         pthread_attr_getstack(&sattr, &stackBase, &stackSize);
         stackBase = (char *)stackBase + stackSize;      // a matter of interpretation, apparently...
         pthread_attr_destroy(&sattr);
+#endif  // OpenBSD
         assert(stackBase);
         stackThread = thread;
     }
