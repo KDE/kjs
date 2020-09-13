@@ -512,13 +512,13 @@ static inline void *currentThreadStackBase()
     static pthread_t stackThread;
     pthread_t thread = pthread_self();
     if (stackBase == nullptr || thread != stackThread) {
-#if defined(__OpenBSD__)
-        stack_t sinfo;
-        pthread_stackseg_np(thread, &sinfo);
-        stackBase = sinfo.ss_sp;
+#if defined(Q_OS_OPENBSD)
+        stack_t ss;
+        pthread_stackseg_np(thread, &ss);
+        stackBase = (void*)((size_t) ss.ss_sp - ss.ss_size);
 #else
         pthread_attr_t sattr;
-#if HAVE_PTHREAD_NP_H || defined(__NetBSD__)
+#if HAVE_PTHREAD_NP_H || defined(Q_OS_NETBSD)
         // e.g. on FreeBSD 5.4, neundorf@kde.org
         // also on NetBSD 3 and 4, raphael.langerhorst@kdemail.net
         // HIGHLY RECOMMENDED by manpage to allocate storage, avoids
