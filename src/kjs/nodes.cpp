@@ -24,7 +24,6 @@
 
 #include "nodes.h"
 #include "scriptfunction.h"
-#include "CompileState.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -37,7 +36,6 @@
 #include "debugger.h"
 #include "function_object.h"
 #include "lexer.h"
-#include "operations.h"
 #include "package.h"
 #include "PropertyNameArray.h"
 #include <wtf/AlwaysInline.h>

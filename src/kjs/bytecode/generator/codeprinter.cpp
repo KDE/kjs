@@ -22,7 +22,6 @@
  */
 #include "codeprinter.h"
 #include <stdlib.h>
-#include <iostream>
 #include <sstream>
 #include "assert.h"
 #include <cctype>

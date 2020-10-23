@@ -24,7 +24,6 @@
 #include "types.h"
 
 #include <stdlib.h>
-#include <iostream>
 #include "assert.h"
 #include <cctype>
 #include <cstdio>

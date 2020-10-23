@@ -34,7 +34,6 @@
 #include "math_object.h"
 #include "nodes.h"
 #include "number_object.h"
-#include "object.h"
 #include "object_object.h"
 #include "operations.h"
 #include "regexp_object.h"

@@ -24,7 +24,6 @@
 #include "CompileState.h"
 #include "nodes.h"
 
-#include <wtf/Assertions.h>
 #include <wtf/Vector.h>
 
 namespace KJS

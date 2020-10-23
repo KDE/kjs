@@ -22,7 +22,6 @@
 
 #include "function_object.h"
 #include "internal.h"
-#include "function.h"
 #include "scriptfunction.h"
 #include "array_object.h"
 #include "nodes.h"

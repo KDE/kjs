@@ -31,8 +31,6 @@
 #include "nodes.h"
 #include "interpreter.h"
 #include "operations.h"
-#include "internal.h"
-#include "regexp.h"
 #include "error_object.h"
 #include "lookup.h"
 

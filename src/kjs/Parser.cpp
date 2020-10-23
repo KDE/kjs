@@ -26,7 +26,6 @@
 #include "lexer.h"
 #include "nodes.h"
 #include <wtf/HashSet.h>
-#include <wtf/Vector.h>
 
 #ifdef KJS_VERBOSE
 #include <stdio.h>

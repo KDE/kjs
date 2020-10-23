@@ -23,7 +23,6 @@
 
 #include "ustring.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "wtf/DisallowCType.h"
@@ -38,10 +37,8 @@
 #include "identifier.h"
 #include <math.h>
 #include "dtoa.h"
-#include "collector.h"
 #include "commonunicode.h"
 
-#include <wtf/Vector.h>
 
 using std::max;
 

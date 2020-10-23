@@ -35,7 +35,6 @@
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
-#include <sys/resource.h>
 
 static const rlim_t sWantedStackSizeLimit = 32 * 1024 * 1024;
 

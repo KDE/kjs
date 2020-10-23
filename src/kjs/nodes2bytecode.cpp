@@ -22,7 +22,6 @@
  *
  */
 #include "nodes2bytecode.h"
-#include "CompileState.h"
 #include <wtf/Assertions.h>
 
 #include <typeinfo>

@@ -41,8 +41,6 @@
 #include "operations.h"
 #include "regexp_object.h"
 #include "string_object.h"
-#include "types.h"
-#include "value.h"
 #include "lexer.h"
 #include "json_object.h"
 
