@@ -10,7 +10,7 @@
  */
 
 #include "ecmatest.h"
-#include <QtTest>
+#include <QTest>
 
 #include <wtf/HashTraits.h>
 #include "JSLock.h"
@@ -20,6 +20,8 @@
 
 #include <QMap>
 #include <QDebug>
+#include <QRegularExpression>
+#include <QDirIterator>
 
 // Let the interpreter create its own global Object instead of using our selfcreated
 #define USE_KJS_GLOBAL 1
