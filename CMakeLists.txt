@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(KF5_VERSION "5.79.0") # handled by release scripts
-project(KJS VERSION ${KF5_VERSION})
+set(KF_VERSION "5.79.0") # handled by release scripts
+project(KJS VERSION ${KF_VERSION})
 
 # ECM setup
 include(FeatureSummary)
@@ -51,7 +51,7 @@ option(KJS_FORCE_DISABLE_PCRE "Force building of KJS without PCRE. Doing this wi
 # TODO: Remove these
 remove_definitions(-DQT_NO_CAST_FROM_ASCII)
 
-find_package(KF5DocTools ${KF5_DEP_VERSION})
+find_package(KF5DocTools ${KF_DEP_VERSION})
 
 add_subdirectory(src)
 if (BUILD_TESTING)
