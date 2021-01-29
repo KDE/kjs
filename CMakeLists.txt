@@ -48,8 +48,11 @@ set_package_properties(PCRE PROPERTIES
 
 option(KJS_FORCE_DISABLE_PCRE "Force building of KJS without PCRE. Doing this will result in many webpage working incorrectly, due to extremely poor regular expression support")
 
-# TODO: Remove these
-remove_definitions(-DQT_NO_CAST_FROM_ASCII)
+# TODO: Support these, set by KDEFrameworkCompilerSettings
+remove_definitions(
+    -DQT_NO_CAST_FROM_ASCII
+    -DQT_NO_FOREACH
+)
 
 find_package(KF5DocTools ${KF_DEP_VERSION})
 
