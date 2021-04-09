@@ -612,9 +612,9 @@ s2b
 
 static int
 hi0bits
-(register ULong x)
+(ULong x)
 {
-    register int k = 0;
+    int k = 0;
 
     if (!(x & 0xffff0000)) {
         k = 16;
@@ -645,8 +645,8 @@ static int
 lo0bits
 (ULong *y)
 {
-    register int k;
-    register ULong x = *y;
+    int k;
+    ULong x = *y;
 
     if (x & 7) {
         if (x & 1) {
@@ -1046,7 +1046,7 @@ static double
 ulp
 (double dx)
 {
-    register Long L;
+    Long L;
     U x, a;
 
     dval(x) = dx;
