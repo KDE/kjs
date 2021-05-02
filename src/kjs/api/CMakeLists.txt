@@ -14,7 +14,7 @@ target_link_libraries(KF5JSApi
     PUBLIC Qt5::Core
     PRIVATE KF5::JS)
 
-set_target_properties(KF5JSApi PROPERTIES VERSION ${KJS_VERSION_STRING}
+set_target_properties(KF5JSApi PROPERTIES VERSION ${KJS_VERSION}
                                           SOVERSION ${KJS_SOVERSION}
                                           EXPORT_NAME JSApi
 )

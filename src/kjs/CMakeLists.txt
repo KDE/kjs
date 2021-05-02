@@ -202,7 +202,7 @@ if(PCRE_FOUND)
 endif()
 target_compile_definitions(KF5JS PRIVATE MAKE_KJS_LIB=1)
 
-set_target_properties(KF5JS PROPERTIES VERSION ${KJS_VERSION_STRING}
+set_target_properties(KF5JS PROPERTIES VERSION ${KJS_VERSION}
                                        SOVERSION ${KJS_SOVERSION}
                                        EXPORT_NAME JS
 )
