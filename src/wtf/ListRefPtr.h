@@ -27,7 +27,7 @@
 namespace WTF
 {
 
-// Specialized version of RefPtr desgined for use in singly-linked lists.
+// Specialized version of RefPtr designed for use in singly-linked lists.
 // Derefs the list iteratively to avoid recursive derefing that can overflow the stack.
 template <typename T> class ListRefPtr : public RefPtr<T>
 {

@@ -345,7 +345,7 @@ void ECMAscriptTest::runAllTests_data()
         // The tests are timezone dependent because of the Date implementation in kjs.
         // It only affects the limit by +/- 24h (or less, depending on your timezone),
         // the "normal" use is not affected.
-        // It requieres a complete Date rewrite to fix this, see ECMA Edition 5.1r6 15.9.1.1
+        // It requires a complete Date rewrite to fix this, see ECMA Edition 5.1r6 15.9.1.1
         skips[ "15.9.5.43-0-8" ] = timeZoneDepend;
         skips[ "15.9.5.43-0-9" ] = timeZoneDepend;
         skips[ "15.9.5.43-0-10" ] = timeZoneDepend;

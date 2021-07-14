@@ -322,7 +322,7 @@ Addr CodeGen::emitOp(CompileState* comp, OpName baseInstr,
     // Now figure out if we need to do align.. We need it if the PC is 8-aligned, since
     // the instr will mess that up, and the instruction need it..
     if (cheapest->hasPadVariant && ((block.size() % 8) == 0)) {
-        // The padded variant of the instruction always preceeds the unpadded one..
+        // The padded variant of the instruction always precedes the unpadded one..
         cheapest = &opsForOpCodes[cheapest->opCode - 1];
     }
 

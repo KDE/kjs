@@ -214,7 +214,7 @@ void JSObject::put(ExecState *exec, const Identifier &propertyName, JSValue *val
         return;
     }
 
-    // putValue() is used for JS assignemnts. It passes no attribute.
+    // putValue() is used for JS assignments. It passes no attribute.
     // Assume that a C++ implementation knows what it is doing
     // and don't spend time doing a read-only check for it.
     bool checkRO = (attr == None || attr == DontDelete);

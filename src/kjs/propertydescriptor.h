@@ -59,7 +59,7 @@ public:
     JSValue *setter() const;
 
     void setEnumerable(bool enumerable);
-    void setConfigureable(bool configureable);
+    void setConfigureable(bool configurable);
     void setValue(JSValue *value);
     void setWritable(bool writable);
     void setGetter(JSValue *getter);

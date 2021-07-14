@@ -204,9 +204,9 @@ void PropertyDescriptor::setEnumerable(bool enumerable)
     m_setAttributes |= EnumerableSet;
 }
 
-void PropertyDescriptor::setConfigureable(bool configureable)
+void PropertyDescriptor::setConfigureable(bool configurable)
 {
-    if (configureable) {
+    if (configurable) {
         m_attributes &= ~DontDelete;
     } else {
         m_attributes |= DontDelete;

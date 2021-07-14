@@ -202,7 +202,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         break;
     }
     case MathObjectImp::Pow:
-        // ECMA 15.8.2.1.13 (::pow takes care of most of the critera)
+        // ECMA 15.8.2.1.13 (::pow takes care of most of the criteria)
         if (isNaN(arg2)) {
             result = NaN;
         } else if (isNaN(arg) && arg2 != 0) {

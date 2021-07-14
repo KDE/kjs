@@ -273,7 +273,7 @@ private:
     // Label resolution..
     WTF::HashSet<Identifier> seenLabels;    // all labels we're inside
     WTF::Vector <Identifier> seenLabelsStack;
-    WTF::Vector <Identifier> pendingLabels; // labels tha that haven't been bound to
+    WTF::Vector <Identifier> pendingLabels; // labels that haven't been bound to
     // a statement yet.
 
     // Targets for continue/break w/o destination.

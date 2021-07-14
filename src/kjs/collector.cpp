@@ -516,7 +516,7 @@ static inline void *currentThreadStackBase()
 #if HAVE_PTHREAD_NP_H || defined(__NetBSD__)
         // e.g. on FreeBSD 5.4, neundorf@kde.org
         // also on NetBSD 3 and 4, raphael.langerhorst@kdemail.net
-        // HIGHLY RECCOMENDED by manpage to allocate storage, avoids
+        // HIGHLY RECOMMENDED by manpage to allocate storage, avoids
         // crashing in JS immediately in FreeBSD.
         pthread_attr_init(&sattr);
         pthread_attr_get_np(thread, &sattr);

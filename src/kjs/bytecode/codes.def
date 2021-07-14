@@ -34,7 +34,7 @@ type int32: int32_t [register, immediate];
 // We provide immediate JSValue's, for the following:
 // 1) Small numeric constants
 // 2) undefined and null.
-// This relies on immediate value JSValue conversion rountines not touching exec!
+// This relies on immediate value JSValue conversion routines not touching exec!
 type value:  JSValue* [register, immediate, align8];
 
 type number: double [register, immediate, align8];
@@ -264,7 +264,7 @@ operation IfNotJump[endsBB] {
     tile (value, addr) as executeIfNotJump;
 }
 
-// Fetches the propertly list, if any, and sets up the iterator state in given
+// Fetches the property list, if any, and sets up the iterator state in given
 // register. Returns the value to iterator
 operation BeginForIn[endsBB] {
     impl value (value e, reg stateReg) [[
@@ -342,10 +342,10 @@ operation PopScope {
         // As PushScope does not Push anything on Exception case, we can not Pop.
         // NOTE: the Exception checking on Push/Pop-Scope is not optimal.
         // Such a Situation, where PushScope already has a Exception can only
-        // occour if import is used inside the the "with"-statement. As import is
+        // occur if import is used inside the the "with"-statement. As import is
         // executed at the beginning of the code (as val decl) and can leave a exception.
         // As "import" is not (yet) part of ECMA-262 the correct behavior is unknown
-        // when this changes we can rework the bahavior, but for now just fix the crash.
+        // when this changes we can rework the behavior, but for now just fix the crash.
         if (exec->hadException())
                 continue;
 
