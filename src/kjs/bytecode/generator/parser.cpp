@@ -32,7 +32,7 @@
  The error recovert is even simpler: we just exit. That's it.
 */
 
-Parser::Parser(istream *stream): tokenLoaded(false), hadError(false), lexer(new Lexer(stream))
+Parser::Parser(istream *stream): tokenLoaded(false), lexer(new Lexer(stream))
 {}
 
 Parser::~Parser()

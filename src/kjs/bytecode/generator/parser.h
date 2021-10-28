@@ -103,8 +103,6 @@ private:
 
     void issueError(const string &msg);
 
-    bool   hadError;
-
     Lexer *lexer;
 
     Lexer::Token peekNext();
