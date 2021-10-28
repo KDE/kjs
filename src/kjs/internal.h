@@ -142,7 +142,7 @@ public:
 double roundValue(double d);
 inline double roundValue(ExecState *e, JSValue *v)
 {
-    return roundValue(v->toNumber(e));
+    return roundValue(JSValue::toNumber(v, e));
 }
 
 int32_t toInt32(double dd);

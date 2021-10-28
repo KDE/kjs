@@ -378,13 +378,13 @@ static JSValue *replace(ExecState *exec, const UString &source, JSValue *pattern
     JSObject *replacementFunction = nullptr;
     UString replacementString;
 
-    if (replacement->isObject() && replacement->toObject(exec)->implementsCall()) {
-        replacementFunction = replacement->toObject(exec);
+    if (JSValue::isObject(replacement) && JSValue::toObject(replacement, exec)->implementsCall()) {
+        replacementFunction = JSValue::toObject(replacement, exec);
     } else {
-        replacementString = replacement->toString(exec);
+        replacementString = JSValue::toString(replacement, exec);
     }
 
-    if (pattern->isObject() && static_cast<JSObject *>(pattern)->inherits(&RegExpImp::info)) {
+    if (JSValue::isObject(pattern) && static_cast<JSObject *>(pattern)->inherits(&RegExpImp::info)) {
         RegExp *reg = static_cast<RegExpImp *>(pattern)->regExp();
         bool global = reg->flags() & RegExp::Global;
 
@@ -429,8 +429,7 @@ static JSValue *replace(ExecState *exec, const UString &source, JSValue *pattern
                 args.append(jsNumber(completeMatchStart));
                 args.append(jsString(source));
 
-                substitutedReplacement = replacementFunction->call(exec, exec->dynamicInterpreter()->globalObject(),
-                                         args)->toString(exec);
+                substitutedReplacement = JSValue::toString(replacementFunction->call(exec, exec->dynamicInterpreter()->globalObject(), args), exec);
             } else {
                 substitutedReplacement = substituteBackreferences(replacementString, source, ovector, reg);
             }
@@ -464,7 +463,7 @@ static JSValue *replace(ExecState *exec, const UString &source, JSValue *pattern
     }
 
     // First arg is a string
-    UString patternString = pattern->toString(exec);
+    UString patternString = JSValue::toString(pattern, exec);
     int matchPos = source.find(patternString);
     int matchLen = patternString.size();
     // Do the replacement
@@ -479,8 +478,7 @@ static JSValue *replace(ExecState *exec, const UString &source, JSValue *pattern
         args.append(jsNumber(matchPos));
         args.append(jsString(source));
 
-        replacementString = replacementFunction->call(exec, exec->dynamicInterpreter()->globalObject(),
-                            args)->toString(exec);
+        replacementString = JSValue::toString(replacementFunction->call(exec, exec->dynamicInterpreter()->globalObject(), args), exec);
     }
 
     return jsString(source.substr(0, matchPos) + replacementString + source.substr(matchPos + matchLen));
@@ -532,7 +530,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     case CharAt:
         // Other browsers treat an omitted parameter as 0 rather than NaN.
         // That doesn't match the ECMA standard, but is needed for site compatibility.
-        dpos = a0->isUndefined() ? 0 : a0->toInteger(exec);
+        dpos = JSValue::isUndefined(a0) ? 0 : JSValue::toInteger(a0, exec);
         if (dpos >= 0 && dpos < len) { // false for NaN
             u = s.substr(static_cast<int>(dpos), 1);
         } else {
@@ -543,7 +541,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     case CharCodeAt:
         // Other browsers treat an omitted parameter as 0 rather than NaN.
         // That doesn't match the ECMA standard, but is needed for site compatibility.
-        dpos = a0->isUndefined() ? 0 : a0->toInteger(exec);
+        dpos = JSValue::isUndefined(a0) ? 0 : JSValue::toInteger(a0, exec);
         if (dpos >= 0 && dpos < len) { // false for NaN
             result = jsNumber(s[static_cast<int>(dpos)].unicode());
         } else {
@@ -553,38 +551,38 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     case Concat: {
         ListIterator it = args.begin();
         for (; it != args.end(); ++it) {
-            s += it->toString(exec);
+            s += JSValue::toString(*it, exec);
         }
         result = jsString(s);
         break;
     }
     case EndsWith:
-	if (a0->isObject() && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
+	if (JSValue::isObject(a0) && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
 	    return throwError(exec, TypeError, "RegExp reserved for future");
 	}
-	u2 = a0->toString(exec);
-	if (a1->isUndefined())
+	u2 = JSValue::toString(a0, exec);
+	if (JSValue::isUndefined(a1))
 	    i = s.size();
 	else
-	    i = minInt(s.size(), a1->toInteger(exec));
+	    i = minInt(s.size(), JSValue::toInteger(a1, exec));
 	pos = i - u2.size();
 	result = jsBoolean(pos >= 0 && s.substr(pos, u2.size()) == u2);
 	break;
     case Includes:
-	if (a0->isObject() && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
+	if (JSValue::isObject(a0) && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
 	    return throwError(exec, TypeError, "RegExp reserved for future");
 	}
-	u2 = a0->toString(exec);
-	pos = a1->toInteger(exec);
+	u2 = JSValue::toString(a0, exec);
+	pos = JSValue::toInteger(a1, exec);
 	i = s.find(u2, pos);
 	result = jsBoolean(i >= 0);
 	break;
     case IndexOf:
-        u2 = a0->toString(exec);
-        if (a1->isUndefined()) {
+        u2 = JSValue::toString(a0, exec);
+        if (JSValue::isUndefined(a1)) {
             dpos = 0;
         } else {
-            dpos = a1->toInteger(exec);
+            dpos = JSValue::toInteger(a1, exec);
             if (dpos >= 0) { // false for NaN
                 if (dpos > len) {
                     dpos = len;
@@ -596,12 +594,12 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         result = jsNumber(s.find(u2, static_cast<int>(dpos)));
         break;
     case LastIndexOf:
-        u2 = a0->toString(exec);
-        d = a1->toNumber(exec);
-        if (a1->isUndefined() || KJS::isNaN(d)) {
+        u2 = JSValue::toString(a0, exec);
+        d = JSValue::toNumber(a1, exec);
+        if (JSValue::isUndefined(a1) || KJS::isNaN(d)) {
             dpos = len;
         } else {
-            dpos = a1->toInteger(exec);
+            dpos = JSValue::toInteger(a1, exec);
             if (dpos >= 0) { // false for NaN
                 if (dpos > len) {
                     dpos = len;
@@ -617,7 +615,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         u = s;
         RegExp *reg, *tmpReg = nullptr;
         RegExpImp *imp = nullptr;
-        if (a0->isObject() && static_cast<JSObject *>(a0)->inherits(&RegExpImp::info)) {
+        if (JSValue::isObject(a0) && static_cast<JSObject *>(a0)->inherits(&RegExpImp::info)) {
             reg = static_cast<RegExpImp *>(a0)->regExp();
         } else {
             /*
@@ -625,7 +623,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
              *  If regexp is not an object whose [[Class]] property is "RegExp", it is
              *  replaced with the result of the expression new RegExp(regexp).
              */
-            reg = tmpReg = new RegExp(a0->toString(exec), RegExp::None);
+            reg = tmpReg = new RegExp(JSValue::toString(a0, exec), RegExp::None);
         }
         if (!reg->isValid()) {
             delete tmpReg;
@@ -683,8 +681,8 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         break;
     case Slice: {
         // The arg processing is very much like ArrayProtoFunc::Slice
-        double start = a0->toInteger(exec);
-        double end = a1->isUndefined() ? len : a1->toInteger(exec);
+        double start = JSValue::toInteger(a0, exec);
+        double end = JSValue::isUndefined(a1) ? len : JSValue::toInteger(a1, exec);
         double from = start < 0 ? len + start : start;
         double to = end < 0 ? len + end : end;
         if (to > from && to > 0 && from < len) {
@@ -706,8 +704,8 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         result = res;
         u = s;
         i = p0 = 0;
-        uint32_t limit = a1->isUndefined() ? 0xFFFFFFFFU : a1->toUInt32(exec);
-        if (a0->isObject() && static_cast<JSObject *>(a0)->inherits(&RegExpImp::info)) {
+        uint32_t limit = JSValue::isUndefined(a1) ? 0xFFFFFFFFU : JSValue::toUInt32(a1, exec);
+        if (JSValue::isObject(a0) && static_cast<JSObject *>(a0)->inherits(&RegExpImp::info)) {
             RegExp *reg = static_cast<RegExpImp *>(a0)->regExp();
 
             RegExpStringContext ctx(u);
@@ -741,7 +739,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
             }
 
         } else {
-            u2 = a0->toString(exec);
+            u2 = JSValue::toString(a0, exec);
             if (u2.isEmpty()) {
                 if (u.isEmpty()) {
                     // empty separator matches empty string -> empty array
@@ -768,11 +766,11 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     }
     break;
     case StartsWith:
-	if (a0->isObject() && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
+	if (JSValue::isObject(a0) && static_cast<JSObject*>(a0)->inherits(&RegExpImp::info)) {
 	    return throwError(exec, TypeError, "RegExp reserved for future");
 	}
-	u2 = a0->toString(exec);
-	pos = maxInt(0, a1->toInteger(exec));
+	u2 = JSValue::toString(a0, exec);
+	pos = maxInt(0, JSValue::toInteger(a1, exec));
 	result = jsBoolean(s.substr(pos, u2.size()) == u2);
 	break;
     case Substr: { //B.2.3
@@ -780,8 +778,8 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         // and start, hence toInteger does fine, and removes worries
         // about weird comparison results below.
         int len = s.size();
-        double start  = a0->toInteger(exec);
-        double length = a1->isUndefined() ? len : a1->toInteger(exec);
+        double start  = JSValue::toInteger(a0, exec);
+        double length = JSValue::isUndefined(a1) ? len : JSValue::toInteger(a1, exec);
 
         if (start >= len) {
             return jsString("");
@@ -804,8 +802,8 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         break;
     }
     case Substring: {
-        double start = a0->toNumber(exec);
-        double end = a1->toNumber(exec);
+        double start = JSValue::toNumber(a0, exec);
+        double end = JSValue::toNumber(a1, exec);
         if (isNaN(start)) {
             start = 0;
         }
@@ -824,7 +822,7 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         if (end > len) {
             end = len;
         }
-        if (a1->isUndefined()) {
+        if (JSValue::isUndefined(a1)) {
             end = len;
         }
         if (start > end) {
@@ -873,9 +871,9 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         if (args.size() < 1) {
             return jsNumber(0);
         }
-        return jsNumber(localeCompare(s, a0->toString(exec)));
+        return jsNumber(localeCompare(s, JSValue::toString(a0, exec)));
     case Repeat: {
-        double n = args[0]->toInteger(exec);
+        double n = JSValue::toInteger(args[0], exec);
         if (exec->hadException())
             return jsUndefined();
         if (n < 0 || KJS::isPosInf(n))
@@ -938,16 +936,16 @@ JSValue *StringProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         result = jsString("<sup>" + s + "</sup>");
         break;
     case Fontcolor:
-        result = jsString("<font color=\"" + a0->toString(exec) + "\">" + s + "</font>");
+        result = jsString("<font color=\"" + JSValue::toString(a0, exec) + "\">" + s + "</font>");
         break;
     case Fontsize:
-        result = jsString("<font size=\"" + a0->toString(exec) + "\">" + s + "</font>");
+        result = jsString("<font size=\"" + JSValue::toString(a0, exec) + "\">" + s + "</font>");
         break;
     case Anchor:
-        result = jsString("<a name=\"" + a0->toString(exec) + "\">" + s + "</a>");
+        result = jsString("<a name=\"" + JSValue::toString(a0, exec) + "\">" + s + "</a>");
         break;
     case Link:
-        result = jsString("<a href=\"" + a0->toString(exec) + "\">" + s + "</a>");
+        result = jsString("<a href=\"" + JSValue::toString(a0, exec) + "\">" + s + "</a>");
         break;
 #endif
     }
@@ -983,7 +981,7 @@ JSObject *StringObjectImp::construct(ExecState *exec, const List &args)
     if (args.size() == 0) {
         return new StringInstance(proto);
     }
-    return new StringInstance(proto, args.begin()->toString(exec));
+    return new StringInstance(proto, JSValue::toString(*args.begin(), exec));
 }
 
 // ECMA 15.5.1
@@ -993,7 +991,7 @@ JSValue *StringObjectImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/
         return jsString("");
     } else {
         JSValue *v = args[0];
-        return jsString(v->toString(exec));
+        return jsString(JSValue::toString(v, exec));
     }
 }
 
@@ -1014,7 +1012,7 @@ JSValue *StringObjectFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisO
         UChar *p = buf;
         ListIterator it = args.begin();
         while (it != args.end()) {
-            unsigned short u = it->toUInt16(exec);
+            unsigned short u = JSValue::toUInt16(*it, exec);
             *p++ = UChar(u);
             it++;
         }

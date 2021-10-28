@@ -59,21 +59,31 @@ bool JSCell::getTruncatedUInt32(uint32_t &) const
 // ECMA 9.4
 double JSValue::toInteger(ExecState *exec) const
 {
+    return toInteger(this, exec);
+}
+
+double JSValue::toInteger(const JSValue *value, ExecState *exec)
+{
     int32_t i;
-    if (getTruncatedInt32(i)) {
+    if (getTruncatedInt32(value, i)) {
         return i;
     }
-    double d = toNumber(exec);
+    double d = toNumber(value, exec);
     return isNaN(d) ? 0.0 : trunc(d);
 }
 
 double JSValue::toIntegerPreserveNaN(ExecState *exec) const
 {
+    return toIntegerPreserveNaN(this, exec);
+}
+
+double JSValue::toIntegerPreserveNaN(const JSValue *value, ExecState *exec)
+{
     int32_t i;
-    if (getTruncatedInt32(i)) {
+    if (getTruncatedInt32(value, i)) {
         return i;
     }
-    return trunc(toNumber(exec));
+    return trunc(toNumber(value, exec));
 }
 
 int32_t JSValue::toInt32SlowCase(double d, bool &ok)
@@ -98,9 +108,9 @@ int32_t JSValue::toInt32SlowCase(double d, bool &ok)
     return static_cast<int32_t>(d32);
 }
 
-int32_t JSValue::toInt32SlowCase(ExecState *exec, bool &ok) const
+int32_t JSValue::toInt32SlowCase(const JSValue *value, ExecState *exec, bool &ok)
 {
-    return JSValue::toInt32SlowCase(toNumber(exec), ok);
+    return JSValue::toInt32SlowCase(toNumber(value, exec), ok);
 }
 
 uint32_t JSValue::toUInt32SlowCase(double d, bool &ok)
@@ -123,24 +133,34 @@ uint32_t JSValue::toUInt32SlowCase(double d, bool &ok)
     return static_cast<uint32_t>(d32);
 }
 
-uint32_t JSValue::toUInt32SlowCase(ExecState *exec, bool &ok) const
+uint32_t JSValue::toUInt32SlowCase(const JSValue *value, ExecState *exec, bool &ok)
 {
-    return JSValue::toUInt32SlowCase(toNumber(exec), ok);
+    return JSValue::toUInt32SlowCase(toNumber(value, exec), ok);
 }
 
 uint16_t JSValue::toUInt16(ExecState *exec) const
 {
+    return toUInt16(this, exec);
+}
+
+uint16_t JSValue::toUInt16(const JSValue *value, ExecState *exec)
+{
     uint32_t i;
-    if (getUInt32(i)) {
+    if (getUInt32(value, i)) {
         return static_cast<uint16_t>(i);
     }
 
-    return KJS::toUInt16(const_cast<JSValue *>(this)->toNumber(exec));
+    return KJS::toUInt16(const_cast<JSValue *>(value)->toNumber(value, exec));
 }
 
 float JSValue::toFloat(ExecState *exec) const
 {
-    return static_cast<float>(toNumber(exec));
+    return toFloat(this, exec);
+}
+
+float JSValue::toFloat(const JSValue *value, ExecState *exec)
+{
+    return static_cast<float>(toNumber(value, exec));
 }
 
 bool JSCell::getNumber(double &numericValue) const
@@ -213,10 +233,10 @@ JSCell *jsOwnedString(const UString &s)
 
 JSCell *jsString(ExecState *exec, const JSValue *value)
 {
-    if (value->isString()) {
+    if (JSValue::isString(value)) {
         return jsString(static_cast<const StringImp *>(value)->value());
     }
-    return jsString(value->toString(exec));
+    return jsString(JSValue::toString(value, exec));
 }
 
 // This method includes a PIC branch to set up the NumberImp's vtable, so we quarantine
@@ -228,16 +248,21 @@ JSValue *jsNumberCell(double d)
 
 JSValue *JSValue::getByIndex(ExecState *exec, unsigned propertyName) const
 {
-    switch (type()) {
+    return getByIndex(this, exec, propertyName);
+}
+
+JSValue *JSValue::getByIndex(const JSValue *value, ExecState *exec, unsigned propertyName)
+{
+    switch (type(value)) {
     case StringType: {
-        UString s = static_cast<const StringImp *>(asCell())->value();
+        UString s = static_cast<const StringImp *>(value->asCell())->value();
         if (propertyName < static_cast<unsigned>(s.size())) {
             return jsString(s.substr(propertyName, 1));
         }
         // fall through
     }
     default: {
-        JSObject *obj = toObject(exec);
+        JSObject *obj = toObject(value, exec);
         PropertySlot slot;
         if (obj->getPropertySlot(exec, propertyName, slot)) {
             return slot.getValue(exec, obj, propertyName);

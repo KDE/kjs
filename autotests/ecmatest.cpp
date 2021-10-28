@@ -43,17 +43,17 @@ QString KJS::UString::qstring() const
 // from khtml/ecma/debugger/value2string.cpp
 QString valueToString(KJS::JSValue *value)
 {
-    switch (value->type()) {
+    switch (KJS::JSValue::type(value)) {
     case KJS::NumberType: {
         double v = 0.0;
-        value->getNumber(v);
+        KJS::JSValue::getNumber(value, v);
         return QString::number(v);
     }
     case KJS::BooleanType:
-        return value->getBoolean() ? "true" : "false";
+        return KJS::JSValue::getBoolean(value) ? "true" : "false";
     case KJS::StringType: {
         KJS::UString s;
-        value->getString(s);
+        KJS::JSValue::getString(value, s);
         return '"' + s.qstring() + '"';
     }
     case KJS::UndefinedType:
@@ -78,7 +78,7 @@ static QString exceptionToString(KJS::ExecState *exec, KJS::JSValue *exceptionOb
     // string serialization ourselves.
     //### might be easier to export class info for ErrorInstance ---
 
-    KJS::JSObject *valueObj = exceptionObj->getObject();
+    KJS::JSObject *valueObj = KJS::JSValue::getObject(exceptionObj);
     KJS::JSValue  *protoObj = valueObj ? valueObj->prototype() : nullptr;
 
     bool exception   = false;
@@ -115,14 +115,14 @@ static QString exceptionToString(KJS::ExecState *exec, KJS::JSValue *exceptionOb
         KJS::JSValue *lineValue = valueObj->get(exec, "line");
         KJS::JSValue *urlValue  = valueObj->get(exec, "sourceURL");
 
-        int      line = lineValue->toNumber(exec);
-        QString  url  = urlValue->toString(exec).qstring();
+        int      line = KJS::JSValue::toNumber(lineValue, exec);
+        QString  url  = KJS::JSValue::toString(urlValue, exec).qstring();
         exceptionMsg = QString::fromLatin1("Parse error at %1 line %2").arg(url).arg(line + 1);
     } else {
         // ### it's still not 100% safe to call toString here, even on
         // native exception objects, since someone might have changed the toString property
         // of the exception prototype, but I'll punt on this case for now.
-        exceptionMsg = exceptionObj->toString(exec).qstring();
+        exceptionMsg = KJS::JSValue::toString(exceptionObj, exec).qstring();
     }
     exec->setException(oldExceptionObj);
     return exceptionMsg;

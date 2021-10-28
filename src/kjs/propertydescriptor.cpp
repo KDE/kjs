@@ -77,18 +77,18 @@ JSObject *PropertyDescriptor::fromPropertyDescriptor(ExecState *exec)
 //ECMAScript Edition 5.1r6 - 8.10.5 - ToPropertyDescriptor
 bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValue *jsValue)
 {
-    JSObject *obj = jsValue->getObject();
+    JSObject *obj = JSValue::getObject(jsValue);
     if (!obj) {
         throwError(exec, TypeError, "not an Object");
         return false;
     }
 
     if (obj->hasProperty(exec, exec->propertyNames().enumerable)) {
-        setEnumerable(obj->get(exec, exec->propertyNames().enumerable)->toBoolean(exec));
+        setEnumerable(JSValue::toBoolean(obj->get(exec, exec->propertyNames().enumerable), exec));
     }
 
     if (obj->hasProperty(exec, exec->propertyNames().configurable)) {
-        setConfigureable(obj->get(exec, exec->propertyNames().configurable)->toBoolean(exec));
+        setConfigureable(JSValue::toBoolean(obj->get(exec, exec->propertyNames().configurable), exec));
     }
 
     if (obj->hasProperty(exec, exec->propertyNames().value)) {
@@ -96,14 +96,14 @@ bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValu
     }
 
     if (obj->hasProperty(exec, exec->propertyNames().writable)) {
-        setWritable(obj->get(exec, exec->propertyNames().writable)->toBoolean(exec));
+        setWritable(JSValue::toBoolean(obj->get(exec, exec->propertyNames().writable), exec));
     }
 
     if (obj->hasProperty(exec, exec->propertyNames().get)) {
         JSValue *getter = obj->get(exec, exec->propertyNames().get);
-        if (!getter->isUndefined()) {
-            if (!getter->implementsCall()) {
-                throwError(exec, TypeError, "Getter: \'" + getter->toString(exec) + "\' is not Callable");
+        if (!JSValue::isUndefined(getter)) {
+            if (!JSValue::implementsCall(getter)) {
+                throwError(exec, TypeError, "Getter: \'" + JSValue::toString(getter, exec) + "\' is not Callable");
                 return false;
             }
         }
@@ -112,9 +112,9 @@ bool PropertyDescriptor::setPropertyDescriptorFromObject(ExecState *exec, JSValu
 
     if (obj->hasProperty(exec, exec->propertyNames().set)) {
         JSValue *setter = obj->get(exec, exec->propertyNames().set);
-        if (!setter->isUndefined()) {
-            if (!setter->implementsCall()) {
-                throwError(exec, TypeError, "Setter: \'" + setter->toString(exec) + "\' is not Callable");
+        if (!JSValue::isUndefined(setter)) {
+            if (!JSValue::implementsCall(setter)) {
+                throwError(exec, TypeError, "Setter: \'" + JSValue::toString(setter, exec) + "\' is not Callable");
                 return false;
             }
         }
@@ -138,7 +138,7 @@ bool PropertyDescriptor::setPropertyDescriptorValues(ExecState *, JSValue *value
     if (!value) {
         return false;
     }
-    if (value->isUndefined() || value->type() != GetterSetterType) {
+    if (JSValue::isUndefined(value) || JSValue::type(value) != GetterSetterType) {
         setValue(value);
         setWritable(!(attributes & ReadOnly));
     } else {

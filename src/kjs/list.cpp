@@ -101,8 +101,8 @@ ListStatisticsExitLogger::~ListStatisticsExitLogger()
 inline void ListImp::markValues()
 {
     for (int i = 0; i != size; ++i) {
-        if (!data[i].val.valueVal->marked()) {
-            data[i].val.valueVal->mark();
+        if (!JSValue::marked(data[i].val.valueVal)) {
+            JSValue::mark(data[i].val.valueVal);
         }
     }
 }

@@ -378,19 +378,19 @@ static double setTimeFields(ExecState *exec, const List &args, int id, double ms
     // hours
     if (maxArgs >= 4 && idx < numArgs) {
         t->tm_hour = 0;
-        milliseconds += args[idx++]->toInt32(exec) * msPerHour;
+        milliseconds += JSValue::toInt32(args[idx++], exec) * msPerHour;
     }
 
     // minutes
     if (maxArgs >= 3 && idx < numArgs) {
         t->tm_min = 0;
-        milliseconds += args[idx++]->toInt32(exec) * msPerMinute;
+        milliseconds += JSValue::toInt32(args[idx++], exec) * msPerMinute;
     }
 
     // seconds
     if (maxArgs >= 2 && idx < numArgs) {
         t->tm_sec = 0;
-        milliseconds += args[idx++]->toInt32(exec) * msPerSecond;
+        milliseconds += JSValue::toInt32(args[idx++], exec) * msPerSecond;
     }
 
     // milliseconds
@@ -425,18 +425,18 @@ static double setDateFields(ExecState *exec, const List &args, int id, double ms
 
     // years
     if (maxArgs >= 3 && idx < numArgs) {
-        t->tm_year = args[idx++]->toInt32(exec) - 1900;
+        t->tm_year = JSValue::toInt32(args[idx++], exec) - 1900;
     }
 
     // months
     if (maxArgs >= 2 && idx < numArgs) {
-        t->tm_mon = args[idx++]->toInt32(exec);
+        t->tm_mon = JSValue::toInt32(args[idx++], exec);
     }
 
     // days
     if (idx < numArgs) {
         t->tm_mday = 0;
-        ms += args[idx]->toInt32(exec) * msPerDay;
+        ms += JSValue::toInt32(args[idx], exec) * msPerDay;
     }
 
     return ms;
@@ -460,7 +460,7 @@ JSObject *DateInstance::valueClone(Interpreter *targetCtx) const
 
 bool DateInstance::getTime(tm &t, int &offset) const
 {
-    double milli = internalValue()->getNumber();
+    double milli = JSValue::getNumber(internalValue());
     if (isNaN(milli)) {
         return false;
     }
@@ -472,7 +472,7 @@ bool DateInstance::getTime(tm &t, int &offset) const
 
 bool DateInstance::getUTCTime(tm &t) const
 {
-    double milli = internalValue()->getNumber();
+    double milli = JSValue::getNumber(internalValue());
     if (isNaN(milli)) {
         return false;
     }
@@ -483,7 +483,7 @@ bool DateInstance::getUTCTime(tm &t) const
 
 bool DateInstance::getTime(double &milli, int &offset) const
 {
-    milli = internalValue()->getNumber();
+    milli = JSValue::getNumber(internalValue());
     if (isNaN(milli)) {
         return false;
     }
@@ -496,7 +496,7 @@ bool DateInstance::getTime(double &milli, int &offset) const
 
 bool DateInstance::getUTCTime(double &milli) const
 {
-    milli = internalValue()->getNumber();
+    milli = JSValue::getNumber(internalValue());
     if (isNaN(milli)) {
         return false;
     }
@@ -640,18 +640,18 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
 {
     if (id == ToJSON) {
         JSValue *tv = thisObj->toPrimitive(exec, NumberType);
-        if (tv->isNumber()) {
-            double ms = tv->toNumber(exec);
+        if (JSValue::isNumber(tv)) {
+            double ms = JSValue::toNumber(tv, exec);
             if (isNaNorInf(ms)) {
                 return jsNull();
             }
         }
 
         JSValue *toISO = thisObj->get(exec, exec->propertyNames().toISOString);
-        if (!toISO->implementsCall()) {
+        if (!JSValue::implementsCall(toISO)) {
             return throwError(exec, TypeError, "toISOString is not callable");
         }
-        JSObject *toISOobj = toISO->toObject(exec);
+        JSObject *toISOobj = JSValue::toObject(toISO, exec);
         if (!toISOobj) {
             return throwError(exec, TypeError, "toISOString is not callable");
         }
@@ -677,7 +677,7 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
     // FIXME: Where's the code to set the locale back to oldlocale?
 #endif
     JSValue *v = thisDateObj->internalValue();
-    double milli = v->toNumber(exec);
+    double milli = JSValue::toNumber(v, exec);
     if (isNaN(milli)) {
         switch (id) {
         case ToString:
@@ -806,7 +806,7 @@ JSValue *DateProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, const
         break;
 
     case SetYear: {
-        int32_t year = args[0]->toInt32(exec);
+        int32_t year = JSValue::toInt32(args[0], exec);
         t.tm_year = (year > 99 || year < 0) ? year - 1900 : year;
         break;
     }
@@ -870,25 +870,25 @@ static double getCurrentUTCTime()
 static double makeTimeFromList(ExecState *exec, const List &args, bool utc)
 {
     const int numArgs = args.size();
-    if (isNaNorInf(args[0]->toNumber(exec))
-            || isNaNorInf(args[1]->toNumber(exec))
-            || (numArgs >= 3 && isNaNorInf(args[2]->toNumber(exec)))
-            || (numArgs >= 4 && isNaNorInf(args[3]->toNumber(exec)))
-            || (numArgs >= 5 && isNaNorInf(args[4]->toNumber(exec)))
-            || (numArgs >= 6 && isNaNorInf(args[5]->toNumber(exec)))
-            || (numArgs >= 7 && isNaNorInf(args[6]->toNumber(exec)))) {
+    if (isNaNorInf(JSValue::toNumber(args[0], exec))
+            || isNaNorInf(JSValue::toNumber(args[1], exec))
+            || (numArgs >= 3 && isNaNorInf(JSValue::toNumber(args[2], exec)))
+            || (numArgs >= 4 && isNaNorInf(JSValue::toNumber(args[3], exec)))
+            || (numArgs >= 5 && isNaNorInf(JSValue::toNumber(args[4], exec)))
+            || (numArgs >= 6 && isNaNorInf(JSValue::toNumber(args[5], exec)))
+            || (numArgs >= 7 && isNaNorInf(JSValue::toNumber(args[6], exec)))) {
         return NaN;
     }
 
     tm t;
     memset(&t, 0, sizeof(t));
-    int year = args[0]->toInt32(exec);
+    int year = JSValue::toInt32(args[0], exec);
     t.tm_year = (year >= 0 && year <= 99) ? year : year - 1900;
-    t.tm_mon = args[1]->toInt32(exec);
-    t.tm_mday = (numArgs >= 3) ? args[2]->toInt32(exec) : 1;
-    t.tm_hour = (numArgs >= 4) ? args[3]->toInt32(exec) : 0;
-    t.tm_min = (numArgs >= 5) ? args[4]->toInt32(exec) : 0;
-    t.tm_sec = (numArgs >= 6) ? args[5]->toInt32(exec) : 0;
+    t.tm_mon = JSValue::toInt32(args[1], exec);
+    t.tm_mday = (numArgs >= 3) ? JSValue::toInt32(args[2], exec) : 1;
+    t.tm_hour = (numArgs >= 4) ? JSValue::toInt32(args[3], exec) : 0;
+    t.tm_min = (numArgs >= 5) ? JSValue::toInt32(args[4], exec) : 0;
+    t.tm_sec = (numArgs >= 6) ? JSValue::toInt32(args[5], exec) : 0;
     if (!utc) {
         t.tm_isdst = -1;
     }
@@ -906,14 +906,14 @@ JSObject *DateObjectImp::construct(ExecState *exec, const List &args)
         value = getCurrentUTCTime();
     } else if (numArgs == 1) {
         JSValue *arg0 = args[0];
-        if (arg0->isObject(&DateInstance::info)) {
-            value = static_cast<DateInstance *>(arg0)->internalValue()->toNumber(exec);
+        if (JSValue::isObject(arg0, &DateInstance::info)) {
+            value = JSValue::toNumber(static_cast<DateInstance *>(arg0)->internalValue(), exec);
         } else {
-            JSValue *primitive = arg0->toPrimitive(exec);
-            if (primitive->isString()) {
-                value = parseDate(primitive->getString());
+            JSValue *primitive = JSValue::toPrimitive(arg0, exec);
+            if (JSValue::isString(primitive)) {
+                value = parseDate(JSValue::getString(primitive));
             } else {
-                value = primitive->toNumber(exec);
+                value = JSValue::toNumber(primitive, exec);
             }
         }
     } else {
@@ -945,7 +945,7 @@ DateObjectFuncImp::DateObjectFuncImp(ExecState *exec, FunctionPrototype *funcPro
 JSValue *DateObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const List &args)
 {
     if (id == Parse) {
-        return jsNumber(parseDate(args[0]->toString(exec)));
+        return jsNumber(parseDate(JSValue::toString(args[0], exec)));
     } else if (id == Now) {
         return jsNumber(getCurrentUTCTime());
     } else { // UTC

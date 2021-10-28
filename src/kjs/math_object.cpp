@@ -136,8 +136,8 @@ MathFuncImp::MathFuncImp(ExecState *exec, int i, int l, const Identifier &name)
 JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, const List &args)
 {
     using namespace std;
-    double arg = args[0]->toNumber(exec);
-    double arg2 = args[1]->toNumber(exec);
+    double arg = JSValue::toNumber(args[0], exec);
+    double arg2 = JSValue::toNumber(args[1], exec);
     double result;
 
     switch (id) {
@@ -175,7 +175,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         unsigned int argsCount = args.size();
         result = -Inf;
         for (unsigned int k = 0; k < argsCount; ++k) {
-            double val = args[k]->toNumber(exec);
+            double val = JSValue::toNumber(args[k], exec);
             if (isNaN(val)) {
                 result = NaN;
                 break;
@@ -190,7 +190,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         unsigned int argsCount = args.size();
         result = +Inf;
         for (unsigned int k = 0; k < argsCount; ++k) {
-            double val = args[k]->toNumber(exec);
+            double val = JSValue::toNumber(args[k], exec);
             if (isNaN(val)) {
                 result = NaN;
                 break;
@@ -308,7 +308,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         bool foundNaN = false;
         for (int i = 0; i < args.size(); ++i)
         {
-            double num = args[i]->toNumber(exec);
+            double num = JSValue::toNumber(args[i], exec);
             if (isInf(num))
                 return jsNumber(KJS::Inf);
             if (foundNaN)
@@ -332,10 +332,10 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
     {
         if (args.size() < 2)
             return jsUndefined();
-        int32_t a = args[0]->toInt32(exec);
+        int32_t a = JSValue::toInt32(args[0], exec);
         if (exec->hadException())
             return jsNumber(a);
-        int32_t b = args[1]->toInt32(exec);
+        int32_t b = JSValue::toInt32(args[1], exec);
         if (exec->hadException())
             return jsNumber(b);
 
@@ -350,7 +350,7 @@ JSValue *MathFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         break;
     case MathObjectImp::Clz32:
     {
-        uint32_t n = args[0]->toUInt32(exec);
+        uint32_t n = JSValue::toUInt32(args[0], exec);
         if (exec->hadException())
             return jsUndefined();
         return jsNumber(clz32(n));

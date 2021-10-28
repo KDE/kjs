@@ -55,8 +55,8 @@ void JSObject::mark()
 #endif
 
     JSValue *proto = _proto;
-    if (!proto->marked()) {
-        proto->mark();
+    if (!JSValue::marked(proto)) {
+        JSValue::mark(proto);
     }
 
     _prop.mark();
@@ -115,7 +115,7 @@ bool JSObject::getPropertySlot(ExecState *exec, unsigned propertyName, PropertyS
         }
 
         JSValue *proto = imp->_proto;
-        if (!proto->isObject()) {
+        if (!JSValue::isObject(proto)) {
             break;
         }
 
@@ -133,10 +133,10 @@ bool JSObject::getPropertyDescriptor(ExecState *exec, const Identifier &property
             return true;
         }
         JSValue *prototype = object->prototype();
-        if (!prototype->isObject()) {
+        if (!JSValue::isObject(prototype)) {
             return false;
         }
-        object = prototype->toObject(exec);
+        object = JSValue::toObject(prototype, exec);
     }
 }
 
@@ -151,7 +151,7 @@ bool JSObject::getOwnPropertySlot(ExecState *exec, unsigned propertyName, Proper
 bool JSObject::getOwnPropertySlot(ExecState *exec, const Identifier &propertyName, PropertySlot &slot)
 {
     if (JSValue **location = getDirectLocation(propertyName)) {
-        if (_prop.hasGetterSetterProperties() && location[0]->type() == GetterSetterType) {
+        if (_prop.hasGetterSetterProperties() && JSValue::type(location[0]) == GetterSetterType) {
             fillGetterPropertySlot(slot, location);
         } else {
             slot.setValueSlot(this, location);
@@ -201,13 +201,13 @@ void JSObject::put(ExecState *exec, const Identifier &propertyName, JSValue *val
 
     // non-standard netscape extension
     if (propertyName == exec->propertyNames().underscoreProto) {
-        JSObject *proto = value->getObject();
+        JSObject *proto = JSValue::getObject(value);
         while (proto) {
             if (proto == this) {
                 throwError(exec, GeneralError, "cyclic __proto__ value");
                 return;
             }
-            proto = proto->prototype() ? proto->prototype()->getObject() : nullptr;
+            proto = proto->prototype() ? JSValue::getObject(proto->prototype()) : nullptr;
         }
 
         setPrototype(value);
@@ -244,7 +244,7 @@ void JSObject::put(ExecState *exec, const Identifier &propertyName, JSValue *val
             break;
         }
 
-        if (!obj->_proto->isObject()) {
+        if (!JSValue::isObject(obj->_proto)) {
             break;
         }
 
@@ -278,7 +278,7 @@ void JSObject::put(ExecState *exec, const Identifier &propertyName, JSValue *val
                 }
             }
 
-            if (!obj->_proto->isObject()) {
+            if (!JSValue::isObject(obj->_proto)) {
                 break;
             }
 
@@ -358,12 +358,12 @@ bool JSObject::deleteProperty(ExecState *exec, unsigned propertyName)
 static ALWAYS_INLINE JSValue *tryGetAndCallProperty(ExecState *exec, const JSObject *object, const Identifier &propertyName)
 {
     JSValue *v = object->get(exec, propertyName);
-    if (v->isObject()) {
+    if (JSValue::isObject(v)) {
         JSObject *o = static_cast<JSObject *>(v);
         if (o->implementsCall()) { // spec says "not primitive type" but ...
             JSObject *thisObj = const_cast<JSObject *>(object);
             JSValue *def = o->call(exec, thisObj, List::empty());
-            JSType defType = def->type();
+            JSType defType = JSValue::type(def);
             ASSERT(defType != GetterSetterType);
             if (defType != ObjectType) {
                 return def;
@@ -376,8 +376,8 @@ static ALWAYS_INLINE JSValue *tryGetAndCallProperty(ExecState *exec, const JSObj
 bool JSObject::getPrimitiveNumber(ExecState *exec, double &number, JSValue *&result)
 {
     result = defaultValue(exec, NumberType);
-    number = result->toNumber(exec);
-    return !result->isString();
+    number = JSValue::toNumber(result, exec);
+    return !JSValue::isString(result);
 }
 
 // ECMA 8.6.2.6
@@ -426,7 +426,7 @@ void JSObject::defineGetter(ExecState *, const Identifier &propertyName, JSObjec
     JSValue *o = getDirect(propertyName);
     GetterSetterImp *gs;
 
-    if (o && o->type() == GetterSetterType) {
+    if (o && JSValue::type(o) == GetterSetterType) {
         gs = static_cast<GetterSetterImp *>(o);
     } else {
         gs = new GetterSetterImp;
@@ -442,7 +442,7 @@ void JSObject::defineSetter(ExecState *, const Identifier &propertyName, JSObjec
     JSValue *o = getDirect(propertyName);
     GetterSetterImp *gs;
 
-    if (o && o->type() == GetterSetterType) {
+    if (o && JSValue::type(o) == GetterSetterType) {
         gs = static_cast<GetterSetterImp *>(o);
     } else {
         gs = new GetterSetterImp;
@@ -472,11 +472,11 @@ bool JSObject::defineOwnProperty(ExecState *exec, const Identifier &propertyName
             GetterSetterImp *gs = new GetterSetterImp();
             putDirect(propertyName, gs, desc.attributes() | GetterSetter);
             _prop.setHasGetterSetterProperties(true);
-            if (desc.getter() && !desc.getter()->isUndefined()) {
-                gs->setGetter(desc.getter()->toObject(exec));
+            if (desc.getter() && !JSValue::isUndefined(desc.getter())) {
+                gs->setGetter(JSValue::toObject(desc.getter(), exec));
             }
-            if (desc.setter() && !desc.setter()->isUndefined()) {
-                gs->setSetter(desc.setter()->toObject(exec));
+            if (desc.setter() && !JSValue::isUndefined(desc.setter())) {
+                gs->setSetter(JSValue::toObject(desc.setter(), exec));
             }
         }
         return true;
@@ -529,17 +529,17 @@ bool JSObject::defineOwnProperty(ExecState *exec, const Identifier &propertyName
                 _prop.setHasGetterSetterProperties(true);
 
                 if (desc.getter()) {
-                    if (desc.getter()->isUndefined()) {
+                    if (JSValue::isUndefined(desc.getter())) {
                         gs->setGetter(nullptr);
                     } else {
-                        gs->setGetter(desc.getter()->toObject(exec));
+                        gs->setGetter(JSValue::toObject(desc.getter(), exec));
                     }
                 }
                 if (desc.setter()) {
-                    if (desc.setter()->isUndefined()) {
+                    if (JSValue::isUndefined(desc.setter())) {
                         gs->setSetter(nullptr);
                     } else {
-                        gs->setSetter(desc.setter()->toObject(exec));
+                        gs->setSetter(JSValue::toObject(desc.setter(), exec));
                     }
                 }
             } else {
@@ -599,20 +599,20 @@ bool JSObject::defineOwnProperty(ExecState *exec, const Identifier &propertyName
     // Everything is allowed here, updating GetterSetter, storing new value
     JSValue *jsval = getDirect(propertyName);
     unsigned int newAttr = current.attributesWithOverride(desc);
-    if (jsval && jsval->type() == GetterSetterType) {
+    if (jsval && JSValue::type(jsval) == GetterSetterType) {
         GetterSetterImp *gs = static_cast<GetterSetterImp *>(jsval);
         if (desc.getter()) {
-            if (desc.getter()->isUndefined()) {
+            if (JSValue::isUndefined(desc.getter())) {
                 gs->setGetter(nullptr);
             } else {
-                gs->setGetter(desc.getter()->toObject(exec));
+                gs->setGetter(JSValue::toObject(desc.getter(), exec));
             }
         }
         if (desc.setter()) {
-            if (desc.setter()->isUndefined()) {
+            if (JSValue::isUndefined(desc.setter())) {
                 gs->setSetter(nullptr);
             } else {
-                gs->setSetter(desc.setter()->toObject(exec));
+                gs->setSetter(JSValue::toObject(desc.setter(), exec));
             }
         }
     } else {
@@ -620,7 +620,7 @@ bool JSObject::defineOwnProperty(ExecState *exec, const Identifier &propertyName
     }
 
     deleteProperty(exec, propertyName);
-    if (jsval->type() == GetterSetterType) {
+    if (JSValue::type(jsval) == GetterSetterType) {
         putDirect(propertyName, jsval, newAttr | GetterSetter);
         _prop.setHasGetterSetterProperties(true);
     } else {
@@ -677,17 +677,17 @@ bool JSObject::implementsHasInstance() const
 bool JSObject::hasInstance(ExecState *exec, JSValue *value)
 {
     JSValue *proto = get(exec, exec->propertyNames().prototype);
-    if (!proto->isObject()) {
+    if (!JSValue::isObject(proto)) {
         throwError(exec, TypeError, "instanceof called on an object with an invalid prototype property.");
         return false;
     }
 
-    if (!value->isObject()) {
+    if (!JSValue::isObject(value)) {
         return false;
     }
 
     JSObject *o = static_cast<JSObject *>(value);
-    while ((o = o->prototype()->getObject())) {
+    while ((o = JSValue::getObject(o->prototype()))) {
         if (o == proto) {
             return true;
         }
@@ -753,7 +753,7 @@ double JSObject::toNumber(ExecState *exec) const
     if (exec->hadException()) { // should be picked up soon in nodes.cpp
         return 0.0;
     }
-    return prim->toNumber(exec);
+    return JSValue::toNumber(prim, exec);
 }
 
 UString JSObject::toString(ExecState *exec) const
@@ -762,7 +762,7 @@ UString JSObject::toString(ExecState *exec) const
     if (exec->hadException()) { // should be picked up soon in nodes.cpp
         return UString(UString::empty);
     }
-    return prim->toString(exec);
+    return JSValue::toString(prim, exec);
 }
 
 JSObject *JSObject::toObject(ExecState * /*exec*/) const

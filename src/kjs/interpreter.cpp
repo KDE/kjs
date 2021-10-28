@@ -386,7 +386,7 @@ void Interpreter::initGlobalObject()
     m_ErrorPrototype = errorProto;
 
     JSObject *o = m_globalObject;
-    while (o->prototype()->isObject()) {
+    while (JSValue::isObject(o->prototype())) {
         o = static_cast<JSObject *>(o->prototype());
     }
     o->setPrototype(m_ObjectPrototype);
@@ -560,8 +560,8 @@ Completion Interpreter::evaluate(const UString &sourceURL, int startingLineNumbe
     JSObject       *thisObj   = globalObj;
 
     // "this" must be an object... use same rules as Function.prototype.apply()
-    if (thisV && !thisV->isUndefinedOrNull()) {
-        thisObj = thisV->toObject(&m_globalExec);
+    if (thisV && !JSValue::isUndefinedOrNull(thisV)) {
+        thisObj = JSValue::toObject(thisV, &m_globalExec);
     }
 
     Completion res;
@@ -779,8 +779,8 @@ void Interpreter::mark(bool)
     if (m_globalObject && !m_globalObject->marked()) {
         m_globalObject->mark();
     }
-    if (m_globalExec.exception() && !m_globalExec.exception()->marked()) {
-        m_globalExec.exception()->mark();
+    if (m_globalExec.exception() && !JSValue::marked(m_globalExec.exception())) {
+        JSValue::mark(m_globalExec.exception());
     }
 
     // Do not let cached activations survive the GC; as they have an unfortunate
@@ -822,8 +822,8 @@ void Interpreter::printException(const Completion &c, const UString &sourceURL)
     JSLock lock;
     ExecState *exec = globalExec();
     CString f = sourceURL.UTF8String();
-    CString message = c.value()->toObject(exec)->toString(exec).UTF8String();
-    int line = c.value()->toObject(exec)->get(exec, "line")->toUInt32(exec);
+    CString message = JSValue::toObject(c.value(), exec)->toString(exec).UTF8String();
+    int line = JSValue::toUInt32(JSValue::toObject(c.value(), exec)->get(exec, "line"), exec);
 #if PLATFORM(WIN_OS)
     printf("%s line %d: %s\n", f.c_str(), line, message.c_str());
 #else

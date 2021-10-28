@@ -29,8 +29,8 @@ namespace KJS
 // ECMA 11.9.3
 bool equal(ExecState *exec, JSValue *v1, JSValue *v2)
 {
-    JSType t1 = v1->type();
-    JSType t2 = v2->type();
+    JSType t1 = JSValue::type(v1);
+    JSType t2 = JSValue::type(v2);
 
     if (t1 != t2) {
         if (t1 == UndefinedType) {
@@ -55,13 +55,13 @@ bool equal(ExecState *exec, JSValue *v1, JSValue *v2)
         // use toNumber
         else {
             if ((t1 == StringType || t1 == NumberType) && t2 >= ObjectType) {
-                return equal(exec, v1, v2->toPrimitive(exec));
+                return equal(exec, v1, JSValue::toPrimitive(v2, exec));
             }
             if (t1 == NullType && t2 == ObjectType) {
                 return static_cast<JSObject *>(v2)->masqueradeAsUndefined();
             }
             if (t1 >= ObjectType && (t2 == StringType || t2 == NumberType)) {
-                return equal(exec, v1->toPrimitive(exec), v2);
+                return equal(exec, JSValue::toPrimitive(v1, exec), v2);
             }
             if (t1 == ObjectType && t2 == NullType) {
                 return static_cast<JSObject *>(v1)->masqueradeAsUndefined();
@@ -77,17 +77,17 @@ bool equal(ExecState *exec, JSValue *v1, JSValue *v2)
     }
 
     if (t1 == NumberType) {
-        double d1 = v1->toNumber(exec);
-        double d2 = v2->toNumber(exec);
+        double d1 = JSValue::toNumber(v1, exec);
+        double d2 = JSValue::toNumber(v2, exec);
         return d1 == d2;
     }
 
     if (t1 == StringType) {
-        return v1->toString(exec) == v2->toString(exec);
+        return JSValue::toString(v1, exec) == JSValue::toString(v2, exec);
     }
 
     if (t1 == BooleanType) {
-        return v1->toBoolean(exec) == v2->toBoolean(exec);
+        return JSValue::toBoolean(v1, exec) == JSValue::toBoolean(v2,  exec);
     }
 
     // types are Object
@@ -96,8 +96,8 @@ bool equal(ExecState *exec, JSValue *v1, JSValue *v2)
 
 bool strictEqual(ExecState *exec, JSValue *v1, JSValue *v2)
 {
-    JSType t1 = v1->type();
-    JSType t2 = v2->type();
+    JSType t1 = JSValue::type(v1);
+    JSType t2 = JSValue::type(v2);
 
     if (t1 != t2) {
         return false;
@@ -106,16 +106,16 @@ bool strictEqual(ExecState *exec, JSValue *v1, JSValue *v2)
         return true;
     }
     if (t1 == NumberType) {
-        double n1 = v1->toNumber(exec);
-        double n2 = v2->toNumber(exec);
+        double n1 = JSValue::toNumber(v1, exec);
+        double n2 = JSValue::toNumber(v2, exec);
         if (n1 == n2) {
             return true;
         }
         return false;
     } else if (t1 == StringType) {
-        return v1->toString(exec) == v2->toString(exec);
+        return JSValue::toString(v1, exec) == JSValue::toString(v2, exec);
     } else if (t2 == BooleanType) {
-        return v1->toBoolean(exec) == v2->toBoolean(exec);
+        return JSValue::toBoolean(v1, exec) == JSValue::toBoolean(v2,  exec);
     }
 
     if (v1 == v2) {
@@ -137,17 +137,17 @@ int relation(ExecState *exec, JSValue *v1, JSValue *v2, bool leftFirst)
     bool wasNotString2;
 
     if (leftFirst) {
-        wasNotString1 = v1->getPrimitiveNumber(exec, n1, p1);
+        wasNotString1 = JSValue::getPrimitiveNumber(v1, exec, n1, p1);
         if (exec->hadException()) {
             return -1;
         }
-        wasNotString2 = v2->getPrimitiveNumber(exec, n2, p2);
+        wasNotString2 = JSValue::getPrimitiveNumber(v2, exec, n2, p2);
     } else {
-        wasNotString1 = v2->getPrimitiveNumber(exec, n2, p2);
+        wasNotString1 = JSValue::getPrimitiveNumber(v2, exec, n2, p2);
         if (exec->hadException()) {
             return -1;
         }
-        wasNotString2 = v1->getPrimitiveNumber(exec, n1, p1);
+        wasNotString2 = JSValue::getPrimitiveNumber(v1, exec, n1, p1);
     }
 
     if (wasNotString1 || wasNotString2) {
@@ -160,7 +160,7 @@ int relation(ExecState *exec, JSValue *v1, JSValue *v2, bool leftFirst)
         return -1; // must be NaN, so undefined
     }
 
-    assert(p1->isString() && p2->isString());
+    assert(JSValue::isString(p1) && JSValue::isString(p2));
     return static_cast<const StringImp *>(p1)->value() < static_cast<const StringImp *>(p2)->value() ? 1 : 0;
 }
 
@@ -168,8 +168,8 @@ int relation(ExecState *exec, JSValue *v1, JSValue *v2, bool leftFirst)
 bool sameValue(ExecState *exec, JSValue *v1, JSValue *v2)
 {
     using namespace std;
-    JSType t1 = v1->type();
-    JSType t2 = v2->type();
+    JSType t1 = JSValue::type(v1);
+    JSType t2 = JSValue::type(v2);
 
     if (t1 != t2) {
         return false;
@@ -178,8 +178,8 @@ bool sameValue(ExecState *exec, JSValue *v1, JSValue *v2)
         return true;
     }
     if (t1 == NumberType) {
-        double n1 = v1->toNumber(exec);
-        double n2 = v2->toNumber(exec);
+        double n1 = JSValue::toNumber(v1, exec);
+        double n2 = JSValue::toNumber(v2, exec);
         if (isNaN(n1) && isNaN(n2)) {
             return true;
         }
@@ -191,9 +191,9 @@ bool sameValue(ExecState *exec, JSValue *v1, JSValue *v2)
         }
         return false;
     } else if (t1 == StringType) {
-        return v1->toString(exec) == v2->toString(exec);
+        return JSValue::toString(v1, exec) == JSValue::toString(v2, exec);
     } else if (t2 == BooleanType) {
-        return v1->toBoolean(exec) == v2->toBoolean(exec);
+        return JSValue::toBoolean(v1, exec) == JSValue::toBoolean(v2,  exec);
     }
 
     if (v1 == v2) {
@@ -209,7 +209,7 @@ int relation(ExecState *exec, JSValue *v1, double n2)
     double n1;
     JSValue *p1;
 
-    v1->getPrimitiveNumber(exec, n1, p1);
+    JSValue::getPrimitiveNumber(v1, exec, n1, p1);
     if (exec->hadException()) {
         return -1;
     }

@@ -60,22 +60,22 @@ void ExecState::markSelf()
 
         for (size_t i = 0; i < size; ++i) {
             JSValue *value = entries[i].val.valueVal;
-            if (!(entries[i].attributes & DontMark) && !value->marked()) {
-                value->mark();
+            if (!(entries[i].attributes & DontMark) && !JSValue::marked(value)) {
+                JSValue::mark(value);
             }
         }
     }
 
     for (size_t i = 0; i < m_deferredCompletions.size(); ++i) {
         JSValue *e = m_deferredCompletions[i].value();
-        if (e && !e->marked()) {
-            e->mark();
+        if (e && !JSValue::marked(e)) {
+            JSValue::mark(e);
         }
     }
 
     JSValue *e = m_completion.value();
-    if (e && !e->marked()) {
-        e->mark();
+    if (e && !JSValue::marked(e)) {
+        JSValue::mark(e);
     }
 
     scope.mark();

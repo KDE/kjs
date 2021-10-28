@@ -636,8 +636,8 @@ void PropertyMap::mark() const
 #if USE_SINGLE_ENTRY
         if (m_singleEntryKey) {
             JSValue *v = m_u.singleEntryValue;
-            if (!v->marked()) {
-                v->mark();
+            if (!JSValue::marked(v)) {
+                JSValue::mark(v);
             }
         }
 #endif
@@ -649,8 +649,8 @@ void PropertyMap::mark() const
     for (int i = 0; i < minimumKeysToProcess; i++) {
         JSValue *v = entries[i].value;
         if (v) {
-            if (!v->marked()) {
-                v->mark();
+            if (!JSValue::marked(v)) {
+                JSValue::mark(v);
             }
         } else {
             ++minimumKeysToProcess;

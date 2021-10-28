@@ -79,9 +79,9 @@ JSValue *BooleanProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, co
     assert(v);
 
     if (id == ToString) {
-        return jsString(v->toString(exec));
+        return jsString(JSValue::toString(v, exec));
     }
-    return jsBoolean(v->toBoolean(exec)); /* TODO: optimize for bool case */
+    return jsBoolean(JSValue::toBoolean(v, exec)); /* TODO: optimize for bool case */
 }
 
 // ------------------------------ BooleanObjectImp -----------------------------
@@ -107,7 +107,7 @@ JSObject *BooleanObjectImp::construct(ExecState *exec, const List &args)
 
     bool b;
     if (args.size() > 0) {
-        b = args.begin()->toBoolean(exec);
+        b = JSValue::toBoolean(*args.begin(), exec);
     } else {
         b = false;
     }
@@ -123,7 +123,7 @@ JSValue *BooleanObjectImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*
     if (args.isEmpty()) {
         return jsBoolean(false);
     } else {
-        return jsBoolean(args[0]->toBoolean(exec));    /* TODO: optimize for bool case */
+        return jsBoolean(JSValue::toBoolean(args[0], exec));    /* TODO: optimize for bool case */
     }
 }
 

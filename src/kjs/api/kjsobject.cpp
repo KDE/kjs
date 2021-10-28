@@ -128,60 +128,60 @@ KJSDate::KJSDate(KJSContext *ctx, const QDateTime &dt)
 
 bool KJSObject::isUndefined() const
 {
-    return JSVALUE(this)->isUndefined();
+    return JSValue::isUndefined(JSVALUE(this));
 }
 
 bool KJSObject::isNull() const
 {
-    return JSVALUE(this)->isNull();
+    return JSValue::isNull(JSVALUE(this));
 }
 
 bool KJSObject::isBoolean() const
 {
-    return JSVALUE(this)->isBoolean();
+    return JSValue::isBoolean(JSVALUE(this));
 }
 
 bool KJSObject::isNumber() const
 {
-    return JSVALUE(this)->isNumber();
+    return JSValue::isNumber(JSVALUE(this));
 }
 
 bool KJSObject::isString() const
 {
-    return JSVALUE(this)->isString();
+    return JSValue::isString(JSVALUE(this));
 }
 
 bool KJSObject::isObject() const
 {
-    return JSVALUE(this)->isObject();
+    return JSValue::isObject(JSVALUE(this));
 }
 
 bool KJSObject::toBoolean(KJSContext *ctx)
 {
     ExecState *exec = EXECSTATE(ctx);
     assert(exec);
-    return JSVALUE(this)->toBoolean(exec);
+    return JSValue::toBoolean(JSVALUE(this), exec);
 }
 
 double KJSObject::toNumber(KJSContext *ctx)
 {
     ExecState *exec = EXECSTATE(ctx);
     assert(exec);
-    return JSVALUE(this)->toNumber(exec);
+    return JSValue::toNumber(JSVALUE(this), exec);
 }
 
 int KJSObject::toInt32(KJSContext *ctx)
 {
     ExecState *exec = EXECSTATE(ctx);
     assert(exec);
-    return JSVALUE(this)->toInt32(exec);
+    return JSValue::toNumber(JSVALUE(this), exec);
 }
 
 QString KJSObject::toString(KJSContext *ctx)
 {
     ExecState *exec = EXECSTATE(ctx);
     assert(exec);
-    return toQString(JSVALUE(this)->toString(exec));
+    return toQString(JSValue::toString(JSVALUE(this), exec));
 }
 
 KJSObject KJSObject::property(KJSContext *ctx, const QString &name)
@@ -197,7 +197,7 @@ KJSObject KJSObject::property(KJSContext *ctx, const QString &name)
 #endif
 
     ExecState *exec = EXECSTATE(ctx);
-    JSObject *o = v->toObject(exec);
+    JSObject *o = JSValue::toObject(v, exec);
     JSValue *res = o->get(exec, toIdentifier(name));
 
     return KJSObject(JSVALUE_HANDLE(res));
@@ -210,7 +210,7 @@ void KJSObject::setProperty(KJSContext *ctx, const QString &name,
     assert(v);
 
     ExecState *exec = EXECSTATE(ctx);
-    JSObject *o = v->toObject(exec);
+    JSObject *o = JSValue::toObject(v, exec);
     o->put(exec, toIdentifier(name), JSVALUE(&value));
 }
 

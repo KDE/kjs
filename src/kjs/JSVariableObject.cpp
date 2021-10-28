@@ -84,8 +84,8 @@ void JSVariableObject::mark()
 
     for (size_t i = 0; i < size; ++i) {
         JSValue *value = entries[i].val.valueVal;
-        if (!(entries[i].attributes & DontMark) && !value->marked()) {
-            value->mark();
+        if (!(entries[i].attributes & DontMark) && !JSValue::marked(value)) {
+            JSValue::mark(value);
         }
     }
 }

@@ -103,17 +103,17 @@ JSValue *ObjectProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         return thisObj;
     case HasOwnProperty: {
         PropertySlot slot;
-        return jsBoolean(thisObj->getOwnPropertySlot(exec, Identifier(args[0]->toString(exec)), slot));
+        return jsBoolean(thisObj->getOwnPropertySlot(exec, Identifier(JSValue::toString(args[0], exec)), slot));
     }
     case IsPrototypeOf: {
-        if (!args[0]->isObject()) {
+        if (!JSValue::isObject(args[0])) {
             return jsBoolean(false);
         }
 
         JSValue *v = static_cast<JSObject *>(args[0])->prototype();
 
         while (true) {
-            if (!v->isObject()) {
+            if (!JSValue::isObject(v)) {
                 return jsBoolean(false);
             }
 
@@ -125,7 +125,7 @@ JSValue *ObjectProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     }
     case DefineGetter:
     case DefineSetter: {
-        if (!args[1]->isObject() ||
+        if (!JSValue::isObject(args[1]) ||
                 !static_cast<JSObject *>(args[1])->implementsCall()) {
             if (id == DefineGetter) {
                 return throwError(exec, SyntaxError, "invalid getter usage");
@@ -135,22 +135,22 @@ JSValue *ObjectProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         }
 
         if (id == DefineGetter) {
-            thisObj->defineGetter(exec, Identifier(args[0]->toString(exec)), static_cast<JSObject *>(args[1]));
+            thisObj->defineGetter(exec, Identifier(JSValue::toString(args[0], exec)), static_cast<JSObject *>(args[1]));
         } else {
-            thisObj->defineSetter(exec, Identifier(args[0]->toString(exec)), static_cast<JSObject *>(args[1]));
+            thisObj->defineSetter(exec, Identifier(JSValue::toString(args[0], exec)), static_cast<JSObject *>(args[1]));
         }
         return jsUndefined();
     }
     case LookupGetter:
     case LookupSetter: {
-        Identifier propertyName = Identifier(args[0]->toString(exec));
+        Identifier propertyName = Identifier(JSValue::toString(args[0], exec));
 
         JSObject *obj = thisObj;
         while (true) {
             JSValue *v = obj->getDirect(propertyName);
 
             if (v) {
-                if (v->type() != GetterSetterType) {
+                if (JSValue::type(v) != GetterSetterType) {
                     return jsUndefined();
                 }
 
@@ -169,7 +169,7 @@ JSValue *ObjectProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
                 }
             }
 
-            if (!obj->prototype() || !obj->prototype()->isObject()) {
+            if (!obj->prototype() || !JSValue::isObject(obj->prototype())) {
                 return jsUndefined();
             }
 
@@ -177,7 +177,7 @@ JSValue *ObjectProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
         }
     }
     case PropertyIsEnumerable:
-        return jsBoolean(thisObj->propertyIsEnumerable(exec, Identifier(args[0]->toString(exec))));
+        return jsBoolean(thisObj->propertyIsEnumerable(exec, Identifier(JSValue::toString(args[0], exec))));
     case ToLocaleString:
         return jsString(thisObj->toString(exec));
     case ToString:
@@ -238,12 +238,12 @@ bool ObjectObjectImp::implementsConstruct() const
 JSObject *ObjectObjectImp::construct(ExecState *exec, const List &args)
 {
     JSValue *arg = args[0];
-    switch (arg->type()) {
+    switch (JSValue::type(arg)) {
     case StringType:
     case BooleanType:
     case NumberType:
     case ObjectType:
-        return arg->toObject(exec);
+        return JSValue::toObject(arg, exec);
     case NullType:
     case UndefinedType:
         return new JSObject(exec->lexicalInterpreter()->builtinObjectPrototype());
@@ -268,7 +268,7 @@ ObjectObjectFuncImp::ObjectObjectFuncImp(ExecState *exec, FunctionPrototype *fun
 
 static JSValue *defineProperties(ExecState *exec, JSObject *object, JSValue *properties)
 {
-    JSObject *props = properties->toObject(exec);
+    JSObject *props = JSValue::toObject(properties, exec);
     if (exec->hadException()) {
         return object;
     }
@@ -296,19 +296,19 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
 {
     switch (id) {
     case GetPrototypeOf: { //ECMA Edition 5.1r6 - 15.2.3.2
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
         return jso->prototype();
     }
     case GetOwnPropertyDescriptor: { //ECMA Edition 5.1r6 - 15.2.3.3
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
 
-        UString name = args[1]->toString(exec);
+        UString name = JSValue::toString(args[1], exec);
         PropertyDescriptor desc;
         if (!jso->getOwnPropertyDescriptor(exec, Identifier(name), desc)) {
             return jsUndefined();
@@ -317,7 +317,7 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
     }
     case GetOwnPropertyNames: //ECMA Edition 5.1r6 - 15.2.3.4
     case Keys: { //ECMA Edition 5.1r6 - 15.2.3.14
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
@@ -341,8 +341,8 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return ret;
     }
     case Create: { //ECMA Edition 5.1r6 - 15.2.3.5
-        JSObject *proto = args[0]->getObject();
-        if (!proto && !args[0]->isNull()) {
+        JSObject *proto = JSValue::getObject(args[0]);
+        if (!proto && !JSValue::isNull(args[0])) {
             return throwError(exec, TypeError, "Not an Object");
         }
 
@@ -352,18 +352,18 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         } else {
             ret->setPrototype(jsNull());
         }
-        if (args.size() >= 2 && !args[1]->isUndefined()) {
+        if (args.size() >= 2 && !JSValue::isUndefined(args[1])) {
             return defineProperties(exec, ret, args[1]);
         }
         return ret;
     }
     case DefineProperty: { //ECMA Edition 5.1r6 - 15.2.3.6
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
 
-        UString name = args[1]->toString(exec);
+        UString name = JSValue::toString(args[1], exec);
         PropertyDescriptor desc;
         if (!desc.setPropertyDescriptorFromObject(exec, args[2])) {
             return jsUndefined();
@@ -374,15 +374,15 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return jso;
     }
     case DefineProperties: { //ECMA Edition 5.1r6 - 15.2.3.7
-        if (!args[0]->isObject()) {
+        if (!JSValue::isObject(args[0])) {
             return throwError(exec, TypeError, "Not an Object");
         }
 
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         return defineProperties(exec, jso, args[1]);
     }
     case Seal: { //ECMA Edition 5.1r6 - 15.2.3.8
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
@@ -405,7 +405,7 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return jso;
     }
     case Freeze: { //ECMA Edition 5.1r6 - 15.2.3.9
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
@@ -432,7 +432,7 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return jso;
     }
     case PreventExtensible: { //ECMA Edition 5.1r6 - 15.2.3.10
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
@@ -440,7 +440,7 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return jso;
     }
     case IsSealed: { //ECMA Edition 5.1r6 - 15.2.3.11
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
@@ -459,7 +459,7 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return jsBoolean(!jso->isExtensible());
     }
     case IsFrozen: { //ECMA Edition 5.1r6 - 15.2.3.12
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }
@@ -482,7 +482,7 @@ JSValue *ObjectObjectFuncImp::callAsFunction(ExecState *exec, JSObject *, const 
         return jsBoolean(!jso->isExtensible());
     }
     case IsExtensible: { //ECMA Edition 5.1r6 - 15.2.3.13
-        JSObject *jso = args[0]->getObject();
+        JSObject *jso = JSValue::getObject(args[0]);
         if (!jso) {
             return throwError(exec, TypeError, "Not an Object");
         }

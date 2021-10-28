@@ -106,7 +106,7 @@ conversion bool => number {
 */
 conversion value => bool {
     impl [[
-        return in->toBoolean(exec);
+        return JSValue::toBoolean(in, exec);
     ]]
 
     tile     costs 5; // it is a virtual call
@@ -115,7 +115,7 @@ conversion value => bool {
 
 conversion value => int32 {
     impl [mayThrow] [[
-        return in->toInt32(exec);
+        return JSValue::toInt32(in, exec);
     ]]
 
     tile     costs 40; // toInt32 uses toNumber --- expensive
@@ -124,7 +124,7 @@ conversion value => int32 {
 
 conversion value => number {
     impl [mayThrow] [[
-        return in->toNumber(exec);
+        return JSValue::toNumber(in, exec);
     ]]
 
     tile     costs 37;
@@ -271,8 +271,8 @@ operation BeginForIn[endsBB] {
         ForInState* st = new ForInState();
         localStore[stateReg].val.valueVal = st;
     
-        if (!e->isUndefinedOrNull()) {
-            JSObject* v = e->toObject(exec);
+        if (!JSValue::isUndefinedOrNull(e)) {
+            JSObject* v = JSValue::toObject(e, exec);
             // The above might raise an exception..
             if (pc != localPC) continue;
 
@@ -295,7 +295,7 @@ operation NextForInEntry {
 
         $$ = jsUndefined();
         while (pos < pa.size()) {
-            ASSERT(e->isObject());
+            ASSERT(JSValue::isObject(e));
             JSObject* v = static_cast<JSObject*>(e);
 
             Identifier& name = pa[pos];
@@ -317,7 +317,7 @@ operation NextForInEntry {
 // restore the chain if an exception happens
 operation PushScope {
     impl void pushScope(value in) [[
-        JSObject* obj = in->toObject(exec);
+        JSObject* obj = JSValue::toObject(in, exec);
         if (exec->hadException())
             continue; // will jump to handler.
 
@@ -671,14 +671,14 @@ operation RegPutInt32 {
 
 operation ToObject {
     impl value toObject(value val) [[
-        $$ = val->toObject(exec);
+        $$ = JSValue::toObject(val, exec);
     ]]
 }
 
 // Put for an object..
 operation SymPutKnownObject {
     impl void symPutKnownObject(value [noimm] scope, ident varName, value val) [[
-        ASSERT(scope->isObject());
+        ASSERT(JSValue::isObject(scope));
         static_cast<JSObject*>(scope)->put(exec, *varName, val);
     ]]
 
@@ -688,7 +688,7 @@ operation SymPutKnownObject {
 // Generic get..
 operation SymGet {
     impl value symGet(value base, ident prop) [[
-        JSObject* baseObj = base->toObject(exec);
+        JSObject* baseObj = JSValue::toObject(base, exec);
         // toObject may fail and return an exception object, but get from it is harmless
 
         // IMPORTANT: The call and store to $$ should be two steps, since ::get can tear off frames!
@@ -700,7 +700,7 @@ operation SymGet {
 // Get when we know the base is an object
 operation SymGetKnownObject {
     impl value symGet(value base, ident prop) [[
-        ASSERT(base->isObject());
+        ASSERT(JSValue::isObject(base));
 
         $$ = static_cast<JSObject*>(base)->get(exec, *prop);
     ]]
@@ -709,7 +709,7 @@ operation SymGetKnownObject {
 // As above, but also stores the object
 operation SymGetAndBind {
     impl value (reg objDest, value [noimm] base, ident varName) [[
-        JSObject* baseObj = base->toObject(exec);
+        JSObject* baseObj = JSValue::toObject(base, exec);
         // toObject may fail and return an exception object, but get from it is harmless
         localStore[objDest].val.valueVal = baseObj;
 
@@ -723,27 +723,27 @@ operation BracketGet {
     impl value (value [noimm] v1, value v2) costs 50 [[
         uint32_t i;
 
-        if (v2->getUInt32(i)) {
-           $$ = v1->getByIndex(exec, i);
+        if (JSValue::getUInt32(v2, i)) {
+           $$ = JSValue::getByIndex(v1, exec, i);
            continue;
         }
 
-        JSObject *o = v1->toObject(exec);
+        JSObject *o = JSValue::toObject(v1, exec);
         // Make sure to  handle exception immediately, here, since toString might throw, too!
         if (exec->hadException())
             continue;
 
         // IMPORTANT: The call and store to $$ should be two steps, since ::get can tear off frames!
-        JSValue* val = o->get(exec, Identifier(v2->toString(exec)));
+        JSValue* val = o->get(exec, Identifier(JSValue::toString(v2, exec)));
         $$ = val;
     ]]
 
     impl value (value [noimm] base, int32 [exact] prop) [[        
         if (prop >= 0) {
-            $$ = base->getByIndex(exec, static_cast<uint32_t>(prop));
+            $$ = JSValue::getByIndex(base, exec, static_cast<uint32_t>(prop));
         } else {
             // Have to go as a string, as above.
-            JSObject* o = base->toObject(exec);
+            JSObject* o = JSValue::toObject(base, exec);
             JSValue* val = o->get(exec, Identifier(UString::from(prop)));
             $$ = val;
         }
@@ -754,7 +754,7 @@ operation BracketGet {
 operation BracketGetAndBind {
     impl value (reg objDest, value [noimm] v1, value v2) costs 50 [[
         uint32_t i;
-        JSObject *o = v1->toObject(exec);
+        JSObject *o = JSValue::toObject(v1, exec);
         // Make sure to  handle exception immediately, here, since toString might throw, too!
         if (exec->hadException())
             continue;
@@ -762,15 +762,15 @@ operation BracketGetAndBind {
         localStore[objDest].val.valueVal = o;
 
         JSValue* val;
-        if (v2->getUInt32(i))
+        if (JSValue::getUInt32(v2, i))
             val = o->get(exec, i);
         else
-            val = o->get(exec, Identifier(v2->toString(exec)));
+            val = o->get(exec, Identifier(JSValue::toString(v2, exec)));
         $$ = val;
     ]]
 
     impl value (reg objDest, value [noimm] base, int32 [exact] prop) [[
-        JSObject* baseObj = base->toObject(exec);
+        JSObject* baseObj = JSValue::toObject(base, exec);
         // toObject may fail and return an exception object, but get from it is harmless
         localStore[objDest].val.valueVal = baseObj;
 
@@ -786,18 +786,18 @@ operation BracketGetAndBind {
 
 operation BracketPutKnownObject {
     impl void (value [noimm] v1, value v2, value v3) costs 50 [[
-        ASSERT(v1->isObject());
+        ASSERT(JSValue::isObject(v1));
         uint32_t i;
         JSObject *o = static_cast<JSObject*>(v1);
 
-        if (v2->getUInt32(i))
+        if (JSValue::getUInt32(v2, i))
             o->put(exec, i, v3);
         else
-            o->put(exec, Identifier(v2->toString(exec)), v3);
+            o->put(exec, Identifier(JSValue::toString(v2, exec)), v3);
     ]]
 
     impl void (value [noimm] base, int32 [exact] prop, value val) [[
-        ASSERT(base->isObject());
+        ASSERT(JSValue::isObject(base));
         if (prop >= 0) {
             static_cast<JSObject*>(base)->put(exec, static_cast<uint32_t>(prop), val);
         } else {
@@ -821,14 +821,14 @@ operation GlobalObjectGet {
 
 operation SymDeleteKnownObject {
     impl bool(value scope, ident name) [[
-        ASSERT(scope->isObject());
+        ASSERT(JSValue::isObject(scope));
         $$ = static_cast<JSObject*>(scope)->deleteProperty(exec, *name);
     ]]
 }
 
 operation SymDelete {
     impl bool(value scope, ident name) [[
-        JSObject* o = scope->toObject(exec);
+        JSObject* o = JSValue::toObject(scope, exec);
         if (pc == localPC) // No exception!
             $$ = o->deleteProperty(exec, *name);
     ]]
@@ -837,18 +837,18 @@ operation SymDelete {
 operation BracketDelete {
     impl bool(value [noimm] v1, value v2) costs 50 [[
         uint32_t i;
-        JSObject *o = v1->toObject(exec);
+        JSObject *o = JSValue::toObject(v1, exec);
         if (pc != localPC)
             continue;
 
-        if (v2->getUInt32(i))
+        if (JSValue::getUInt32(v2, i))
             $$ = o->deleteProperty(exec, i);
         else
-            $$ = o->deleteProperty(exec, Identifier(v2->toString(exec)));
+            $$ = o->deleteProperty(exec, Identifier(JSValue::toString(v2, exec)));
     ]]
 
     impl bool(value v1, int32 [exact] i) [[
-        JSObject *o = v1->toObject(exec);
+        JSObject *o = JSValue::toObject(v1, exec);
         if (pc != localPC)
             continue;
 
@@ -894,16 +894,16 @@ operation NewRegExp {
 
 operation DefineGetter {
     impl void(value [noimm] base, ident name, value getter) [[
-        ASSERT(base->isObject());
-        ASSERT(getter->isObject());
+        ASSERT(JSValue::isObject(base));
+        ASSERT(JSValue::isObject(getter));
         static_cast<JSObject*>(base)->defineGetter(exec, *name, static_cast<JSObject*>(getter));
     ]]
 }
 
 operation DefineSetter {
     impl void(value [noimm] base, ident name, value setter) [[
-        ASSERT(base->isObject());
-        ASSERT(setter->isObject());
+        ASSERT(JSValue::isObject(base));
+        ASSERT(JSValue::isObject(setter));
         static_cast<JSObject*>(base)->defineSetter(exec, *name, static_cast<JSObject*>(setter));
     ]]
 }
@@ -971,13 +971,13 @@ operation Sub {
 operation Add {
     impl value(value v1, value v2) costs 50 [[
         // exception for the Date exception in defaultValue()
-        JSValue *p1 = v1->toPrimitive(exec, UnspecifiedType);
+        JSValue *p1 = JSValue::toPrimitive(v1, exec, UnspecifiedType);
         if (pc != localPC) continue;
-        JSValue *p2 = v2->toPrimitive(exec, UnspecifiedType);
+        JSValue *p2 = JSValue::toPrimitive(v2, exec, UnspecifiedType);
         if (pc != localPC) continue;
 
-        if (p1->isString() || p2->isString()) {
-            UString value = p1->toString(exec) + p2->toString(exec);
+        if (JSValue::isString(p1) || JSValue::isString(p2)) {
+            UString value = JSValue::toString(p1, exec) + JSValue::toString(p2, exec);
             if (value.isNull()) {
                 JSObject *error = Error::create(exec, GeneralError, "Out of memory");
                 exec->setException(error);
@@ -985,7 +985,7 @@ operation Add {
                 $$ = jsString(value);
             }
         } else {
-            $$ = jsNumber(p1->toNumber(exec) + p2->toNumber(exec));
+            $$ = jsNumber(JSValue::toNumber(p1, exec) + JSValue::toNumber(p2, exec));
         }
     ]]
 
@@ -1074,7 +1074,7 @@ operation EqEq {
 
     impl bool(value v1, int32[exact] n2) [[
         double n1;
-        if (v1->getNumber(n1))
+        if (JSValue::getNumber(v1, n1))
             $$ = (n1 == n2);
         else
             $$ = equal(exec, v1, jsNumber(n2));
@@ -1089,7 +1089,7 @@ operation NotEq {
 
     impl bool(value v1, int32[exact] n2) [[
         double n1;
-        if (v1->getNumber(n1))
+        if (JSValue::getNumber(v1, n1))
             $$ = (n1 != n2);
         else
             $$ = !equal(exec, v1, jsNumber(n2));
@@ -1164,18 +1164,18 @@ operation TypeOf {
 
 operation In {
     impl bool (value v1, value v2) [[
-        if (!v2->isObject()) {
+        if (!JSValue::isObject(v2)) {
             throwError(exec,  TypeError, "Value is not an object. Cannot be used with IN expression.");
             continue;
         }
         JSObject* o2 = static_cast<JSObject*>(v2);
-        $$ = o2->hasProperty(exec, Identifier(v1->toString(exec)));
+        $$ = o2->hasProperty(exec, Identifier(JSValue::toString(v1, exec)));
     ]]
 }
 
 operation InstanceOf {
     impl bool (value v1, value v2) [[
-        if (!v2->isObject()) {
+        if (!JSValue::isObject(v2)) {
             throwError(exec,  TypeError, "Value is not an object. Cannot be used with instanceof operator.");
             continue;
         }
@@ -1225,10 +1225,10 @@ operation Add3Arg {
 
 operation FunctionCall {
     impl value(value v, value thisVal) [[
-        ASSERT(thisVal->isObject());
+        ASSERT(JSValue::isObject(thisVal));
         ASSERT(!static_cast<JSObject*>(thisVal)->isActivation());
 
-        if (!v->implementsCall()) {
+        if (!JSValue::implementsCall(v)) {
             throwError(exec, TypeError, "Attempt to use a non-function object or a value as a function.");
             //return throwError(exec, TypeError, notAnObjectMessage(), v, expr.get());
             continue;
@@ -1243,7 +1243,7 @@ operation FunctionCall {
 
 operation CtorCall {
     impl value(value v) [[
-        if (!v->isObject()) {
+        if (!JSValue::isObject(v)) {
             throwError(exec, TypeError, "Value is not an object. Cannot be used with new.");
             //return throwError(exec, TypeError, "Value %s (result of expression %s) is not an object. Cannot be used with new.", v, expr.get());
             continue;

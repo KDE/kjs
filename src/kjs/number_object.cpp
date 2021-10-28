@@ -165,9 +165,9 @@ static double intPow10(int e)
 
 static JSValue *numberToString(ExecState *exec, JSValue *v, const List &args)
 {
-    double radixAsDouble = args[0]->toInteger(exec); // nan -> 0
-    if (radixAsDouble == 10 || args[0]->isUndefined()) {
-        return jsString(v->toString(exec));
+    double radixAsDouble = JSValue::toInteger(args[0], exec); // nan -> 0
+    if (radixAsDouble == 10 || JSValue::isUndefined(args[0])) {
+        return jsString(JSValue::toString(v, exec));
     }
 
     if (radixAsDouble < 2 || radixAsDouble > 36) {
@@ -181,7 +181,7 @@ static JSValue *numberToString(ExecState *exec, JSValue *v, const List &args)
     // unless someone finds a precise rule.
     char s[2048 + 3];
     const char *lastCharInString = s + sizeof(s) - 1;
-    double x = v->toNumber(exec);
+    double x = JSValue::toNumber(v, exec);
     if (isNaN(x) || isInf(x)) {
         return jsString(UString::from(x));
     }
@@ -231,13 +231,13 @@ static JSValue *numberToString(ExecState *exec, JSValue *v, const List &args)
 static JSValue *numberToFixed(ExecState *exec, JSValue *v, const List &args)
 {
     JSValue *fractionDigits = args[0];
-    double df = fractionDigits->toInteger(exec);
+    double df = JSValue::toInteger(fractionDigits, exec);
     if (!(df >= 0 && df <= 20)) {
         return throwError(exec, RangeError, "toFixed() digits argument must be between 0 and 20");
     }
     int f = (int)df;
 
-    double x = v->toNumber(exec);
+    double x = JSValue::toNumber(v, exec);
     if (isNaN(x)) {
         return jsString("NaN");
     }
@@ -323,19 +323,19 @@ void exponentialPartToString(char *buf, int &i, int decimalPoint)
 
 static JSValue *numberToExponential(ExecState *exec, JSValue *v, const List &args)
 {
-    double x = v->toNumber(exec);
+    double x = JSValue::toNumber(v, exec);
 
     if (isNaN(x) || isInf(x)) {
         return jsString(UString::from(x));
     }
 
     JSValue *fractionalDigitsValue = args[0];
-    double df = fractionalDigitsValue->toInteger(exec);
+    double df = JSValue::toInteger(fractionalDigitsValue, exec);
     if (!(df >= 0 && df <= 20)) {
         return throwError(exec, RangeError, "toExponential() argument must between 0 and 20");
     }
     int fractionalDigits = (int)df;
-    bool includeAllDigits = fractionalDigitsValue->isUndefined();
+    bool includeAllDigits = JSValue::isUndefined(fractionalDigitsValue);
 
     int decimalAdjust = 0;
     if (x && !includeAllDigits) {
@@ -396,10 +396,10 @@ static JSValue *numberToExponential(ExecState *exec, JSValue *v, const List &arg
 
 static JSValue *numberToPrecision(ExecState *exec, JSValue *v, const List &args)
 {
-    double doublePrecision = args[0]->toIntegerPreserveNaN(exec);
-    double x = v->toNumber(exec);
-    if (args[0]->isUndefined() || isNaN(x) || isInf(x)) {
-        return jsString(v->toString(exec));
+    double doublePrecision = JSValue::toIntegerPreserveNaN(args[0], exec);
+    double x = JSValue::toNumber(v, exec);
+    if (JSValue::isUndefined(args[0]) || isNaN(x) || isInf(x)) {
+        return jsString(JSValue::toString(v, exec));
     }
 
     UString s;
@@ -475,9 +475,9 @@ JSValue *NumberProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     case ToString:
         return numberToString(exec, v, args);
     case ToLocaleString: /* TODO */
-        return jsString(v->toString(exec));
+        return jsString(JSValue::toString(v, exec));
     case ValueOf:
-        return jsNumber(v->toNumber(exec));
+        return jsNumber(JSValue::toNumber(v, exec));
     case ToFixed:
         return numberToFixed(exec, v, args);
     case ToExponential:
@@ -558,7 +558,7 @@ JSObject *NumberObjectImp::construct(ExecState *exec, const List &args)
     JSObject *proto = exec->lexicalInterpreter()->builtinNumberPrototype();
     NumberInstance *obj = new NumberInstance(proto);
 
-    double n = args.isEmpty() ? 0 : args[0]->toNumber(exec);
+    double n = args.isEmpty() ? 0 : JSValue::toNumber(args[0], exec);
     obj->setInternalValue(jsNumber(n));
     return obj;
 }
@@ -566,7 +566,7 @@ JSObject *NumberObjectImp::construct(ExecState *exec, const List &args)
 // ECMA 15.7.2
 JSValue *NumberObjectImp::callAsFunction(ExecState *exec, JSObject *, const List &args)
 {
-    double n = args.isEmpty() ? 0 : args[0]->toNumber(exec);
+    double n = args.isEmpty() ? 0 : JSValue::toNumber(args[0], exec);
     return jsNumber(n);
 }
 
@@ -579,43 +579,43 @@ NumberFuncImp::NumberFuncImp(ExecState* exec, int i, int l, const Identifier& na
 
 JSValue* NumberFuncImp::callAsFunction(ExecState* exec, JSObject* /*thisObj*/, const List& args)
 {
-    double arg = args[0]->toNumber(exec);
+    double arg = JSValue::toNumber(args[0], exec);
 
     switch (id) {
     case NumberObjectImp::IsFinite:
-        if (args[0]->type() != NumberType)
+        if (JSValue::type(args[0]) != NumberType)
             return jsBoolean(false);
         return jsBoolean(!isNaN(arg) && !isInf(arg));
 
     case NumberObjectImp::IsInteger:
     {
-        if (args[0]->type() != NumberType)
+        if (JSValue::type(args[0]) != NumberType)
             return jsBoolean(false);
         if (isNaN(arg) || isInf(arg))
             return jsBoolean(false);
-        double num = args[0]->toInteger(exec);
+        double num = JSValue::toInteger(args[0], exec);
         return jsBoolean(num == arg);
     }
     case NumberObjectImp::IsNaN:
-        if (args[0]->type() != NumberType)
+        if (JSValue::type(args[0]) != NumberType)
             return jsBoolean(false);
         return jsBoolean(isNaN(arg));
 
     case NumberObjectImp::IsSafeInteger:
     {
-        if (args[0]->type() != NumberType)
+        if (JSValue::type(args[0]) != NumberType)
             return jsBoolean(false);
         if (isNaN(arg) || isInf(arg))
             return jsBoolean(false);
-        double num = args[0]->toInteger(exec);
+        double num = JSValue::toInteger(args[0], exec);
         if (num != arg)
             return jsBoolean(false);
         return jsBoolean(fabs(num) <= MAX_SAFE_INTEGER);
     }
     case NumberObjectImp::ParseInt:
-        return jsNumber(KJS::parseInt(args[0]->toString(exec), args[1]->toInt32(exec)));
+        return jsNumber(KJS::parseInt(JSValue::toString(args[0], exec), JSValue::toInt32(args[1], exec)));
     case NumberObjectImp::ParseFloat:
-        return jsNumber(KJS::parseFloat(args[0]->toString(exec)));
+        return jsNumber(KJS::parseFloat(JSValue::toString(args[0], exec)));
     }
     return jsUndefined();
 }

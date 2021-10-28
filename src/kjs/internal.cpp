@@ -200,7 +200,7 @@ UString GetterSetterImp::toString(ExecState *) const
 JSObject *GetterSetterImp::toObject(ExecState *exec) const
 {
     assert(false);
-    return jsNull()->toObject(exec);
+    return JSValue::toObject(jsNull(), exec);
 }
 
 // ------------------------------ InternalFunctionImp --------------------------
@@ -312,7 +312,7 @@ void printInfo(ExecState *exec, const char *s, JSValue *o, int lineno)
         bool hadExcep = exec->hadException();
 
         UString name;
-        switch (v->type()) {
+        switch (JSValue::type(v)) {
         case UnspecifiedType:
             name = "Unspecified";
             break;
@@ -339,7 +339,7 @@ void printInfo(ExecState *exec, const char *s, JSValue *o, int lineno)
             }
 
             if (obj->inherits(&ArrayInstance::info)) {
-                arrayLength = obj->get(exec, exec->propertyNames().length)->toUInt32(exec);
+                arrayLength = JSValue::toUInt32(obj->get(exec, exec->propertyNames().length), exec);
             }
             vString = "[object " + name + "]"; // krazy:exclude=doublequote_chars
             break;
@@ -352,8 +352,8 @@ void printInfo(ExecState *exec, const char *s, JSValue *o, int lineno)
         // Avoid calling toString on a huge array (e.g. 4 billion elements, in mozilla/js/js1_5/Array/array-001.js)
         if (arrayLength > 100) {
             vString = UString("[ Array with ") + UString::from(arrayLength) + " elements ]";
-        } else if (v->type() != ObjectType) { // Don't want to call a user toString function!
-            vString = v->toString(exec);
+        } else if (JSValue::type(v) != ObjectType) { // Don't want to call a user toString function!
+            vString = JSValue::toString(v, exec);
         }
         if (!hadExcep) {
             exec->clearException();

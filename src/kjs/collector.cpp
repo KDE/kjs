@@ -482,8 +482,8 @@ void Collector::markStackObjectsConservatively(void *start, void *end)
                 if ((blocks[block] == blockAddr) && (offset <= lastCellOffset)) {
                     if (((CollectorCell *)x)->u.freeCell.zeroIfFree != nullptr) {
                         JSCell *imp = reinterpret_cast<JSCell *>(x);
-                        if (!imp->marked()) {
-                            imp->mark();
+                        if (!JSValue::marked(imp)) {
+                            JSValue::mark(imp);
                         }
                     }
                 } // if valid block

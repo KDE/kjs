@@ -27,11 +27,11 @@ namespace KJS
 void JSWrapperObject::mark()
 {
     JSObject::mark();
-    if (m_internalValue && !m_internalValue->marked()) {
-        m_internalValue->mark();
+    if (m_internalValue && !JSValue::marked(m_internalValue)) {
+        JSValue::mark(m_internalValue);
     }
-    if (!m_originalProto->marked()) {
-        m_originalProto->mark();
+    if (!JSValue::marked(m_originalProto)) {
+        JSValue::mark(m_originalProto);
     }
 }
 

@@ -634,7 +634,7 @@ inline void JSObject::fillDirectLocationSlot(PropertySlot &slot,
         JSValue **location)
 {
     if (_prop.hasGetterSetterProperties() &&
-            (*location)->type() == GetterSetterType) {
+            JSValue::type(*location) == GetterSetterType) {
         fillGetterPropertySlot(slot, location);
     } else {
         slot.setValueSlot(this, location);
@@ -650,7 +650,12 @@ inline bool JSCell::isObject(const ClassInfo *info) const
 // this method is here to be after the inline declaration of JSCell::isObject
 inline bool JSValue::isObject(const ClassInfo *c) const
 {
-    return !JSImmediate::isImmediate(this) && asCell()->isObject(c);
+    return isObject(this, c);
+}
+
+inline bool JSValue::isObject(const JSValue *value, const ClassInfo *c)
+{
+    return !JSImmediate::isImmediate(value) && value->asCell()->isObject(c);
 }
 
 // It may seem crazy to inline a function this large but it makes a big difference
@@ -664,7 +669,7 @@ inline bool JSObject::getPropertySlot(ExecState *exec, const Identifier &propert
         }
 
         JSValue *proto = object->_proto;
-        if (!proto->isObject()) {
+        if (!JSValue::isObject(proto)) {
             return false;
         }
 
@@ -674,7 +679,7 @@ inline bool JSObject::getPropertySlot(ExecState *exec, const Identifier &propert
 
 inline void JSObject::getPropertyNames(ExecState *exec, PropertyNameArray &propertyNames, PropertyMap::PropertyMode mode)
 {
-    for (JSObject *cur = this; cur; cur = cur->_proto->getObject()) {
+    for (JSObject *cur = this; cur; cur = JSValue::getObject(cur->_proto)) {
         cur->getOwnPropertyNames(exec, propertyNames, mode);
     }
 }

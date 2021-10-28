@@ -383,7 +383,7 @@ static void dumpParam(CodeBlock& block, size_t offset, OpType type, bool wasImm)
         break;
     case OpType_value:
         // Immediate value -- should go through JSImmediate stuff..
-        std::fprintf(stderr, "<ival:%s>", reinterpret_cast<WideArg*>(block.data() + offset)->valueVal->toString(nullptr).ascii());
+        std::fprintf(stderr, "<ival:%s>", JSValue::toString(reinterpret_cast<WideArg*>(block.data() + offset)->valueVal, nullptr).ascii());
         break;
     case OpType_ident:
         std::fprintf(stderr, "%s", reinterpret_cast<WideArg*>(block.data() + offset)->identVal->ustring().ascii());

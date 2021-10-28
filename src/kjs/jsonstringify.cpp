@@ -41,11 +41,11 @@ static const unsigned int StackObjectLimit = 1500;
 JSONStringify::JSONStringify(ExecState *exec, JSValue *replacer, JSValue *spacer)
     : m_state(Success)
 {
-    m_replacerObject = replacer->getObject();
+    m_replacerObject = JSValue::getObject(replacer);
 
     if (!m_replacerObject) {
         m_replacerType = Invalid;
-    } else if (replacer->implementsCall()) {
+    } else if (JSValue::implementsCall(replacer)) {
         m_replacerType = Function;
     } else if (m_replacerObject->inherits(&ArrayInstance::info)) {
         //get all whitelist names
@@ -59,7 +59,7 @@ JSONStringify::JSONStringify(ExecState *exec, JSValue *replacer, JSValue *spacer
             if (!isValidIndex) {
                 continue;
             }
-            m_whitelistNames.add(Identifier(m_replacerObject->get(exec, names[i])->toString(exec)));
+            m_whitelistNames.add(Identifier(JSValue::toString(m_replacerObject->get(exec, names[i]), exec)));
             if (exec->hadException()) {
                 m_state = FailedException;
                 return;
@@ -70,10 +70,10 @@ JSONStringify::JSONStringify(ExecState *exec, JSValue *replacer, JSValue *spacer
         m_replacerObject = nullptr;
     }
 
-    JSObject *spacerObject = spacer->getObject();
+    JSObject *spacerObject = JSValue::getObject(spacer);
     m_emtpySpacer = true;
-    if (spacer->isString() || (spacerObject && spacerObject->inherits(&StringInstance::info))) {
-        m_spacer = spacer->toString(exec);
+    if (JSValue::isString(spacer) || (spacerObject && spacerObject->inherits(&StringInstance::info))) {
+        m_spacer = JSValue::toString(spacer, exec);
         if (exec->hadException()) {
             m_state = FailedException;
             return;
@@ -82,8 +82,8 @@ JSONStringify::JSONStringify(ExecState *exec, JSValue *replacer, JSValue *spacer
             m_spacer = m_spacer.substr(0, 10);
             m_emtpySpacer = false;
         }
-    } else if (spacer->isNumber() || (spacerObject && spacerObject->inherits(&NumberInstance::info))) {
-        double spacesDouble = spacer->toInteger(exec);
+    } else if (JSValue::isNumber(spacer) || (spacerObject && spacerObject->inherits(&NumberInstance::info))) {
+        double spacesDouble = JSValue::toInteger(spacer, exec);
         if (exec->hadException()) {
             m_state = FailedException;
             return;
@@ -204,12 +204,12 @@ UString JSONStringify::stringifyObject(KJS::ExecState *exec, KJS::JSValue *objec
         return UString();
     }
 
-    // As stringifyObject is only called with object->type() == ObhectType, this can't be null
-    JSObject *jso = object->getObject();
+    // As stringifyObject is only called with JSValue::type(object) == ObhectType, this can't be null
+    JSObject *jso = JSValue::getObject(object);
 
     if (jso->hasProperty(exec, exec->propertyNames().toJSON)) {
         JSObject *toJSONFunc = nullptr;
-        toJSONFunc = jso->get(exec, exec->propertyNames().toJSON)->getObject();
+        toJSONFunc = JSValue::getObject(jso->get(exec, exec->propertyNames().toJSON));
 
         if (toJSONFunc) {
             m_objectStack.push_back(object);
@@ -224,7 +224,7 @@ UString JSONStringify::stringifyObject(KJS::ExecState *exec, KJS::JSValue *objec
             //Check if the toJSON call returned a function
             // we check it here because our stack already contains an object,
             // but this is still the root object.
-            if (m_objectStack.size() == 1 && toJSONCall->implementsCall()) {
+            if (m_objectStack.size() == 1 && JSValue::implementsCall(toJSONCall)) {
                 m_rootIsUndefined = true;
                 return UString();
             }
@@ -274,7 +274,7 @@ UString JSONStringify::stringifyObject(KJS::ExecState *exec, KJS::JSValue *objec
         for (int i = 0; i < sizeWhitelisted; ++i) {
             JSValue *arrayVal = jso->get(exec, whiteListedNames[i]);
             //do not render undefined, ECMA Edition 5.1r6 - 15.12.3 NOTE 2
-            if (arrayVal->isUndefined()) {
+            if (JSValue::isUndefined(arrayVal)) {
                 continue;
             }
 
@@ -323,7 +323,7 @@ UString JSONStringify::stringifyObject(KJS::ExecState *exec, KJS::JSValue *objec
         for (int i = 0; i < sizeWhitelisted; ++i) {
             JSValue *objectVal = jso->get(exec, whiteListedNames[i]);
             //do not render undefined, ECMA Edition 5.1r6 - 15.12.3 NOTE 2
-            if (objectVal->isUndefined()) {
+            if (JSValue::isUndefined(objectVal)) {
                 continue;
             }
 
@@ -390,26 +390,26 @@ UString JSONStringify::stringifyValue(KJS::ExecState *exec, KJS::JSValue *object
     }
 
     //Check if root object is a function, after replace
-    if (m_objectStack.empty() && object->implementsCall()) {
+    if (m_objectStack.empty() && JSValue::implementsCall(object)) {
         m_rootIsUndefined = true;
         return UString();
     }
 
-    JSType type = object->type();
+    JSType type = JSValue::type(object);
     switch (type) {
     case ObjectType:
         return stringifyObject(exec, object, propertyName, holder);
     case NumberType: {
-        double val = object->getNumber();
+        double val = JSValue::getNumber(object);
         if (isInf(val) || isNaN(val)) { // !isfinite
             return UString("null");
         }
         // fall through
     }
     case BooleanType:
-        return object->toString(exec);
+        return JSValue::toString(object, exec);
     case StringType:
-        return quotedString(exec, object->toString(exec));
+        return quotedString(exec, JSValue::toString(object, exec));
         break;
     case UndefinedType:
         // Special case: while we normally don't render undefined,

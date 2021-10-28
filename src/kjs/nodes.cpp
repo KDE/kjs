@@ -1147,8 +1147,8 @@ PackageObject *PackageNameNode::resolvePackage(ExecState *exec,
 
     // Let's see whether the package was already resolved previously.
     JSValue *v = baseObject->get(exec, id);
-    if (v && !v->isUndefined()) {
-        if (!v->isObject()) {
+    if (v && !JSValue::isUndefined(v)) {
+        if (!JSValue::isObject(v)) {
             // Symbol conflict
             throwError(exec, GeneralError, "Invalid type of package %s", id);
             return nullptr;

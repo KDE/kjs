@@ -334,7 +334,7 @@ inline KJS::JSObject *cacheGlobalObject(KJS::ExecState *exec, const KJS::Identif
     KJS::JSObject *globalObject = static_cast<KJS::JSObject *>(exec->lexicalInterpreter()->globalObject());
     KJS::JSValue *obj = globalObject->getDirect(propertyName);
     if (obj) {
-        assert(obj->isObject());
+        assert(KJS::JSValue::isObject(obj));
         return static_cast<KJS::JSObject *>(obj);
     }
     KJS::JSObject *newObject = new ClassCtor(exec);

@@ -98,7 +98,7 @@ NEVER_INLINE void throwUndefinedVariableError(ExecState* exec, const Identifier&
 
 static JSValue* typeStringForValue(JSValue* v)
 {
-    switch (v->type()) {
+    switch (JSValue::type(v)) {
     case UndefinedType:
         return jsString("undefined");
     case NullType:
@@ -110,7 +110,7 @@ static JSValue* typeStringForValue(JSValue* v)
     case StringType:
         return jsString("string");
     default:
-        if (v->isObject()) {
+        if (JSValue::isObject(v)) {
             // Return "undefined" for objects that should be treated
             // as null when doing comparisons.
             if (static_cast<JSObject*>(v)->masqueradeAsUndefined())

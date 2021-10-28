@@ -105,12 +105,12 @@ KJSInterpreter::KJSInterpreter(const KJSGlobalObject &global)
     : globCtx(nullptr)
 {
     JSValue *gv = JSVALUE(&global);
-    assert(gv->isObject());
+    assert(JSValue::isObject(gv));
     JSObject *go = static_cast<JSObject *>(gv);
     assert(go->isGlobalObject());
     Interpreter *ip = new Interpreter(static_cast<JSGlobalObject *>(go));
     ip->ref();
-    assert(go->prototype()->isObject());
+    assert(JSValue::isObject(go->prototype()));
     JSObject *p =  static_cast<JSObject *>(go->prototype());
     JSObject *objectProto = ip->builtinObjectPrototype();
     p->setPrototype(objectProto);
@@ -183,7 +183,7 @@ KJSResult KJSInterpreter::evaluate(const QString &sourceURL,
     KJSResult res;
     if (c.complType() == Throw) {
         ExecState *exec = ip->globalExec();
-        UString msg = c.value()->toString(exec);
+        UString msg = JSValue::toString(c.value(), exec);
 #if 0
         JSObject *resObj = c.value()->toObject(exec);
         CString message = resObj->toString(exec).UTF8String();

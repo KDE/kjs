@@ -129,7 +129,7 @@ JSValue *TestFunctionImp::callAsFunction(ExecState *exec,
 {
     switch (id) {
     case Print:
-        printf("%s\n", args[0]->toString(exec).UTF8String().c_str());
+        printf("%s\n", JSValue::toString(args[0], exec).UTF8String().c_str());
         return jsUndefined();
     case Quit:
         exit(0);
@@ -137,7 +137,7 @@ JSValue *TestFunctionImp::callAsFunction(ExecState *exec,
         while (Interpreter::collect()) {}
         break;
     case Load:
-        evaluateFile(exec->dynamicInterpreter(), args[0]->toString(exec).UTF8String().c_str());
+        evaluateFile(exec->dynamicInterpreter(), JSValue::toString(args[0], exec).UTF8String().c_str());
         break;
     default:
         abort();
@@ -154,10 +154,10 @@ static ExitCode evaluateString(Interpreter *interp, const char *fileName,
     Completion res = interp->evaluate(fileName, 0, code);
 
     if (res.complType() == Throw) {
-        CString msg = res.value()->toString(exec).UTF8String();
-        JSObject *resObj = res.value()->toObject(exec);
+        CString msg = JSValue::toString(res.value(), exec).UTF8String();
+        JSObject *resObj = JSValue::toObject(res.value(), exec);
         CString message = resObj->toString(exec).UTF8String();
-        int line = resObj->toObject(exec)->get(exec, "line")->toUInt32(exec);
+        int line = JSValue::toUInt32(resObj->toObject(exec)->get(exec, "line"), exec);
 
         if (fileName) {
             fprintf(stderr, "%s (line %d): ", fileName, line);
@@ -165,8 +165,8 @@ static ExitCode evaluateString(Interpreter *interp, const char *fileName,
         fprintf(stderr, "%s\n", msg.c_str());
         return ErrorEval;
     } else if (printResult) {
-        if (res.isValueCompletion() && !res.value()->isUndefined()) {
-            CString s8 = res.value()->toString(exec).UTF8String();
+        if (res.isValueCompletion() && !JSValue::isUndefined(res.value())) {
+            CString s8 = JSValue::toString(res.value(), exec).UTF8String();
             if (s8.size() != 0) {
                 fprintf(stdout, "%s\n", s8.c_str());
             }

@@ -101,20 +101,20 @@ JSValue *FunctionProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, c
         }
 
         JSObject *applyThis;
-        if (thisArg->isUndefinedOrNull()) {
+        if (JSValue::isUndefinedOrNull(thisArg)) {
             applyThis = exec->dynamicInterpreter()->globalObject();
         } else {
-            applyThis = thisArg->toObject(exec);
+            applyThis = JSValue::toObject(thisArg, exec);
         }
 
         List applyArgs;
-        if (!argArray->isUndefinedOrNull()) {
-            if (argArray->isObject() &&
+        if (!JSValue::isUndefinedOrNull(argArray)) {
+            if (JSValue::isObject(argArray) &&
                     (static_cast<JSObject *>(argArray)->inherits(&ArrayInstance::info) ||
                      static_cast<JSObject *>(argArray)->inherits(&Arguments::info))) {
 
                 JSObject *argArrayObj = static_cast<JSObject *>(argArray);
-                unsigned int length = argArrayObj->get(exec, exec->propertyNames().length)->toUInt32(exec);
+                unsigned int length = JSValue::toUInt32(argArrayObj->get(exec, exec->propertyNames().length), exec);
                 for (unsigned int i = 0; i < length; i++) {
                     applyArgs.append(argArrayObj->get(exec, i));
                 }
@@ -134,10 +134,10 @@ JSValue *FunctionProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, c
         }
 
         JSObject *callThis;
-        if (thisArg->isUndefinedOrNull()) {
+        if (JSValue::isUndefinedOrNull(thisArg)) {
             callThis = exec->dynamicInterpreter()->globalObject();
         } else {
-            callThis = thisArg->toObject(exec);
+            callThis = JSValue::toObject(thisArg, exec);
         }
 
         result = func->call(exec, callThis, args.copyTail());
@@ -158,17 +158,17 @@ JSValue *FunctionProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, c
 
         // As call does not accept JSValue(undefined/null),
         // do it like in call and use the global object
-        if (args[0]->isUndefinedOrNull()) {
+        if (JSValue::isUndefinedOrNull(args[0])) {
             boundThis = exec->dynamicInterpreter()->globalObject();
         } else {
-            boundThis = args[0]->toObject(exec);
+            boundThis = JSValue::toObject(args[0], exec);
         }
 
         BoundFunction *bfunc = new BoundFunction(exec, target, boundThis, newArgs);
 
         unsigned length;
         if (target->inherits(&FunctionImp::info)) {
-            double L = target->get(exec, exec->propertyNames().length)->getNumber() - newArgs.size();
+            double L = JSValue::getNumber(target->get(exec, exec->propertyNames().length)) - newArgs.size();
             length = (unsigned)std::max<int>((int)L, 0);
         } else {
             length = 0;
@@ -226,13 +226,13 @@ JSObject *FunctionObjectImp::construct(ExecState *exec, const List &args, const 
     if (argsSize == 0) {
         body = "";
     } else if (argsSize == 1) {
-        body = args[0]->toString(exec);
+        body = JSValue::toString(args[0], exec);
     } else {
-        p = args[0]->toString(exec);
+        p = JSValue::toString(args[0], exec);
         for (int k = 1; k < argsSize - 1; k++) {
-            p += "," + args[k]->toString(exec);
+            p += "," + JSValue::toString(args[k], exec);
         }
-        body = args[argsSize - 1]->toString(exec);
+        body = JSValue::toString(args[argsSize - 1], exec);
     }
 
     // parse the source code

@@ -241,8 +241,8 @@ void ArrayInstance::put(ExecState *exec, const Identifier &propertyName, JSValue
         if (m_lengthAttributes & ReadOnly) {
             return;
         }
-        unsigned newLength = value->toUInt32(exec);
-        if (value->toNumber(exec) != static_cast<double>(newLength)) {
+        unsigned newLength = JSValue::toUInt32(value, exec);
+        if (JSValue::toNumber(value, exec) != static_cast<double>(newLength)) {
             throwError(exec, RangeError, "Invalid array length.");
             return;
         }
@@ -264,7 +264,7 @@ void ArrayInstance::put(ExecState *exec, unsigned i, JSValue *value, int attribu
         attributes |= ent->attributes;
 
         JSValue *gs = ent->value;
-        if (gs && !gs->isUndefined()) {
+        if (gs && !JSValue::isUndefined(gs)) {
             if (ent->attributes & GetterSetter) {
                 JSObject *setterFunc = static_cast<GetterSetterImp *>(gs)->getSetter();
 
@@ -397,7 +397,7 @@ bool ArrayInstance::defineOwnProperty(ExecState *exec, const Identifier &propert
 {
     PropertyDescriptor oldLenDesc;
     getOwnPropertyDescriptor(exec, exec->propertyNames().length, oldLenDesc);
-    unsigned int oldLen = oldLenDesc.value()->toUInt32(exec);
+    unsigned int oldLen = JSValue::toUInt32(oldLenDesc.value(), exec);
 
     //4a
     bool isArrayIndex;
@@ -413,9 +413,9 @@ bool ArrayInstance::defineOwnProperty(ExecState *exec, const Identifier &propert
         //b
         PropertyDescriptor newLenDesc(desc);
         //c
-        unsigned int newLen = desc.value()->toUInt32(exec);
+        unsigned int newLen = JSValue::toUInt32(desc.value(), exec);
         //d
-        if (newLen != desc.value()->toNumber(exec) || desc.value()->toNumber(exec) > maxArrayLength) {
+        if (newLen != JSValue::toNumber(desc.value(), exec) || JSValue::toNumber(desc.value(), exec) > maxArrayLength) {
             throwError(exec, RangeError, "Index out of range");
             return false;
         }
@@ -801,8 +801,8 @@ void ArrayInstance::mark()
     unsigned usedVectorLength = min(m_length, m_vectorLength);
     for (unsigned i = 0; i < usedVectorLength; ++i) {
         ArrayEntity *ent = &storage->m_vector[i];
-        if (ent->value && !ent->value->marked()) {
-            ent->value->mark();
+        if (ent->value && !JSValue::marked(ent->value)) {
+            JSValue::mark(ent->value);
         }
     }
 
@@ -810,8 +810,8 @@ void ArrayInstance::mark()
         SparseArrayValueMap::iterator end = map->end();
         for (SparseArrayValueMap::iterator it = map->begin(); it != end; ++it) {
             ArrayEntity *ent = &it->second;
-            if (!ent->value->marked()) {
-                ent->value->mark();
+            if (!JSValue::marked(ent->value)) {
+                JSValue::mark(ent->value);
             }
         }
     }
@@ -826,10 +826,10 @@ static int compareByStringForQSort(const void *a, const void *b)
     const ArrayEntity *va = static_cast<const ArrayEntity *>(a);
     const ArrayEntity *vb = static_cast<const ArrayEntity *>(b);
 
-    ASSERT(va->value && !va->value->isUndefined());
-    ASSERT(vb->value && !vb->value->isUndefined());
+    ASSERT(va->value && !JSValue::isUndefined(va->value));
+    ASSERT(vb->value && !JSValue::isUndefined(vb->value));
 
-    return compare(va->value->toString(exec), vb->value->toString(exec));
+    return compare(JSValue::toString(va->value, exec), JSValue::toString(vb->value, exec));
 }
 
 void ArrayInstance::sort(ExecState *exec)
@@ -891,14 +891,13 @@ static int compareWithCompareFunctionForQSort(const void *a, const void *b)
     const ArrayEntity *va = static_cast<const ArrayEntity *>(a);
     const ArrayEntity *vb = static_cast<const ArrayEntity *>(b);
 
-    ASSERT(va->value && !va->value->isUndefined());
-    ASSERT(vb->value && !vb->value->isUndefined());
+    ASSERT(va->value && !JSValue::isUndefined(va->value));
+    ASSERT(vb->value && !JSValue::isUndefined(vb->value));
 
     args->arguments.clear();
     args->arguments.append(va->value);
     args->arguments.append(vb->value);
-    double compareResult = args->compareFunction->call
-                           (args->exec, args->globalObject, args->arguments)->toNumber(args->exec);
+    double compareResult = JSValue::toNumber(args->compareFunction->call(args->exec, args->globalObject, args->arguments), args->exec);
     return compareResult < 0 ? -1 : compareResult > 0 ? 1 : 0;
 }
 
@@ -954,7 +953,7 @@ unsigned ArrayInstance::compactForSorting()
     // count the first contiguous run of defined values in the vector store
     for (; numDefined < usedVectorLength; ++numDefined) {
         ArrayEntity *v = &storage->m_vector[numDefined];
-        if (!v->value || v->value->isUndefined()) {
+        if (!v->value || JSValue::isUndefined(v->value)) {
             break;
         }
     }
@@ -962,7 +961,7 @@ unsigned ArrayInstance::compactForSorting()
     // compact the rest, counting along the way
     for (unsigned i = numDefined; i < usedVectorLength; ++i) {
         ArrayEntity v = storage->m_vector[i];
-        if (!v.value || v.value->isUndefined()) {
+        if (!v.value || JSValue::isUndefined(v.value)) {
             ++numUndefined;
         } else {
             storage->m_vector[numDefined++] = storage->m_vector[i];

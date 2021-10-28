@@ -85,14 +85,14 @@ JSValue *RegExpProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
 
         UString input;
         if (args.isEmpty()) {
-            input = regExpObj->get(exec, exec->propertyNames().input)->toString(exec);
+            input = JSValue::toString(regExpObj->get(exec, exec->propertyNames().input), exec);
         } else {
-            input = args[0]->toString(exec);
+            input = JSValue::toString(args[0], exec);
         }
 
-        double lastIndex = thisObj->get(exec, exec->propertyNames().lastIndex)->toInteger(exec);
+        double lastIndex = JSValue::toInteger(thisObj->get(exec, exec->propertyNames().lastIndex), exec);
 
-        bool globalFlag = thisObj->get(exec, exec->propertyNames().global)->toBoolean(exec);
+        bool globalFlag = JSValue::toBoolean(thisObj->get(exec, exec->propertyNames().global), exec);
         if (!globalFlag) {
             lastIndex = 0;
         }
@@ -134,21 +134,21 @@ JSValue *RegExpProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, con
     }
     break;
     case ToString: {
-        UString result = "/" + thisObj->get(exec, exec->propertyNames().source)->toString(exec) + "/";
-        if (thisObj->get(exec, exec->propertyNames().global)->toBoolean(exec)) {
+        UString result = "/" + JSValue::toString(thisObj->get(exec, exec->propertyNames().source), exec) + "/";
+        if (JSValue::toBoolean(thisObj->get(exec, exec->propertyNames().global), exec)) {
             result += "g";
         }
-        if (thisObj->get(exec, exec->propertyNames().ignoreCase)->toBoolean(exec)) {
+        if (JSValue::toBoolean(thisObj->get(exec, exec->propertyNames().ignoreCase), exec)) {
             result += "i";
         }
-        if (thisObj->get(exec, exec->propertyNames().multiline)->toBoolean(exec)) {
+        if (JSValue::toBoolean(thisObj->get(exec, exec->propertyNames().multiline), exec)) {
             result += "m";
         }
         return jsString(result);
     }
     case Compile: { // JS1.2 legacy, but still in use in the wild somewhat
         RegExpImp *instance = static_cast<RegExpImp *>(thisObj);
-        RegExp *newEngine   = RegExpObjectImp::makeEngine(exec, args[0]->toString(exec), args[1]);
+        RegExp *newEngine   = RegExpObjectImp::makeEngine(exec, JSValue::toString(args[0], exec), args[1]);
         if (!newEngine) {
             return exec->exception();
         }
@@ -419,10 +419,10 @@ void RegExpObjectImp::putValueProperty(ExecState *exec, int token, JSValue *valu
 {
     switch (token) {
     case Input:
-        d->lastInput = value->toString(exec);
+        d->lastInput = JSValue::toString(value, exec);
         break;
     case Multiline:
-        d->multiline = value->toBoolean(exec);
+        d->multiline = JSValue::toBoolean(value, exec);
         break;
     default:
         ASSERT(0);
@@ -438,8 +438,8 @@ RegExp *RegExpObjectImp::makeEngine(ExecState *exec, const UString &p, JSValue *
 {
     int reflags = RegExp::None;
 
-    if (!flagsInput->isUndefined()) {
-        const UString flags = flagsInput->toString(exec);
+    if (!JSValue::isUndefined(flagsInput)) {
+        const UString flags = JSValue::toString(flagsInput, exec);
 
         // Check flags
         for (int pos = 0; pos < flags.size(); ++pos) {
@@ -490,19 +490,19 @@ RegExp *RegExpObjectImp::makeEngine(ExecState *exec, const UString &p, JSValue *
 // ECMA 15.10.4
 JSObject *RegExpObjectImp::construct(ExecState *exec, const List &args)
 {
-    JSObject *o = args[0]->getObject();
+    JSObject *o = JSValue::getObject(args[0]);
     if (o && o->inherits(&RegExpImp::info)) {
-        if (!args[1]->isUndefined()) {
+        if (!JSValue::isUndefined(args[1])) {
             return throwError(exec, TypeError);
         }
         return o;
     }
 
-    UString p = args[0]->isUndefined() ? UString("") : args[0]->toString(exec);
+    UString p = JSValue::isUndefined(args[0]) ? UString("") : JSValue::toString(args[0], exec);
 
     RegExp *re = makeEngine(exec, p, args[1]);
     if (!re) {
-        return exec->exception()->toObject(exec);
+        return JSValue::toObject(exec->exception(), exec);
     }
 
     RegExpPrototype *proto = static_cast<RegExpPrototype *>(exec->lexicalInterpreter()->builtinRegExpPrototype());

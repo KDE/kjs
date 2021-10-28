@@ -67,10 +67,10 @@ static void reviver(ExecState *exec, JSValue *value, JSObject *func)
         return;
     }
 
-    JSType type = value->type();
+    JSType type = JSValue::type(value);
     switch (type) {
     case ObjectType: {
-        JSObject *obj = value->getObject();
+        JSObject *obj = JSValue::getObject(value);
         bool isArray = obj->inherits(&ArrayInstance::info);
         bool validArrayIndex = false;
 
@@ -96,7 +96,7 @@ static void reviver(ExecState *exec, JSValue *value, JSObject *func)
             if (exec->hadException()) {
                 return;
             }
-            if (ret->isUndefined()) {
+            if (JSValue::isUndefined(ret)) {
                 obj->deleteProperty(exec, names[i]);
             } else {
                 obj->put(exec, names[i], ret);
@@ -128,7 +128,7 @@ JSValue *JSONFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
             return throwError(exec, SyntaxError, "Invalid JSON Syntax");
         }
 
-        JSONParser parser(args[0]->toString(exec));
+        JSONParser parser(JSValue::toString(args[0], exec));
         if (exec->hadException()) {
             return jsUndefined();
         }
@@ -143,19 +143,19 @@ JSValue *JSONFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, co
         }
 
         JSValue *func = args[1];
-        if (func->implementsCall()) {
-            JSObject *function = func->getObject();
+        if (JSValue::implementsCall(func)) {
+            JSObject *function = JSValue::getObject(func);
 
             List args;
             args.append(jsString(""));
             args.append(val);
 
-            JSObject *jsobjectArg = val->toObject(exec);
+            JSObject *jsobjectArg = JSValue::toObject(val, exec);
             if (exec->hadException()) {
                 return jsUndefined();
             }
             JSValue *ret = function->call(exec, jsobjectArg, args);
-            if (ret->isUndefined()) {
+            if (JSValue::isUndefined(ret)) {
                 return ret;
             } else {
                 reviver(exec, ret, function);

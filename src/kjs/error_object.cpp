@@ -70,16 +70,16 @@ JSValue *ErrorProtoFunc::callAsFunction(ExecState *exec, JSObject *thisObj, cons
     // toString()
     UString name;
     JSValue *v = thisObj->get(exec, exec->propertyNames().name);
-    if (!v->isUndefined()) {
-        name = v->toString(exec);
+    if (!JSValue::isUndefined(v)) {
+        name = JSValue::toString(v, exec);
     } else {
         name = "Error";
     }
 
     UString message;
     v = thisObj->get(exec, exec->propertyNames().message);
-    if (!v->isUndefined()) {
-        message = v->toString(exec);
+    if (!JSValue::isUndefined(v)) {
+        message = JSValue::toString(v, exec);
     }
 
     if (name.isEmpty()) {
@@ -115,8 +115,8 @@ JSObject *ErrorObjectImp::construct(ExecState *exec, const List &args)
     JSObject *imp = new ErrorInstance(proto);
     JSObject *obj(imp);
 
-    if (!args[0]->isUndefined()) {
-        imp->putDirect(exec->propertyNames().message, jsString(args[0]->toString(exec)));
+    if (!JSValue::isUndefined(args[0])) {
+        imp->putDirect(exec->propertyNames().message, jsString(JSValue::toString(args[0], exec)));
     }
 
     return obj;
@@ -160,8 +160,8 @@ JSObject *NativeErrorImp::construct(ExecState *exec, const List &args)
 {
     JSObject *imp = new ErrorInstance(proto);
     JSObject *obj(imp);
-    if (!args[0]->isUndefined()) {
-        imp->putDirect(exec->propertyNames().message, jsString(args[0]->toString(exec)));
+    if (!JSValue::isUndefined(args[0])) {
+        imp->putDirect(exec->propertyNames().message, jsString(JSValue::toString(args[0], exec)));
     }
     return obj;
 }

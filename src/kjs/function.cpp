@@ -349,7 +349,7 @@ JSObject *FunctionImp::construct(ExecState *exec, const List &args)
 {
     JSObject *proto;
     JSValue *p = get(exec, exec->propertyNames().prototype);
-    if (p->isObject()) {
+    if (JSValue::isObject(p)) {
         proto = static_cast<JSObject *>(p);
     } else {
         proto = exec->lexicalInterpreter()->builtinObjectPrototype();
@@ -359,7 +359,7 @@ JSObject *FunctionImp::construct(ExecState *exec, const List &args)
 
     JSValue *res = call(exec, obj, args);
 
-    if (res->isObject()) {
+    if (JSValue::isObject(res)) {
         return static_cast<JSObject *>(res);
     } else {
         return obj;
@@ -877,7 +877,7 @@ GlobalFuncImp::GlobalFuncImp(ExecState *exec, FunctionPrototype *funcProto, int 
 
 static JSValue *encode(ExecState *exec, const List &args, const char *do_not_escape)
 {
-    UString r = "", s, str = args[0]->toString(exec);
+    UString r = "", s, str = JSValue::toString(args[0], exec);
     CString cstr = str.UTF8String();
     const char *p = cstr.c_str();
     for (size_t k = 0; k < cstr.size(); k++, p++) {
@@ -895,7 +895,7 @@ static JSValue *encode(ExecState *exec, const List &args, const char *do_not_esc
 
 static JSValue *decode(ExecState *exec, const List &args, const char *do_not_unescape)
 {
-    UString s = "", str = args[0]->toString(exec);
+    UString s = "", str = JSValue::toString(args[0], exec);
     int k = 0, len = str.size();
     const UChar *d = str.data();
     UChar u;
@@ -1098,10 +1098,10 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
     switch (id) {
     case Eval: { // eval()
         JSValue *x = args[0];
-        if (!x->isString()) {
+        if (!JSValue::isString(x)) {
             return x;
         } else {
-            UString s = x->toString(exec);
+            UString s = JSValue::toString(x, exec);
 
             int sourceId;
             int errLine;
@@ -1170,16 +1170,16 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
         break;
     }
     case ParseInt:
-        res = jsNumber(parseInt(args[0]->toString(exec), args[1]->toInt32(exec)));
+        res = jsNumber(parseInt(JSValue::toString(args[0], exec), JSValue::toInt32(args[1], exec)));
         break;
     case ParseFloat:
-        res = jsNumber(parseFloat(args[0]->toString(exec)));
+        res = jsNumber(parseFloat(JSValue::toString(args[0], exec)));
         break;
     case IsNaN:
-        res = jsBoolean(isNaN(args[0]->toNumber(exec)));
+        res = jsBoolean(isNaN(JSValue::toNumber(args[0], exec)));
         break;
     case IsFinite: {
-        double n = args[0]->toNumber(exec);
+        double n = JSValue::toNumber(args[0], exec);
         res = jsBoolean(!isNaN(n) && !isInf(n));
         break;
     }
@@ -1196,7 +1196,7 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
         res = encode(exec, args, do_not_escape_when_encoding_URI_component);
         break;
     case Escape: {
-        UString r = "", s, str = args[0]->toString(exec);
+        UString r = "", s, str = JSValue::toString(args[0], exec);
         const UChar *c = str.data();
         for (int k = 0; k < str.size(); k++, c++) {
             int u = c->uc;
@@ -1217,7 +1217,7 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
         break;
     }
     case UnEscape: {
-        UString s = "", str = args[0]->toString(exec);
+        UString s = "", str = JSValue::toString(args[0], exec);
         int k = 0, len = str.size();
         while (k < len) {
             const UChar *c = str.data() + k;
@@ -1244,7 +1244,7 @@ JSValue *GlobalFuncImp::callAsFunction(ExecState *exec, JSObject * /*thisObj*/, 
     }
 #ifndef NDEBUG
     case KJSPrint:
-        puts(args[0]->toString(exec).ascii());
+        puts(JSValue::toString(args[0], exec).ascii());
         break;
 #endif
     }
