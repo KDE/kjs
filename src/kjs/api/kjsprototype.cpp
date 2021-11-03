@@ -74,11 +74,11 @@ public:
 
     using Base::put;
     void put(ExecState *exec, const Identifier &id,
-             JSValue *value, int attr = None);
+             JSValue *value, int attr = None) override;
 
     // rtti
     static const ClassInfo info;
-    const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -100,8 +100,8 @@ public:
     }
 
     JSValue *callAsFunction(ExecState *exec, JSObject *thisObj,
-                            const List &args);
-    bool implementsCall() const
+                            const List &args) override;
+    bool implementsCall() const override
     {
         return true;
     }
@@ -185,7 +185,7 @@ public:
 
     using KJS::JSObject::getOwnPropertySlot;
     bool getOwnPropertySlot(ExecState *exec, const Identifier &id,
-                            PropertySlot &sl)
+                            PropertySlot &sl) override
     {
         CustomPropertyMap::iterator it = properties.find(id.ustring());
         if (it == properties.end()) {

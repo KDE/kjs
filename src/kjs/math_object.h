@@ -32,9 +32,9 @@ public:
     MathObjectImp(ExecState *exec,
                   ObjectPrototype *objProto);
     using KJS::JSObject::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
     JSValue *getValueProperty(ExecState *exec, int token) const;
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -53,7 +53,7 @@ class MathFuncImp : public InternalFunctionImp
 {
 public:
     MathFuncImp(ExecState *exec, int i, int l, const Identifier &);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 private:
     int id;
 };

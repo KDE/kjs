@@ -42,13 +42,13 @@ public:
     bool getTime(double &ms, int &gmtoffset) const;
     bool getUTCTime(double &ms) const;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
     static const ClassInfo info;
 
-    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+    JSObject *valueClone(Interpreter *targetCtx) const override;
 };
 
 /**
@@ -62,8 +62,8 @@ class DatePrototype : public DateInstance
 public:
     DatePrototype(ExecState *, ObjectPrototype *);
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
-    virtual const ClassInfo *classInfo() const
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -81,7 +81,7 @@ class DateProtoFunc : public InternalFunctionImp
 public:
     DateProtoFunc(ExecState *, int i, int len, const Identifier &date);
 
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args) override;
 
     enum { ToString, ToDateString, ToTimeString, ToLocaleString,
            ToLocaleDateString, ToLocaleTimeString, ValueOf, GetTime,
@@ -108,9 +108,9 @@ class DateObjectImp : public InternalFunctionImp
 public:
     DateObjectImp(ExecState *, FunctionPrototype *, DatePrototype *);
 
-    virtual bool implementsConstruct() const;
-    virtual JSObject *construct(ExecState *, const List &args);
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    bool implementsConstruct() const override;
+    JSObject *construct(ExecState *, const List &args) override;
+    JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args) override;
 
     Completion execute(const List &);
     JSObject *construct(const List &);

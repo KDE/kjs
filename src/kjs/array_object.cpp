@@ -53,7 +53,7 @@ class ArrayObjectFuncImp : public InternalFunctionImp
 public:
     ArrayObjectFuncImp(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args) override;
 
     enum { IsArray };
 

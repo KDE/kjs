@@ -114,7 +114,7 @@ class DateObjectFuncImp : public InternalFunctionImp
 public:
     DateObjectFuncImp(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args) override;
 
     enum { Parse, UTC, Now };
 

@@ -207,7 +207,7 @@ public:
     VarDeclVisitor(ExecState *exec) : m_exec(exec)
     {}
 
-    virtual Node *visit(Node *node)
+    Node *visit(Node *node) override
     {
         node->processVarDecl(m_exec);
 
@@ -229,7 +229,7 @@ public:
     FuncDeclVisitor(ExecState *exec) : m_exec(exec)
     {}
 
-    virtual Node *visit(Node *node)
+    Node *visit(Node *node) override
     {
         node->processFuncDecl(m_exec);
 

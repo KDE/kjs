@@ -41,11 +41,11 @@ public:
     InternalFunctionImp(FunctionPrototype *);
     InternalFunctionImp(FunctionPrototype *, const Identifier &);
 
-    virtual bool implementsCall() const;
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObjec, const List &args) = 0;
-    virtual bool implementsHasInstance() const;
+    bool implementsCall() const override;
+    JSValue *callAsFunction(ExecState *, JSObject *thisObjec, const List &args) override = 0;
+    bool implementsHasInstance() const override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -75,8 +75,8 @@ class Thrower : public JSObject
 public:
     Thrower(ErrorType type);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *, const List &args);
-    virtual bool implementsCall() const
+    JSValue *callAsFunction(ExecState *exec, JSObject *, const List &args) override;
+    bool implementsCall() const override
     {
         return true;
     };
@@ -93,21 +93,21 @@ public:
     void setBoundThis(JSObject *boundThis);
     void setBoundArgs(const List &boundArgs);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &extraArgs);
-    virtual bool implementsCall() const
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &extraArgs) override;
+    bool implementsCall() const override
     {
         return true;
     };
 
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &extraArgs);
-    virtual bool implementsConstruct() const
+    JSObject *construct(ExecState *exec, const List &extraArgs) override;
+    bool implementsConstruct() const override
     {
         return true;
     };
 
-    virtual bool hasInstance(ExecState *exec, JSValue *value);
-    virtual bool implementsHasInstance() const
+    bool hasInstance(ExecState *exec, JSValue *value) override;
+    bool implementsHasInstance() const override
     {
         return true;
     };
@@ -130,7 +130,7 @@ public:
     FunctionPrototype(ExecState *exec);
     ~FunctionPrototype() override;
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 };
 
 class IndexToNameMap
@@ -155,18 +155,18 @@ class Arguments : public JSObject
 {
 public:
     Arguments(ExecState *exec, FunctionImp *func, const List &args, ActivationImp *act);
-    virtual void mark();
+    void mark() override;
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
     using KJS::JSObject::put;
-    virtual void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None);
+    void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None) override;
     using KJS::JSObject::deleteProperty;
-    virtual bool deleteProperty(ExecState *exec, const Identifier &propertyName);
-    virtual void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode);
+    bool deleteProperty(ExecState *exec, const Identifier &propertyName) override;
+    void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode) override;
 
-    virtual bool defineOwnProperty(ExecState *exec, const Identifier &propertyName, PropertyDescriptor &desc, bool shouldThrow);
+    bool defineOwnProperty(ExecState *exec, const Identifier &propertyName, PropertyDescriptor &desc, bool shouldThrow) override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -195,29 +195,29 @@ public:
     void performTearOff();
 
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *exec, const Identifier &, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *exec, const Identifier &, PropertySlot &) override;
     using KJS::JSObject::put;
-    virtual void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None);
+    void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None) override;
     using KJS::JSObject::deleteProperty;
-    virtual bool deleteProperty(ExecState *exec, const Identifier &propertyName);
+    bool deleteProperty(ExecState *exec, const Identifier &propertyName) override;
 
-    virtual void putDirect(const Identifier &propertyName, JSValue *value, int attr = 0);
+    void putDirect(const Identifier &propertyName, JSValue *value, int attr = 0) override;
     using JSObject::putDirect;
-    virtual JSValue *getDirect(const Identifier &propertyName) const;
-    virtual bool getPropertyAttributes(const Identifier &propertyName, unsigned &attributes) const;
+    JSValue *getDirect(const Identifier &propertyName) const override;
+    bool getPropertyAttributes(const Identifier &propertyName, unsigned &attributes) const override;
 
     bool isLocalReadOnly(int propertyID) const
     {
         return (localStorage[propertyID].attributes & ReadOnly) == ReadOnly;
     }
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
     static const ClassInfo info;
 
-    virtual bool isActivation() const
+    bool isActivation() const override
     {
         return true;
     }
@@ -264,7 +264,7 @@ class GlobalFuncImp : public InternalFunctionImp
 {
 public:
     GlobalFuncImp(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
     enum { Eval, ParseInt, ParseFloat, IsNaN, IsFinite, Escape, UnEscape,
            DecodeURI, DecodeURIComponent, EncodeURI, EncodeURIComponent
 #ifndef NDEBUG

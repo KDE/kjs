@@ -66,8 +66,8 @@ class KJS_EXPORT StandardGlobalPackage : public Package
 {
 public:
     StandardGlobalPackage();
-    virtual Package *loadSubPackage(const Identifier &n,
-                                    UString *err);
+    Package *loadSubPackage(const Identifier &n,
+                                    UString *err) override;
 };
 
 class KJS_EXPORT PackageObject : public JSObject
@@ -80,7 +80,7 @@ public:
         return pkg;
     }
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }

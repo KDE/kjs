@@ -35,20 +35,20 @@ public:
     StringInstance(JSObject *proto, StringImp *);
     StringInstance(JSObject *proto, const UString &);
 
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
-    virtual bool getOwnPropertySlot(ExecState *, unsigned propertyName, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
+    bool getOwnPropertySlot(ExecState *, unsigned propertyName, PropertySlot &) override;
 
     using KJS::JSObject::put;
-    virtual void put(ExecState *exec, const Identifier &propertyName, JSValue *, int attr = None);
+    void put(ExecState *exec, const Identifier &propertyName, JSValue *, int attr = None) override;
     using KJS::JSObject::deleteProperty;
-    virtual bool deleteProperty(ExecState *exec, const Identifier &propertyName);
-    virtual void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode);
-    virtual bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &);
+    bool deleteProperty(ExecState *exec, const Identifier &propertyName) override;
+    void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode) override;
+    bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &) override;
 
-    virtual UString toString(ExecState *exec) const;
-    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+    UString toString(ExecState *exec) const override;
+    JSObject *valueClone(Interpreter *targetCtx) const override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -84,8 +84,8 @@ public:
     StringPrototype(ExecState *exec,
                     ObjectPrototype *objProto);
     using KJS::StringInstance::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
-    virtual const ClassInfo *classInfo() const
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -103,7 +103,7 @@ class StringProtoFunc : public InternalFunctionImp
 public:
     StringProtoFunc(ExecState *exec, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     enum { ToString, ValueOf, CharAt, CharCodeAt, Concat, IndexOf, LastIndexOf,
            Match, Replace, Search, Slice, Split,
@@ -136,10 +136,10 @@ public:
                     FunctionPrototype *funcProto,
                     StringPrototype *stringProto);
 
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &args);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 };
 
 /**
@@ -152,7 +152,7 @@ class StringObjectFuncImp : public InternalFunctionImp
 {
 public:
     StringObjectFuncImp(ExecState *, FunctionPrototype *, const Identifier &);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 };
 
 } // namespace

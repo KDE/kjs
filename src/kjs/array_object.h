@@ -34,8 +34,8 @@ public:
     ArrayPrototype(ExecState *exec,
                    ObjectPrototype *objProto);
     using KJS::ArrayInstance::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
-    virtual const ClassInfo *classInfo() const
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -47,7 +47,7 @@ class ArrayProtoFunc : public InternalFunctionImp
 public:
     ArrayProtoFunc(ExecState *exec, int i, int len, const Identifier &name);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     enum { ToString, ToLocaleString, Concat, Join, Pop, Push,
            Reverse, Shift, Slice, Sort, Splice, UnShift,
@@ -65,10 +65,10 @@ public:
                    FunctionPrototype *funcProto,
                    ArrayPrototype *arrayProto);
 
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &args);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
 };
 

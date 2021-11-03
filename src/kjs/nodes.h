@@ -209,7 +209,7 @@ private:
 class LocationNode : public Node
 {
 public:
-    virtual bool isLocation() const
+    bool isLocation() const override
     {
         return true;
     }
@@ -271,12 +271,12 @@ class NullNode : public Node
 {
 public:
     NullNode() {}
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return NullNodeType;
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
 };
 
 class BooleanNode : public Node
@@ -288,12 +288,12 @@ public:
         return val;
     }
 
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return BooleanNodeType;
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
 private:
     bool val;
 };
@@ -311,12 +311,12 @@ public:
         val = v;
     }
 
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return NumberNodeType;
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
 private:
     double val;
 };
@@ -335,12 +335,12 @@ public:
         val = v;
     }
 
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return StringNodeType;
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
 private:
     UString val;
     StringImp *interned;
@@ -351,12 +351,12 @@ class RegExpNode : public Node
 public:
     RegExpNode(const UString &p, const UString &f)
         : pattern(p), flags(f) { }
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return RegExpNodeType;
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
 private:
     UString pattern, flags;
 };
@@ -365,8 +365,8 @@ class ThisNode : public Node
 {
 public:
     ThisNode() {}
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
 };
 
 class VarAccessNode : public LocationNode
@@ -374,19 +374,19 @@ class VarAccessNode : public LocationNode
 public:
     VarAccessNode(const Identifier &s) : ident(s) {}
 
-    virtual bool isVarAccessNode() const
+    bool isVarAccessNode() const override
     {
         return true;
     }
-    virtual void streamTo(SourceStream &) const;
-    virtual OpValue generateEvalCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    OpValue generateEvalCode(CompileState *comp) override;
 
-    virtual CompileReference *generateRefBind(CompileState *);
-    virtual CompileReference *generateRefRead(CompileState *, OpValue *out);
-    virtual void generateRefWrite(CompileState *,
-                                  CompileReference *ref, OpValue &valToStore);
-    virtual OpValue generateRefDelete(CompileState *);
-    virtual void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut);
+    CompileReference *generateRefBind(CompileState *) override;
+    CompileReference *generateRefRead(CompileState *, OpValue *out) override;
+    void generateRefWrite(CompileState *,
+                                  CompileReference *ref, OpValue &valToStore) override;
+    OpValue generateRefDelete(CompileState *) override;
+    void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut) override;
 
     // This one never fails..
     OpValue valueForTypeOf(CompileState *comp);
@@ -409,15 +409,15 @@ class GroupNode : public Node
 {
 public:
     GroupNode(Node *g) : group(g) { }
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return GroupNodeType;
     }
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual Node *nodeInsideAllParens();
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    Node *nodeInsideAllParens() override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> group;
 };
@@ -436,13 +436,13 @@ public:
         l->next = this;
     }
 
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<ElementNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void breakCycle() override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class ArrayNode;
     ListRefPtr<ElementNode> next;
@@ -464,10 +464,10 @@ public:
     {
         Parser::removeNodeCycle(element.get());
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual bool scanForDeclarations() const
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    bool scanForDeclarations() const override
     {
         return false;
     }
@@ -481,7 +481,7 @@ class PropertyNameNode : public Node
 {
 public:
     PropertyNameNode(const Identifier &s) : str(s) { }
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
 private:
     friend class ObjectLiteralNode;
     Identifier str;
@@ -493,9 +493,9 @@ public:
     enum Type { Constant, Getter, Setter };
     PropertyNode(PropertyNameNode *n, Node *a, Type t)
         : name(n), assign(a), type(t) { }
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
     friend class PropertyListNode;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class ObjectLiteralNode;
     RefPtr<PropertyNameNode> name;
@@ -517,13 +517,13 @@ public:
     {
         l->next = this;
     }
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<PropertyListNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void breakCycle() override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class ObjectLiteralNode;
     RefPtr<PropertyNode> node;
@@ -538,10 +538,10 @@ public:
     {
         Parser::removeNodeCycle(list.get());
     }
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual bool scanForDeclarations() const
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    bool scanForDeclarations() const override
     {
         return false;
     }
@@ -553,16 +553,16 @@ class BracketAccessorNode : public LocationNode
 {
 public:
     BracketAccessorNode(Node *e1, Node *e2) : expr1(e1), expr2(e2) {}
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
 
-    virtual OpValue generateEvalCode(CompileState *comp);
+    OpValue generateEvalCode(CompileState *comp) override;
 
-    virtual CompileReference *generateRefBind(CompileState *);
-    virtual CompileReference *generateRefRead(CompileState *, OpValue *out);
-    virtual void generateRefWrite(CompileState *,
-                                  CompileReference *ref, OpValue &valToStore);
-    virtual OpValue generateRefDelete(CompileState *);
-    virtual void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut);
+    CompileReference *generateRefBind(CompileState *) override;
+    CompileReference *generateRefRead(CompileState *, OpValue *out) override;
+    void generateRefWrite(CompileState *,
+                                  CompileReference *ref, OpValue &valToStore) override;
+    OpValue generateRefDelete(CompileState *) override;
+    void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut) override;
 
     Node *base()
     {
@@ -573,7 +573,7 @@ public:
         return expr2.get();
     }
 
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void recurseVisit(NodeVisitor *visitor) override;
 protected:
     RefPtr<Node> expr1;
     RefPtr<Node> expr2;
@@ -583,16 +583,16 @@ class DotAccessorNode : public LocationNode
 {
 public:
     DotAccessorNode(Node *e, const Identifier &s) : expr(e), ident(s) { }
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
 
-    virtual OpValue generateEvalCode(CompileState *comp);
+    OpValue generateEvalCode(CompileState *comp) override;
 
-    virtual CompileReference *generateRefBind(CompileState *);
-    virtual CompileReference *generateRefRead(CompileState *, OpValue *out);
-    virtual void generateRefWrite(CompileState *,
-                                  CompileReference *ref, OpValue &valToStore);
-    virtual OpValue generateRefDelete(CompileState *);
-    virtual void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut);
+    CompileReference *generateRefBind(CompileState *) override;
+    CompileReference *generateRefRead(CompileState *, OpValue *out) override;
+    void generateRefWrite(CompileState *,
+                                  CompileReference *ref, OpValue &valToStore) override;
+    OpValue generateRefDelete(CompileState *) override;
+    void generateRefFunc(CompileState *comp, OpValue *funOut, OpValue *thisOut) override;
 
     Node *base() const
     {
@@ -603,7 +603,7 @@ public:
         return ident;
     }
 
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void recurseVisit(NodeVisitor *visitor) override;
 protected:
     RefPtr<Node> expr;
     Identifier ident;
@@ -623,14 +623,14 @@ public:
         l->next = this;
     }
 
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<ArgumentListNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
+    void breakCycle() override;
 
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class ArgumentsNode;
     ListRefPtr<ArgumentListNode> next;
@@ -648,9 +648,9 @@ public:
     }
 
     void generateEvalArguments(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
 
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<ArgumentListNode> list;
 };
@@ -661,9 +661,9 @@ public:
     NewExprNode(Node *e) : expr(e) {}
     NewExprNode(Node *e, ArgumentsNode *a) : expr(e), args(a) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
     RefPtr<ArgumentsNode> args;
@@ -674,9 +674,9 @@ class FunctionCallValueNode : public Node
 public:
     FunctionCallValueNode(Node *e, ArgumentsNode *a) : expr(e), args(a) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
     RefPtr<ArgumentsNode> args;
@@ -687,9 +687,9 @@ class FunctionCallReferenceNode : public Node
 public:
     FunctionCallReferenceNode(Node *e, ArgumentsNode *a) : expr(e), args(a) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
     RefPtr<ArgumentsNode> args;
@@ -700,9 +700,9 @@ class PostfixNode : public Node
 public:
     PostfixNode(Node *l, Operator o) : m_loc(l), m_oper(o) {}
 
-    void streamTo(SourceStream &) const;
-    void recurseVisit(NodeVisitor *visitor);
-    virtual OpValue generateEvalCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    OpValue generateEvalCode(CompileState *comp) override;
 protected:
     RefPtr<Node> m_loc;
     Operator m_oper;
@@ -713,9 +713,9 @@ class DeleteReferenceNode : public Node
 public:
     DeleteReferenceNode(LocationNode *l) : loc(l) {}
 
-    void streamTo(SourceStream &) const;
-    void recurseVisit(NodeVisitor *visitor);
-    virtual OpValue generateEvalCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    OpValue generateEvalCode(CompileState *comp) override;
 private:
     RefPtr<LocationNode> loc;
 };
@@ -725,9 +725,9 @@ class DeleteValueNode : public Node
 public:
     DeleteValueNode(Node *e) : m_expr(e) {}
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual OpValue generateEvalCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    OpValue generateEvalCode(CompileState *comp) override;
 private:
     RefPtr<Node> m_expr;
 };
@@ -737,9 +737,9 @@ class VoidNode : public Node
 public:
     VoidNode(Node *e) : expr(e) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
 };
@@ -749,9 +749,9 @@ class TypeOfVarNode : public Node
 public:
     TypeOfVarNode(VarAccessNode *l) : loc(l) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    void streamTo(SourceStream &) const;
-    void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<VarAccessNode> loc;
 };
@@ -761,9 +761,9 @@ class TypeOfValueNode : public Node
 public:
     TypeOfValueNode(Node *e) : m_expr(e) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> m_expr;
 };
@@ -773,9 +773,9 @@ class PrefixNode : public Node
 public:
     PrefixNode(Node *l, Operator o) : m_loc(l), m_oper(o) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    void streamTo(SourceStream &) const;
-    void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 protected:
     RefPtr<Node> m_loc;
     Operator m_oper;
@@ -786,9 +786,9 @@ class UnaryPlusNode : public Node
 public:
     UnaryPlusNode(Node *e) : expr(e) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
 };
@@ -798,9 +798,9 @@ class NegateNode : public Node
 public:
     NegateNode(Node *e) : expr(e) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
 };
@@ -810,9 +810,9 @@ class BitwiseNotNode : public Node
 public:
     BitwiseNotNode(Node *e) : expr(e) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
 };
@@ -822,9 +822,9 @@ class LogicalNotNode : public Node
 public:
     LogicalNotNode(Node *e) : expr(e) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
 };
@@ -835,9 +835,9 @@ public:
     BinaryOperatorNode(Node *e1, Node *e2, Operator op)
         : expr1(e1), expr2(e2), oper(op) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr1;
     RefPtr<Node> expr2;
@@ -853,9 +853,9 @@ public:
     BinaryLogicalNode(Node *e1, Operator o, Node *e2) :
         expr1(e1), expr2(e2), oper(o) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr1;
     RefPtr<Node> expr2;
@@ -871,9 +871,9 @@ public:
     ConditionalNode(Node *l, Node *e1, Node *e2) :
         logical(l), expr1(e1), expr2(e2) {}
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> logical;
     RefPtr<Node> expr1;
@@ -886,9 +886,9 @@ public:
     AssignNode(Node *loc, Operator oper, Node *right)
         : m_loc(loc), m_oper(oper), m_right(right) {}
 
-    void streamTo(SourceStream &) const;
-    virtual OpValue generateEvalCode(CompileState *comp);
-    void recurseVisit(NodeVisitor *visitor);
+    void streamTo(SourceStream &) const override;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void recurseVisit(NodeVisitor *visitor) override;
 protected:
     RefPtr<Node> m_loc;
     Operator m_oper;
@@ -900,9 +900,9 @@ class CommaNode : public Node
 public:
     CommaNode(Node *e1, Node *e2) : expr1(e1), expr2(e2) {}
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual OpValue generateEvalCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    OpValue generateEvalCode(CompileState *comp) override;
 private:
     RefPtr<Node> expr1;
     RefPtr<Node> expr2;
@@ -913,9 +913,9 @@ class AssignExprNode : public Node
 public:
     AssignExprNode(Node *e) : expr(e) {}
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual OpValue generateEvalCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    OpValue generateEvalCode(CompileState *comp) override;
 
     Node *getExpr()
     {
@@ -933,10 +933,10 @@ public:
 
     void generateCode(CompileState *comp);
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 
-    virtual void processVarDecl(ExecState *);
+    void processVarDecl(ExecState *) override;
 private:
     friend class VarStatementNode;
     friend class VarDeclListNode;
@@ -959,14 +959,14 @@ public:
         l->next = this;
     }
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<VarDeclListNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void breakCycle() override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class ForNode;
     friend class VarStatementNode;
@@ -982,9 +982,9 @@ public:
         Parser::removeNodeCycle(next.get());
     }
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
 private:
     RefPtr<VarDeclListNode> next;
 };
@@ -994,9 +994,9 @@ class BlockNode : public StatementNode
 public:
     BlockNode(SourceElementsNode *s);
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
 protected:
     RefPtr<SourceElementsNode> source;
 };
@@ -1006,8 +1006,8 @@ class EmptyStatementNode : public StatementNode
 public:
     EmptyStatementNode() { } // debug
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void generateExecCode(CompileState *);
+    void streamTo(SourceStream &) const override;
+    void generateExecCode(CompileState *) override;
 };
 
 class ExprStatementNode : public StatementNode
@@ -1015,9 +1015,9 @@ class ExprStatementNode : public StatementNode
 public:
     ExprStatementNode(Node *e) : expr(e) { }
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
 private:
     RefPtr<Node> expr;
 };
@@ -1028,9 +1028,9 @@ public:
     IfNode(Node *e, StatementNode *s1, StatementNode *s2)
         : expr(e), statement1(s1), statement2(s2) {}
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
 private:
     RefPtr<Node> expr;
     RefPtr<StatementNode> statement1;
@@ -1042,10 +1042,10 @@ class DoWhileNode : public StatementNode
 public:
     DoWhileNode(StatementNode *s, Node *e) : statement(s), expr(e) {}
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
-    virtual bool isIterationStatement() const
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
+    bool isIterationStatement() const override
     {
         return true;
     }
@@ -1059,10 +1059,10 @@ class WhileNode : public StatementNode
 public:
     WhileNode(Node *e, StatementNode *s) : expr(e), statement(s) {}
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
-    virtual bool isIterationStatement() const
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
+    bool isIterationStatement() const override
     {
         return true;
     }
@@ -1082,10 +1082,10 @@ public:
         Parser::removeNodeCycle(expr1.get());
     }
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual bool isIterationStatement() const
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    bool isIterationStatement() const override
     {
         return true;
     }
@@ -1102,10 +1102,10 @@ public:
     ForInNode(Node *l, Node *e, StatementNode *s);
     ForInNode(const Identifier &i, AssignExprNode *in, Node *e, StatementNode *s);
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual bool isIterationStatement() const
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    bool isIterationStatement() const override
     {
         return true;
     }
@@ -1124,8 +1124,8 @@ public:
     ContinueNode() : target(nullptr) { }
     ContinueNode(const Identifier &i) : ident(i), target(nullptr) { }
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
 private:
     Identifier  ident;
     const Node *target;
@@ -1137,8 +1137,8 @@ public:
     BreakNode() : target(nullptr) { }
     BreakNode(const Identifier &i) : ident(i), target(nullptr) { }
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
 private:
     Identifier ident;
     const Node *target;
@@ -1149,9 +1149,9 @@ class ReturnNode : public StatementNode
 public:
     ReturnNode(Node *v) : value(v) {}
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> value;
 };
@@ -1161,9 +1161,9 @@ class WithNode : public StatementNode
 public:
     WithNode(Node *e, StatementNode *s) : expr(e), statement(s) {}
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
     RefPtr<StatementNode> statement;
@@ -1174,10 +1174,10 @@ class LabelNode : public StatementNode
 public:
     LabelNode(const Identifier &l, StatementNode *s) : label(l), statement(s) { }
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *);
-    virtual NodeType type() const
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *) override;
+    NodeType type() const override
     {
         return LabelNodeType;
     }
@@ -1191,9 +1191,9 @@ class ThrowNode : public StatementNode
 public:
     ThrowNode(Node *e) : expr(e) {}
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<Node> expr;
 };
@@ -1203,14 +1203,14 @@ class TryNode : public StatementNode
 public:
     TryNode(StatementNode *b, const Identifier &e, StatementNode *c, StatementNode *f)
         : tryBlock(b), exceptionIdent(e), catchBlock(c), finallyBlock(f) { }
-    virtual NodeType type() const
+    NodeType type() const override
     {
         return TryNodeType;
     }
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     RefPtr<StatementNode> tryBlock;
     Identifier exceptionIdent;
@@ -1240,14 +1240,14 @@ public:
     {
         return next.get();
     }
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<ParameterNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
+    void breakCycle() override;
 
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class FuncDeclNode;
     friend class FuncExprNode;
@@ -1303,7 +1303,7 @@ public:
         return m_compType;
     }
 
-    virtual void generateExecCode(CompileState *);
+    void generateExecCode(CompileState *) override;
 
     // Reserves a register for private use, making sure that id is in the right spot..
     void reserveSlot(size_t id, bool shouldMark);
@@ -1421,10 +1421,10 @@ public:
         } addParams();
     }
 
-    virtual OpValue generateEvalCode(CompileState *comp);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual bool scanForDeclarations() const
+    OpValue generateEvalCode(CompileState *comp) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    bool scanForDeclarations() const override
     {
         return false;
     }
@@ -1452,15 +1452,15 @@ public:
         addParams();
     }
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual bool scanForDeclarations() const
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    bool scanForDeclarations() const override
     {
         return false;
     }
 
-    virtual void processFuncDecl(ExecState *);
+    void processFuncDecl(ExecState *) override;
     FunctionImp *makeFunctionObject(ExecState *);
 private:
     void addParams();
@@ -1477,14 +1477,14 @@ public:
     SourceElementsNode(StatementNode *);
     SourceElementsNode(SourceElementsNode *s1, StatementNode *s2);
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<SourceElementsNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void breakCycle() override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class BlockNode;
     friend class CaseClauseNode;
@@ -1502,8 +1502,8 @@ public:
         Parser::removeNodeCycle(source.get());
     }
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class SwitchNode;
     RefPtr<Node> expr;
@@ -1532,13 +1532,13 @@ public:
     {
         return next.get();
     }
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
     PassRefPtr<ClauseListNode> releaseNext()
     {
         return next.release();
     }
-    virtual void breakCycle();
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void breakCycle() override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class SwitchNode;
     friend class CaseBlockNode;
@@ -1551,8 +1551,8 @@ class CaseBlockNode : public Node
 public:
     CaseBlockNode(ClauseListNode *l1, CaseClauseNode *d, ClauseListNode *l2);
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
     friend class SwitchNode;
     RefPtr<ClauseListNode> list1;
@@ -1565,9 +1565,9 @@ class SwitchNode : public StatementNode
 public:
     SwitchNode(Node *e, CaseBlockNode *b) : expr(e), block(b) { }
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
-    virtual void generateExecCode(CompileState *comp);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
+    void generateExecCode(CompileState *comp) override;
 private:
     RefPtr<Node> expr;
     RefPtr<CaseBlockNode> block;
@@ -1580,7 +1580,7 @@ class ProgramNode : public FunctionBodyNode
 {
 public:
     ProgramNode(SourceElementsNode *s);
-    virtual void streamTo(SourceStream &) const;
+    void streamTo(SourceStream &) const override;
 };
 
 class PackageNameNode : public Node
@@ -1590,8 +1590,8 @@ public:
     PackageNameNode(PackageNameNode *n,
                     const Identifier &i) : names(n), id(i) { }
 
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 
     Completion loadSymbol(ExecState *exec, bool wildcard);
     PackageObject *resolvePackage(ExecState *exec);
@@ -1616,11 +1616,11 @@ public:
         al = a;
     }
 
-    virtual void generateExecCode(CompileState *);
-    virtual void streamTo(SourceStream &) const;
-    virtual void recurseVisit(NodeVisitor *visitor);
+    void generateExecCode(CompileState *) override;
+    void streamTo(SourceStream &) const override;
+    void recurseVisit(NodeVisitor *visitor) override;
 private:
-    virtual void processVarDecl(ExecState *state);
+    void processVarDecl(ExecState *state) override;
     RefPtr<PackageNameNode> name;
     Identifier al;
     bool wld;

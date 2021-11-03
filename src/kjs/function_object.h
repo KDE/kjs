@@ -39,7 +39,7 @@ class FunctionProtoFunc : public InternalFunctionImp
 public:
     FunctionProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     enum { ToString, Apply, Call, Bind };
 private:
@@ -57,10 +57,10 @@ public:
     FunctionObjectImp(ExecState *, FunctionPrototype *);
     ~FunctionObjectImp() override;
 
-    virtual bool implementsConstruct() const;
-    virtual JSObject *construct(ExecState *, const List &args);
-    virtual JSObject *construct(ExecState *, const List &args, const Identifier &functionName, const UString &sourceURL, int lineNumber);
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    bool implementsConstruct() const override;
+    JSObject *construct(ExecState *, const List &args) override;
+    JSObject *construct(ExecState *, const List &args, const Identifier &functionName, const UString &sourceURL, int lineNumber) override;
+    JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args) override;
 };
 
 } // namespace

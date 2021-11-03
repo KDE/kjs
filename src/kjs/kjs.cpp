@@ -95,7 +95,7 @@ static ExitCode evaluateFile(Interpreter *interp, const char *fileName);
 class GlobalImp : public JSGlobalObject
 {
 public:
-    virtual UString className() const
+    UString className() const override
     {
         return "global";
     }
@@ -105,12 +105,12 @@ class TestFunctionImp : public JSObject
 {
 public:
     TestFunctionImp(int i, int length);
-    virtual bool implementsCall() const
+    bool implementsCall() const override
     {
         return true;
     }
-    virtual JSValue *callAsFunction(ExecState *exec,
-                                    JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec,
+                                    JSObject *thisObj, const List &args) override;
     enum { Print, Quit, Load, GC };
 
 private:

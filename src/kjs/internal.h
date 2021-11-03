@@ -62,17 +62,17 @@ public:
         return val;
     }
 
-    virtual JSType type() const
+    JSType type() const override
     {
         return StringType;
     }
 
-    virtual JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
-    virtual bool toBoolean(ExecState *exec) const;
-    virtual double toNumber(ExecState *exec) const;
-    virtual UString toString(ExecState *exec) const;
-    virtual JSObject *toObject(ExecState *exec) const;
+    JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const override;
+    bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value) override;
+    bool toBoolean(ExecState *exec) const override;
+    double toNumber(ExecState *exec) const override;
+    UString toString(ExecState *exec) const override;
+    JSObject *toObject(ExecState *exec) const override;
 
 private:
     UString val;
@@ -88,24 +88,24 @@ public:
         return val;
     }
 
-    JSType type() const
+    JSType type() const override
     {
         return NumberType;
     }
 
-    JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
-    bool toBoolean(ExecState *exec) const;
-    double toNumber(ExecState *exec) const;
-    UString toString(ExecState *exec) const;
-    JSObject *toObject(ExecState *exec) const;
+    JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const override;
+    bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value) override;
+    bool toBoolean(ExecState *exec) const override;
+    double toNumber(ExecState *exec) const override;
+    UString toString(ExecState *exec) const override;
+    JSObject *toObject(ExecState *exec) const override;
 
 private:
     NumberImp(double v) : val(v) { }
 
-    virtual bool getUInt32(uint32_t &) const;
-    virtual bool getTruncatedInt32(int32_t &) const;
-    virtual bool getTruncatedUInt32(uint32_t &) const;
+    bool getUInt32(uint32_t &) const override;
+    bool getTruncatedInt32(int32_t &) const override;
+    bool getTruncatedUInt32(uint32_t &) const override;
 
     double val;
 };

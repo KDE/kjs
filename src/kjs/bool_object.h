@@ -33,9 +33,9 @@ class BooleanInstance : public JSWrapperObject
 public:
     BooleanInstance(JSObject *proto);
 
-    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+    JSObject *valueClone(Interpreter *targetCtx) const override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -67,7 +67,7 @@ class BooleanProtoFunc : public InternalFunctionImp
 public:
     BooleanProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     enum { ToString, ValueOf };
 private:
@@ -86,11 +86,11 @@ public:
     BooleanObjectImp(ExecState *exec, FunctionPrototype *funcProto,
                      BooleanPrototype *booleanProto);
 
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 };
 
 } // namespace

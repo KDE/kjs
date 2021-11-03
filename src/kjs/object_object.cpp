@@ -40,7 +40,7 @@ class ObjectObjectFuncImp : public InternalFunctionImp
 public:
     ObjectObjectFuncImp(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *, JSObject *thisObj, const List &args) override;
 
     enum { GetOwnPropertyDescriptor, DefineProperty, GetPrototypeOf,
            GetOwnPropertyNames, Keys, DefineProperties, Create, IsExtensible,

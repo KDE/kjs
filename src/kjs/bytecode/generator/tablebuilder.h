@@ -65,15 +65,15 @@ private:
     // conversion ops.
     friend class TypeTable;
 
-    virtual void handleType(const string &type, const string &nativeName, unsigned flags);
-    virtual void handleConversion(const string &runtimeRoutine, int codeLine,
+    void handleType(const string &type, const string &nativeName, unsigned flags) override;
+    void handleConversion(const string &runtimeRoutine, int codeLine,
                                   unsigned flags, const string &from, const string &to,
-                                  int tileCost, int registerCost);
+                                  int tileCost, int registerCost) override;
 
-    virtual void handleOperation(const string &name, unsigned flags);
-    virtual void handleImpl(const string &fnName, const string &code, int codeLine, int cost,
-                            const string &retType, vector<Parameter> sig);
-    virtual void handleTile(const string &fnName, StringList sig);
+    void handleOperation(const string &name, unsigned flags) override;
+    void handleImpl(const string &fnName, const string &code, int codeLine, int cost,
+                            const string &retType, vector<Parameter> sig) override;
+    void handleTile(const string &fnName, StringList sig) override;
 
     // Enumerates all r/i/pad variants; plus computes the shuffle table.
     void expandOperationVariants(const Operation &op, vector<bool> &paramIsIm);

@@ -32,13 +32,13 @@ class NumberInstance : public JSWrapperObject
 public:
     NumberInstance(JSObject *proto);
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
     static const ClassInfo info;
 
-    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+    JSObject *valueClone(Interpreter *targetCtx) const override;
 };
 
 /**
@@ -66,7 +66,7 @@ class NumberProtoFunc : public InternalFunctionImp
 public:
     NumberProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     enum { ToString, ToLocaleString, ValueOf, ToFixed, ToExponential, ToPrecision };
 private:
@@ -86,16 +86,16 @@ public:
                     FunctionPrototype *funcProto,
                     NumberPrototype *numberProto);
 
-    virtual bool implementsConstruct() const;
-    virtual JSObject *construct(ExecState *exec, const List &args);
+    bool implementsConstruct() const override;
+    JSObject *construct(ExecState *exec, const List &args) override;
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     using KJS::JSObject::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
     JSValue *getValueProperty(ExecState *exec, int token) const;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -113,7 +113,7 @@ public:
 class NumberFuncImp : public InternalFunctionImp {
 public:
     NumberFuncImp(ExecState *exec, int i, int l, const Identifier&);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 private:
     int id;
 };

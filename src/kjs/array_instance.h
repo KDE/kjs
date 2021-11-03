@@ -35,29 +35,29 @@ public:
     ArrayInstance(JSObject *prototype, const List &initialValues);
     ~ArrayInstance() override;
 
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &propertyName, PropertySlot &);
-    virtual bool getOwnPropertySlot(ExecState *, unsigned propertyName, PropertySlot &);
-    virtual bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &);
-    virtual void put(ExecState *, const Identifier &propertyName, JSValue *, int attributes = None);
-    virtual void put(ExecState *, unsigned propertyName, JSValue *, int attributes = None);
-    virtual bool deleteProperty(ExecState *, const Identifier &propertyName);
-    virtual bool deleteProperty(ExecState *, unsigned propertyName);
-    virtual void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode);
+    bool getOwnPropertySlot(ExecState *, const Identifier &propertyName, PropertySlot &) override;
+    bool getOwnPropertySlot(ExecState *, unsigned propertyName, PropertySlot &) override;
+    bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &) override;
+    void put(ExecState *, const Identifier &propertyName, JSValue *, int attributes = None) override;
+    void put(ExecState *, unsigned propertyName, JSValue *, int attributes = None) override;
+    bool deleteProperty(ExecState *, const Identifier &propertyName) override;
+    bool deleteProperty(ExecState *, unsigned propertyName) override;
+    void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode) override;
 
-    virtual bool defineOwnProperty(ExecState *exec, const Identifier &propertyName, PropertyDescriptor &desc, bool shouldThrow);
-    virtual void mark();
+    bool defineOwnProperty(ExecState *exec, const Identifier &propertyName, PropertyDescriptor &desc, bool shouldThrow) override;
+    void mark() override;
 
-    virtual bool getPropertyAttributes(const Identifier &propertyName, unsigned &attributes) const;
+    bool getPropertyAttributes(const Identifier &propertyName, unsigned &attributes) const override;
 
-    virtual JSValue *getDirect(const Identifier &propertyName) const;
+    JSValue *getDirect(const Identifier &propertyName) const override;
 
     virtual void putDirect(unsigned index, JSValue *value, int attr = 0);
-    virtual void putDirect(const Identifier &propertyName, JSValue *value, int attr = 0);
-    virtual void putDirect(const Identifier &propertyName, int value, int attr = 0);
+    void putDirect(const Identifier &propertyName, JSValue *value, int attr = 0) override;
+    void putDirect(const Identifier &propertyName, int value, int attr = 0) override;
 
-    virtual void removeDirect(const Identifier &propertyName);
+    void removeDirect(const Identifier &propertyName) override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }

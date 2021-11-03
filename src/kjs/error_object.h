@@ -31,7 +31,7 @@ class ErrorInstance : public JSObject
 public:
     ErrorInstance(JSObject *proto);
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -50,7 +50,7 @@ class ErrorProtoFunc : public InternalFunctionImp
 {
 public:
     ErrorProtoFunc(ExecState *, FunctionPrototype *, const Identifier &);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 };
 
 class ErrorObjectImp : public InternalFunctionImp
@@ -59,11 +59,11 @@ public:
     ErrorObjectImp(ExecState *exec, FunctionPrototype *funcProto,
                    ErrorPrototype *errorProto);
 
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 };
 
 class NativeErrorPrototype : public JSObject
@@ -81,14 +81,14 @@ public:
     NativeErrorImp(ExecState *exec, FunctionPrototype *funcProto,
                    JSObject *prot);
 
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &args);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
-    virtual void mark();
+    void mark() override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }

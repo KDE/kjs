@@ -34,9 +34,9 @@ public:
                   ObjectPrototype *objProto);
 
     using KJS::JSObject::getOwnPropertySlot;
-    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -48,7 +48,7 @@ class JSONFuncImp : public InternalFunctionImp
 {
 public:
     JSONFuncImp(ExecState *exec, int i, int l, const Identifier &);
-    virtual JSValue *callAsFunction(ExecState *, JSObject *, const List &);
+    JSValue *callAsFunction(ExecState *, JSObject *, const List &) override;
 private:
     int id;
 };

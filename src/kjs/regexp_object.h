@@ -35,7 +35,7 @@ public:
     RegExpPrototype(ExecState *exec,
                     ObjectPrototype *objProto,
                     FunctionPrototype *funcProto);
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -47,7 +47,7 @@ class RegExpProtoFunc : public InternalFunctionImp
 public:
     RegExpProtoFunc(ExecState *, FunctionPrototype *, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     enum { Exec, Test, ToString, Compile };
 private:
@@ -65,13 +65,13 @@ public:
         return reg;
     }
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
     static const ClassInfo info;
 
-    virtual JSObject *valueClone(Interpreter *targetCtx) const;
+    JSObject *valueClone(Interpreter *targetCtx) const override;
 private:
     RegExp *reg;
 };
@@ -88,16 +88,16 @@ public:
     RegExpObjectImp(ExecState *exec,
                     FunctionPrototype *funcProto,
                     RegExpPrototype *regProto);
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *exec, const List &args);
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
     using KJS::JSObject::put;
-    virtual void put(ExecState *, const Identifier &, JSValue *, int attr = None);
+    void put(ExecState *, const Identifier &, JSValue *, int attr = None) override;
     void putValueProperty(ExecState *, int token, JSValue *, int attr);
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
     JSValue *getValueProperty(ExecState *, int token) const;
 
     // If resources are exhausted during a match, exec parameter will have an exception
@@ -108,7 +108,7 @@ public:
 
     static void throwRegExpError(ExecState *);
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }

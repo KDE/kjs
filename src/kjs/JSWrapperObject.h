@@ -57,7 +57,7 @@ public:
      */
     void setInternalValue(JSValue *v);
 
-    virtual void mark();
+    void mark() override;
 
     /**
      * Returns the prototype this object had during construction

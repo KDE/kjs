@@ -42,18 +42,18 @@ public:
     ~FunctionImp() override;
 
     using KJS::JSObject::getOwnPropertySlot;
-    virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);
-    virtual bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &);
+    bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &) override;
+    bool getOwnPropertyDescriptor(ExecState *, const Identifier &, PropertyDescriptor &) override;
     using KJS::JSObject::put;
-    virtual void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None);
+    void put(ExecState *exec, const Identifier &propertyName, JSValue *value, int attr = None) override;
     using KJS::JSObject::deleteProperty;
-    virtual bool deleteProperty(ExecState *exec, const Identifier &propertyName);
+    bool deleteProperty(ExecState *exec, const Identifier &propertyName) override;
 
-    virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
+    JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args) override;
 
-    bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    JSObject *construct(ExecState *exec, const List &args);
+    JSObject *construct(ExecState *exec, const List &args) override;
 
     // Note: implemented in nodes2string.cpp
     UString toSource() const;
@@ -62,7 +62,7 @@ public:
     // that will never get set, due to later param having the same name
     Identifier getParameterName(size_t index);
 
-    virtual const ClassInfo *classInfo() const
+    const ClassInfo *classInfo() const override
     {
         return &info;
     }
@@ -105,7 +105,7 @@ public:
         _scope = s;
     }
 
-    virtual void mark();
+    void mark() override;
 private:
     void initialCompile(ExecState *newExec);
 

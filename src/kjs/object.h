@@ -70,21 +70,21 @@ struct ClassInfo {
 class GetterSetterImp : public JSCell
 {
 public:
-    JSType type() const
+    JSType type() const override
     {
         return GetterSetterType;
     }
 
     GetterSetterImp() : getter(nullptr), setter(nullptr) { }
 
-    virtual JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
-    virtual bool toBoolean(ExecState *exec) const;
-    virtual double toNumber(ExecState *exec) const;
-    virtual UString toString(ExecState *exec) const;
-    virtual JSObject *toObject(ExecState *exec) const;
+    JSValue *toPrimitive(ExecState *exec, JSType preferred = UnspecifiedType) const override;
+    bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value) override;
+    bool toBoolean(ExecState *exec) const override;
+    double toNumber(ExecState *exec) const override;
+    UString toString(ExecState *exec) const override;
+    JSObject *toObject(ExecState *exec) const override;
 
-    virtual void mark();
+    void mark() override;
 
     JSObject *getGetter()
     {
@@ -124,8 +124,8 @@ public:
      */
     explicit JSObject();
 
-    virtual void mark();
-    virtual JSType type() const;
+    void mark() override;
+    JSType type() const override;
 
     /**
      * A pointer to a ClassInfo struct for this class. This provides a basic
@@ -438,12 +438,12 @@ public:
     void getPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode = PropertyMap::ExcludeDontEnumProperties);
     virtual void getOwnPropertyNames(ExecState *, PropertyNameArray &, PropertyMap::PropertyMode mode);
 
-    virtual JSValue *toPrimitive(ExecState *exec, JSType preferredType = UnspecifiedType) const;
-    virtual bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value);
-    virtual bool toBoolean(ExecState *exec) const;
-    virtual double toNumber(ExecState *exec) const;
-    virtual UString toString(ExecState *exec) const;
-    virtual JSObject *toObject(ExecState *exec) const;
+    JSValue *toPrimitive(ExecState *exec, JSType preferredType = UnspecifiedType) const override;
+    bool getPrimitiveNumber(ExecState *, double &number, JSValue *&value) override;
+    bool toBoolean(ExecState *exec) const override;
+    double toNumber(ExecState *exec) const override;
+    UString toString(ExecState *exec) const override;
+    JSObject *toObject(ExecState *exec) const override;
 
     virtual bool getPropertyAttributes(const Identifier &propertyName, unsigned &attributes) const;
 

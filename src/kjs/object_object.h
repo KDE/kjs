@@ -56,7 +56,7 @@ class ObjectProtoFunc : public InternalFunctionImp
 public:
     ObjectProtoFunc(ExecState *exec, FunctionPrototype *funcProto, int i, int len, const Identifier &);
 
-    virtual JSValue *callAsFunction(ExecState *, JSObject *, const List &args);
+    JSValue *callAsFunction(ExecState *, JSObject *, const List &args) override;
 
     enum { ToString, ToLocaleString, ValueOf, HasOwnProperty, IsPrototypeOf, PropertyIsEnumerable,
            DefineGetter, DefineSetter, LookupGetter, LookupSetter
@@ -78,10 +78,10 @@ public:
                     ObjectPrototype *objProto,
                     FunctionPrototype *funcProto);
 
-    virtual bool implementsConstruct() const;
+    bool implementsConstruct() const override;
     using KJS::JSObject::construct;
-    virtual JSObject *construct(ExecState *, const List &args);
-    virtual JSValue *callAsFunction(ExecState *, JSObject *, const List &args);
+    JSObject *construct(ExecState *, const List &args) override;
+    JSValue *callAsFunction(ExecState *, JSObject *, const List &args) override;
 };
 
 } // namespace
