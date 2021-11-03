@@ -33,7 +33,7 @@ class KJS_EXPORT ArrayInstance : public JSObject
 public:
     ArrayInstance(JSObject *prototype, unsigned initialLength);
     ArrayInstance(JSObject *prototype, const List &initialValues);
-    ~ArrayInstance();
+    ~ArrayInstance() override;
 
     virtual bool getOwnPropertySlot(ExecState *, const Identifier &propertyName, PropertySlot &);
     virtual bool getOwnPropertySlot(ExecState *, unsigned propertyName, PropertySlot &);

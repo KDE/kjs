@@ -58,7 +58,7 @@ public:
     TableBuilder(istream *inStream, ostream *hStream, ostream *cppStream,
                  FileTemplate *fTemplate, ostream *mStream);
 
-    virtual ~TableBuilder() {}
+    ~TableBuilder() override {}
     void generateCode();
 private:
     // Interface to the parser; also (ab)used by the type system to emit

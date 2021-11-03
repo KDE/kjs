@@ -97,7 +97,7 @@ public:
     }
 protected:
     JSVariableObject(): localStorage(nullptr), symbolTable(nullptr) { }
-    ~JSVariableObject();
+    ~JSVariableObject() override;
 
     bool symbolTableGet(const Identifier &, PropertySlot &);
     bool symbolTablePut(const Identifier &, JSValue *, bool checkReadOnly);

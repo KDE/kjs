@@ -55,7 +55,7 @@ class KJS_EXPORT FunctionObjectImp : public InternalFunctionImp
 {
 public:
     FunctionObjectImp(ExecState *, FunctionPrototype *);
-    virtual ~FunctionObjectImp();
+    ~FunctionObjectImp() override;
 
     virtual bool implementsConstruct() const;
     virtual JSObject *construct(ExecState *, const List &args);

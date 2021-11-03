@@ -39,7 +39,7 @@ class KJS_EXPORT FunctionImp : public InternalFunctionImp
     friend class ActivationImp;
 public:
     FunctionImp(ExecState *exec, const Identifier &n, FunctionBodyNode *b, const ScopeChain &sc);
-    virtual ~FunctionImp();
+    ~FunctionImp() override;
 
     using KJS::JSObject::getOwnPropertySlot;
     virtual bool getOwnPropertySlot(ExecState *, const Identifier &, PropertySlot &);

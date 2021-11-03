@@ -178,7 +178,7 @@ public:
     CustomPrototype()
     {
     }
-    ~CustomPrototype()
+    ~CustomPrototype() override
     {
         qDeleteAll(properties);
     }

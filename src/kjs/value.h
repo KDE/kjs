@@ -163,7 +163,7 @@ class KJS_EXPORT JSCell : public JSValue
     friend class GetterSetterImp;
 private:
     explicit JSCell();
-    virtual ~JSCell();
+    ~JSCell() override;
 public:
     // Querying the type.
     virtual JSType type() const = 0;

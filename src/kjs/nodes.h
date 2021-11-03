@@ -325,7 +325,7 @@ class StringNode : public Node
 {
 public:
     StringNode(const UString *v) : val(*v), interned(nullptr) { }
-    ~StringNode(); // in nodes2bytecode.cpp
+    ~StringNode() override; // in nodes2bytecode.cpp
     UString value() const
     {
         return val;

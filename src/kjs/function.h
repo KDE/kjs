@@ -128,7 +128,7 @@ class KJS_EXPORT FunctionPrototype : public InternalFunctionImp
 {
 public:
     FunctionPrototype(ExecState *exec);
-    virtual ~FunctionPrototype();
+    ~FunctionPrototype() override;
 
     virtual JSValue *callAsFunction(ExecState *exec, JSObject *thisObj, const List &args);
 };

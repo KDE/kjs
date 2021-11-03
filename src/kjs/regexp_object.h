@@ -58,7 +58,7 @@ class RegExpImp : public JSObject
 {
 public:
     RegExpImp(RegExpPrototype *regexpProto);
-    ~RegExpImp();
+    ~RegExpImp() override;
     void setRegExp(ExecState *exec, RegExp *r);
     RegExp *regExp() const
     {

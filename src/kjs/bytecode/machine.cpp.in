@@ -213,7 +213,7 @@ public:
         pos   = 0;
     }
     
-    ~ForInState() {
+    ~ForInState() override {
         delete array;
     }
 };
