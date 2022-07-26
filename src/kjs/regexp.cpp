@@ -31,7 +31,7 @@
 #include <wtf/Vector.h>
 
 #if defined _WIN32 || defined _WIN64
-#undef HAVE_SYS_TIME_H
+#define HAVE_SYS_TIME_H 0
 #endif
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
