@@ -1,103 +1,169 @@
 <?xml version="1.0" ?>
 <!DOCTYPE refentry PUBLIC "-//KDE//DTD DocBook XML V4.5-Based Variant V1.1//EN" "dtd/kdedbx45.dtd" [
-  <!ENTITY % English "INCLUDE"><!-- change language only here -->
+  <!ENTITY % German "INCLUDE"
+><!-- change language only here -->
 ]>
 
 <refentry lang="&language;">
 
 <refentryinfo>
-<title>Programming Tool</title>
+<title
+>Programmier-Werkzeug</title>
 
-<author>
-<firstname>Harri</firstname>
-<surname>Porten</surname>
-<affiliation>
-<address><email>porten@kde.org</email></address>
+<author
+><firstname
+>Harri</firstname
+> <surname
+>Porten</surname
+> <affiliation
+> <address
+><email
+>porten@kde.org</email
+></address>
 </affiliation>
 </author>
 
-<date>2014-05-04</date>
-<releaseinfo>Frameworks 5.0</releaseinfo>
-<productname>KDE Frameworks</productname>
+<date
+>2014-05-04</date>
+<releaseinfo
+>Frameworks 5.0</releaseinfo>
+<productname
+>KDE Frameworks</productname>
 
 </refentryinfo>
 
 <refmeta>
-<refentrytitle><command>kjs5</command></refentrytitle>
-<manvolnum>1</manvolnum>
+<refentrytitle
+><command
+>kjs5</command
+></refentrytitle>
+<manvolnum
+>1</manvolnum>
 </refmeta>
 
 <refnamediv>
-<refname><command>kjs5</command></refname>
-<refpurpose>&kde; ECMAScript compatible interpreter</refpurpose>
+<refname
+><command
+>kjs5</command
+></refname>
+<refpurpose
+>&kde;-ECMAScript-kompatibler Interpreter</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
-<title>Synopsis</title>
+<title
+>Übersicht</title>
 
-<cmdsynopsis>
-<command>kjs5</command>
-
-<group>
-<arg choice="opt">--help</arg>
-<arg choice="opt">-help</arg>
-<arg choice="opt">-h</arg>
-</group>
-<group>
-<arg choice="opt">--version</arg>
-<arg choice="opt">-version</arg>
-<arg choice="opt">-v</arg>
-</group>
-<group>
-<arg choice="opt">-e<replaceable> statement</replaceable></arg>
-</group>
-<group>
-<arg choice="plain"><replaceable>script</replaceable></arg>
-</group>
-</cmdsynopsis>
+<cmdsynopsis
+><command
+>kjs5</command
+> <group
+> <arg choice="opt"
+>--help</arg
+> <arg choice="opt"
+>-help</arg
+> <arg choice="opt"
+>-h</arg
+> </group
+> <group
+> <arg choice="opt"
+>--version</arg
+> <arg choice="opt"
+>-version</arg
+> <arg choice="opt"
+>-v</arg
+> </group
+> <group
+> <arg choice="opt"
+>-e<replaceable
+> statement</replaceable
+></arg
+> </group
+> <group
+> <arg choice="plain"
+><replaceable
+>script</replaceable
+></arg
+> </group
+> </cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1>
-<title>Description</title>
+<title
+>Beschreibung</title>
 
-<para><command>kjs</command> is KDE ECMAScript/JavaScript engine.
-</para>
+<para
+><command
+>kjs</command
+> ist der KDE-ECMAScript/JavaScript-Interpreter. </para>
 </refsect1>
 
 <refsect1>
-<title>Application Options</title>
+<title
+>Anwendungsoptionen</title>
 <variablelist>
 
 <varlistentry>
-<term><option>--help</option>,<option>-help</option>,<option>-h</option></term>
+<term
+><option
+>--help</option
+>,<option
+>-help</option
+>,<option
+>-h</option
+></term>
 <listitem>
-<para>
-Show <command>kjs5</command> usage.
-</para>
+<para
+>Hilfe zu <command
+>kjs5</command
+> anzeigen. </para>
 </listitem>
 </varlistentry>
 
 <varlistentry>
-<term><option>--version</option>,<option>-version</option>,<option>-v</option></term>
+<term
+><option
+>--version</option
+>,<option
+>-version</option
+>,<option
+>-v</option
+></term>
 <listitem>
-<para>
-Show <command>kjs5</command> version.
-</para>
+<para
+>Version von <command
+>kjs5</command
+> anzeigen. </para>
 </listitem>
 </varlistentry>
 
 <varlistentry>
-<term><option>-e</option><parameter> statement</parameter></term>
+<term
+><option
+>-e</option
+><parameter
+> statement</parameter
+></term>
 <listitem>
-<para>Executes the statement and exits. For example:</para>
-<screen><command>kjs5</command> -e "print('hello world')"</screen>
+<para
+>Führt den Skript-Ausdruck aus und beendet anschließend. Beispiel:</para>
+<screen
+><command
+>kjs5</command
+> -e "print('hello world')"</screen>
 </listitem>
 </varlistentry>
 
 <varlistentry>
-<term><parameter>script</parameter></term>
+<term
+><parameter
+>script</parameter
+></term>
 <listitem>
-<para>Executes the statements included in file <parameter>script</parameter>.</para>
+<para
+>Führt die Skript-Befehle aus, die in der Datei <parameter
+>script</parameter
+> enthalten sind.</para>
 </listitem>
 </varlistentry>
 
@@ -106,23 +172,39 @@ Show <command>kjs5</command> version.
 </refsect1>
 
 <refsect1>
-<title>Usage</title>
-<para>
-<command>kjs5</command> <parameter>file</parameter>, as many other interpreters, when called without parameters
-uses a line editor to enter statements, showing the prompt 
-<literallayout>JS></literallayout>
-To exit the line editor type <command>quit()</command> or press <command>Ctrl+D</command>.
-</para>
+<title
+>Benutzung</title>
+<para
+>Wird <command
+>kjs5</command
+> <parameter
+>file</parameter
+> ohne Parameter aufgerufen, verhält sich das Programm wie viele andere Interpreter auch: Es wird eine Eingabeaufforderung <literallayout
+>JS
+></literallayout
+> angezeigt, an der Sie Befehle eingeben können. Beenden Sie die Eingabeaufforderung mit dem Befehl <command
+>quit()</command
+> oder drücken Sie <command
+>Strg+D</command
+>. </para>
 </refsect1>
 
 <refsect1>
-<title>See Also</title>
-<para><replaceable>kjscmd5</replaceable>(1)</para>
+<title
+>Siehe auch</title>
+<para
+><replaceable
+>kjscmd5</replaceable
+>(1)</para>
 </refsect1>
 
 <refsect1>
-<title>Bugs</title>
-<para>Please use <ulink url="http://bugs.kde.org">KDE's bugtracker</ulink> to report bugs.</para>
+<title
+>Fehler</title>
+<para
+>Bitte berichten Sie Fehler im <ulink url="http://bugs.kde.org"
+>Fehlerverfolgungssystem von KDE</ulink
+>.</para>
 </refsect1>
 
 </refentry>
