@@ -1,9 +1,0 @@
-@PACKAGE_INIT@
-
-set(KJS_CREATE_HASH_TABLE "@PACKAGE_KDE_INSTALL_DATADIR_KF5@/kjs/create_hash_table")
-set(KJS_HAVE_PCRE_REGEX "@PCRE_FOUND@")
-
-include(CMakeFindDependencyMacro)
-find_dependency(Qt5Core @REQUIRED_QT_VERSION@)
-
-include("${CMAKE_CURRENT_LIST_DIR}/KF5JSTargets.cmake")

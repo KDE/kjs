@@ -2,9 +2,4 @@
 
 Javascript engine
 
-## Introduction
-
-This library provides an ECMAScript compatible interpreter. The ECMA standard
-is based on well known scripting languages such as Netscape's JavaScript and
-Microsoft's JScript.
-
+Removed for KF6, the 'kf5' branch contains the last maintained state.
