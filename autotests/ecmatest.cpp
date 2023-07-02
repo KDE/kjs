@@ -400,3 +400,4 @@ void ECMAscriptTest::cleanupTestCase()
     qDebug() << "passed testcases:" << m_passed << "failed testcases:" << m_failed;
 }
 
+#include "moc_ecmatest.cpp"
