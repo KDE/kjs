@@ -173,7 +173,7 @@ void TimeoutChecker::pauseTimeoutCheck(Interpreter *interpreter)
         return;
     }
 
-    setitimer(ITIMER_REAL, nullptr, &m_pausetv);
+    getitimer(ITIMER_REAL, &m_pausetv);
 #endif
 
     interpreter->m_pauseTimeoutCheckCount++;
