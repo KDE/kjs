@@ -182,11 +182,11 @@
 >, com molts altres intèrprets, quan es crida sense paràmetres utilitza un editor de línies per a introduir sentències, mostrant <literallayout
 >JS
 ></literallayout
->. Per a eixir de l'editor de línies, escriviu <command
+>. Per a eixir, escriviu <command
 >quit()</command
 > o premeu <command
 >Ctrl+D</command
->. </para>
+> en l'editor de línies. </para>
 </refsect1>
 
 <refsect1>
