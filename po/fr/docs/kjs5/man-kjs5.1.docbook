@@ -47,7 +47,7 @@
 >kjs5</command
 ></refname>
 <refpurpose
->Intepréteur compatible ECMAScript de &kde;</refpurpose>
+>Interpréteur compatible avec « ECMAScript » de &kde;</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
@@ -76,7 +76,7 @@
 > <group
 > <arg choice="opt"
 >-e<replaceable
-> statement</replaceable
+> déclaration</replaceable
 ></arg
 > </group
 > <group
@@ -146,7 +146,7 @@
 ></term>
 <listitem>
 <para
->Exécute la décalration et quitte. Par exemple :</para>
+>Exécute la déclaration et termine. Par exemple :</para>
 <screen
 ><command
 >kjs5</command
@@ -185,7 +185,7 @@
 >. Pour quitter l'éditeur de ligne, saisissez<command
 >quit()</command
 > ou appuyez sur <command
->Ctrl+D</command
+>CTRL + D</command
 >. </para>
 </refsect1>
 
