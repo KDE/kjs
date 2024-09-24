@@ -1,0 +1,210 @@
+<?xml version="1.0" ?>
+<!DOCTYPE refentry PUBLIC "-//KDE//DTD DocBook XML V4.5-Based Variant V1.1//EN" "dtd/kdedbx45.dtd" [
+  <!ENTITY % Slovenian "INCLUDE"
+><!-- change language only here -->
+]>
+
+<refentry lang="&language;">
+
+<refentryinfo>
+<title
+>Programirno orodje</title>
+
+<author
+><firstname
+>Harri</firstname
+> <surname
+>Porten</surname
+> <affiliation
+> <address
+><email
+>porten@kde.org</email
+></address>
+</affiliation>
+</author>
+
+<date
+>04.05.2014</date>
+<releaseinfo
+>Frameworks 5.0</releaseinfo>
+<productname
+>KDE Frameworks</productname>
+
+</refentryinfo>
+
+<refmeta>
+<refentrytitle
+><command
+>kjs5</command
+></refentrytitle>
+<manvolnum
+>1</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname
+><command
+>kjs5</command
+></refname>
+<refpurpose
+>&kde; ECMAScript združljiv tolmač</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<title
+>Sinopsis</title>
+
+<cmdsynopsis
+><command
+>kjs5</command
+> <group
+> <arg choice="opt"
+>--help</arg
+> <arg choice="opt"
+>-help</arg
+> <arg choice="opt"
+>-h</arg
+> </group
+> <group
+> <arg choice="opt"
+>--version</arg
+> <arg choice="opt"
+>-version</arg
+> <arg choice="opt"
+>-v</arg
+> </group
+> <group
+> <arg choice="opt"
+>-e<replaceable
+> statement</replaceable
+></arg
+> </group
+> <group
+> <arg choice="plain"
+><replaceable
+>script</replaceable
+></arg
+> </group
+> </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title
+>Opis</title>
+
+<para
+><command
+>kjs</command
+> je motor KDE ECMAScript/JavaScript. </para>
+</refsect1>
+
+<refsect1>
+<title
+>Možnosti aplikacije</title>
+<variablelist>
+
+<varlistentry>
+<term
+><option
+>--help</option
+>,<option
+>-help</option
+>,<option
+>-h</option
+></term>
+<listitem>
+<para
+>Prikaži uporabo <command
+>kjs5</command
+>. </para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term
+><option
+>--version</option
+>,<option
+>-version</option
+>,<option
+>-v</option
+></term>
+<listitem>
+<para
+>Prikaži različico <command
+>kjs5</command
+>. </para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term
+><option
+>-e</option
+><parameter
+> statement</parameter
+></term>
+<listitem>
+<para
+>Izvede statement in konča. Na primer:</para>
+<screen
+><command
+>kjs5</command
+> -e "print('hello world')"</screen>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term
+><parameter
+>skript</parameter
+></term>
+<listitem>
+<para
+>Izvaja stavke, vključene v <parameter
+>script</parameter
+> datoteke.</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+
+</refsect1>
+
+<refsect1>
+<title
+>Uporaba</title>
+<para
+><command
+>kjs5</command
+> <parameter
+>datoteka</parameter
+>, tako kot mnogi drugi tolmači, ko je poklican brez parametrov, uporablja vrstični urejevalnik za vnos stavkov, ki prikazuje poziv <literallayout
+>JS
+></literallayout
+> Za izhod iz vrstice urejevalnik vnesite <command
+>quit()</command
+> ali pritisnite <command
+>Ctrl+D</command
+>. </para>
+</refsect1>
+
+<refsect1>
+<title
+>Poglejte tudi</title>
+<para
+><replaceable
+>kjscmd5</replaceable
+>(1)</para>
+</refsect1>
+
+<refsect1>
+<title
+>Napake</title>
+<para
+>Uporabite <ulink url="http://bugs.kde.org"
+>sledilnik napak KDE</ulink
+> za poročanje o napakah.</para>
+</refsect1>
+
+</refentry>
