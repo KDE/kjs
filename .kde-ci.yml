@@ -6,3 +6,4 @@ Dependencies:
 
 Options:
   test-before-installing: True
+  cmake-options: '-DKJS_FORCE_DISABLE_PCRE=true'
